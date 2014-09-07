@@ -35,3 +35,13 @@ void prDeleteVertexbuffer(PRuint vertexbufferID)
 {
     _pr_delete_vertexbuffer((pr_vertexbuffer*)vertexbufferID);
 }
+
+void prDraw(PRenum primitives, PRuint numVertices, PRuint firstVertex)
+{
+    //...
+}
+
+void prDrawIndexed(PRenum primitives, PRuint numVertices, PRuint firstVertex)
+{
+    //...
+}
