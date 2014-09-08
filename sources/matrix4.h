@@ -23,6 +23,8 @@ typedef struct pr_matrix4
 pr_matrix4;
 
 
+void _pr_matrix_load_identity(pr_matrix4* matrix);
+
 void _pr_matrix_mul_float3(PRfloat* result, const pr_matrix4* lhs, const PRfloat* rhs);
 void _pr_matrix_mul_float4(PRfloat* result, const pr_matrix4* lhs, const PRfloat* rhs);
 

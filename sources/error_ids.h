@@ -9,9 +9,11 @@
 #define __PR_ERROR_IDS_H__
 
 
-#define PR_ERROR_NONE               0
-#define PR_ERROR_INVALID_ARGUMENT   1
-#define PR_ERROR_INVALID_ID         2
+#define PR_ERROR_NONE                   0
+#define PR_ERROR_NULL_POINTER           1
+#define PR_ERROR_INVALID_ARGUMENT       2
+#define PR_ERROR_INVALID_ID             3
+#define PR_ERROR_INDEX_OUT_OF_BOUNDS    4
 
 
 #endif

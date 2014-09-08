@@ -28,7 +28,7 @@ typedef struct pr_vertex
 pr_vertex;
 
 
-void _pr_transform_vertex(pr_vertex* vertex, const pr_matrix4* modelViewMatrix, const pr_matrix4* projectionMatrix);
+void _pr_vertex_init(pr_vertex* vertex);
 
 
 #endif

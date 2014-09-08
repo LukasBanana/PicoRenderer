@@ -11,7 +11,7 @@
 #include <stdlib.h>
 
 
-pr_framebuffer* _pr_gen_framebuffer(PRuint width, PRuint height)
+pr_framebuffer* _pr_framebuffer_create(PRuint width, PRuint height)
 {
     if (width == 0 || height == 0)
     {
@@ -28,7 +28,7 @@ pr_framebuffer* _pr_gen_framebuffer(PRuint width, PRuint height)
     return framebuffer;
 }
 
-void _pr_delete_framebuffer(pr_framebuffer* framebuffer)
+void _pr_framebuffer_delete(pr_framebuffer* framebuffer)
 {
     if (framebuffer != NULL && framebuffer->pixels != NULL)
     {

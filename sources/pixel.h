@@ -25,10 +25,10 @@ pr_pixel;
 Writes the specified real depth value to a pixel depth.
 \param[in] z Specifies the real z value. This must be in the range [0.0 .. 1.0].
 */
-PRushort _pr_write_pixel_depth(PRfloat z);
+PRushort _pr_pixel_write_depth(PRfloat z);
 
 //! Reads the specified pixel depth to a real depth value.
-PRfloat _pr_read_pixel_depth(PRushort z);
+PRfloat _pr_pixel_read_depth(PRushort z);
 
 
 #endif

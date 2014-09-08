@@ -10,12 +10,12 @@
 #include <limits.h>
 
 
-PRushort _pr_write_pixel_depth(PRfloat z)
+PRushort _pr_pixel_write_depth(PRfloat z)
 {
     return (PRushort)(z * (PRfloat)USHRT_MAX);
 }
 
-PRfloat _pr_read_pixel_depth(PRushort z)
+PRfloat _pr_pixel_read_depth(PRushort z)
 {
     return ((PRfloat)z) / ((PRushort)USHRT_MAX);
 }

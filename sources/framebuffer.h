@@ -12,6 +12,10 @@
 #include "pixel.h"
 
 
+#define PR_DEFAULT_RESOLUTION_WIDTH     640
+#define PR_DEFAULT_RESOLUTION_HEIGHT    480
+
+
 //! Framebuffer structure.
 typedef struct pr_framebuffer
 {
@@ -22,8 +26,8 @@ typedef struct pr_framebuffer
 pr_framebuffer;
 
 
-pr_framebuffer* _pr_gen_framebuffer(PRuint width, PRuint height);
-void _pr_delete_framebuffer(pr_framebuffer* framebuffer);
+pr_framebuffer* _pr_framebuffer_create(PRuint width, PRuint height);
+void _pr_framebuffer_delete(pr_framebuffer* framebuffer);
 
 
 #endif
