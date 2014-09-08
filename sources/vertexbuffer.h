@@ -10,6 +10,7 @@
 
 
 #include "vertex.h"
+#include "viewport.h"
 
 
 typedef struct pr_vertexbuffer

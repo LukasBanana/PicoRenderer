@@ -1,11 +1,11 @@
 /*
- * math.h
+ * ext_math.h
  * 
  * This file is part of the "PicoRenderer" (Copyright (c) 2014 by Lukas Hermanns)
  * See "LICENSE.txt" for license information.
  */
 
-#include "aprx_math.h"
+#include "ext_math.h"
 
 #define _USE_MATH_DEFINES
 #include <math.h>

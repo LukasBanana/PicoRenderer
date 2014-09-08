@@ -46,5 +46,8 @@ typedef unsigned int PRflags;
 //! Size type.
 typedef size_t PRsizei;
 
+//! No type or used for void pointer.
+typedef void PRvoid;
+
 
 #endif

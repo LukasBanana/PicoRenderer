@@ -13,8 +13,8 @@
 #include "error_ids.h"
 
 
-void _pr_set_error(PRenum errorID);
-PRenum _pr_get_error();
+void _pr_error_set(PRenum errorID);
+PRenum _pr_error_get();
 
 
 #endif

@@ -15,7 +15,7 @@ pr_framebuffer* _pr_framebuffer_create(PRuint width, PRuint height)
 {
     if (width == 0 || height == 0)
     {
-        _pr_set_error(PR_ERROR_INVALID_ARGUMENT);
+        _pr_error_set(PR_ERROR_INVALID_ARGUMENT);
         return NULL;
     }
 

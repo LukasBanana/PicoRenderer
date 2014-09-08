@@ -43,7 +43,10 @@ static void _setup_triangle_vertex(pr_raster_vertex* rasterVert, const pr_vertex
 
 static void _raster_triangle(pr_vertex* a, pr_vertex* b, pr_vertex* c)
 {
-    // Initialize raster triangle
+    // To raster a triangle we copy the vertex data into a 'raster_triangle' structure,
+    // which is much smaller and compact to reduce memory overhead.
+    // This is necessary because during triangle rasterization we will
+    // access this memory a lot of times.
     pr_raster_triangle triangle;
 
     _setup_triangle_vertex(&(triangle.a), a);

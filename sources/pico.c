@@ -17,7 +17,7 @@
 
 PRenum prGetError()
 {
-    return _pr_get_error();
+    return _pr_error_get();
 }
 
 PRboolean prInit()

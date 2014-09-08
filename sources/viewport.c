@@ -22,5 +22,5 @@ void _pr_viewport_init(pr_viewport* viewport)
         viewport->maxDepth  = 1.0f;
     }
     else
-        _pr_set_error(PR_ERROR_NULL_POINTER);
+        _pr_error_set(PR_ERROR_NULL_POINTER);
 }

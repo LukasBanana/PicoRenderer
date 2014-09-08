@@ -62,7 +62,7 @@ PRboolean _pr_vertexbuffer_transform(
 
     if (lastVertex >= vertexbuffer->numVertices)
     {
-        _pr_set_error(PR_ERROR_INDEX_OUT_OF_BOUNDS);
+        _pr_error_set(PR_ERROR_INDEX_OUT_OF_BOUNDS);
         return PR_FALSE;
     }
 

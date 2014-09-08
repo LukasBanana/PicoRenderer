@@ -11,12 +11,12 @@
 
 static PRenum _error = PR_ERROR_NONE;
 
-void _pr_set_error(PRenum errorID)
+void _pr_error_set(PRenum errorID)
 {
     _error = errorID;
 }
 
-PRenum _pr_get_error()
+PRenum _pr_error_get()
 {
     return _error;
 }

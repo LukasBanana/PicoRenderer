@@ -15,7 +15,7 @@
 //! Frame buffer pixel structure.
 typedef struct pr_pixel
 {
-    PRubyte colorIndex; //!< Colores are stored as 8-bit unsigned integer.
+    PRubyte colorIndex; //!< Colors are stored as 8-bit unsigned integer.
     PRushort depth;     //!< Depth values are stored as 16-bit unsigned integer.
 }
 pr_pixel;
