@@ -20,6 +20,10 @@ add_definitions(-D_CRT_SECURE_NO_WARNINGS)
 # === Global files ===
 
 file(GLOB_RECURSE SourcesAll ${PROJECT_SOURCE_DIR}/src/*.*)
+file(GLOB_RECURSE HeadersAll ${PROJECT_SOURCE_DIR}/inc/*.*)
+
+file(GLOB HeadersMain ${PROJECT_SOURCE_DIR}/inc/*.*)
+file(GLOB SourcesMain ${PROJECT_SOURCE_DIR}/src/*.*)
 
 file(GLOB SourcesRasterizer ${PROJECT_SOURCE_DIR}/src/rasterizer/*.*)
 file(GLOB SourcesPlatformBase ${PROJECT_SOURCE_DIR}/src/platform/*.*)
@@ -36,6 +40,8 @@ endif()
 # === Include directories ===
 
 include_directories("${PROJECT_SOURCE_DIR}/src/rasterizer")
+include_directories("${PROJECT_SOURCE_DIR}/src/")
+include_directories("${PROJECT_SOURCE_DIR}/inc/")
 
 
 # === Source groups ===
@@ -53,12 +59,25 @@ source_group(
 	${SourcesPlatform}
 )
 
+source_group(
+	"inc"
+	FILES
+	${HeadersMain}
+)
+
+source_group(
+	"src"
+	FILES
+	${SourcesMain}
+)
+
 
 # === Executable ===
 
 add_library(
 	pico_renderer
 	${SourcesAll}
+	${HeadersAll}
 )
 
 set_target_properties(pico_renderer PROPERTIES LINKER_LANGUAGE C)
