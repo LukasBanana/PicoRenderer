@@ -30,9 +30,11 @@ file(GLOB SourcesPlatformBase ${PROJECT_SOURCE_DIR}/src/platform/*.*)
 
 if(WIN32)
 	file(GLOB SourcesPlatform ${PROJECT_SOURCE_DIR}/src/platform/win32/*.*)
+	file(GLOB SourcesTest ${PROJECT_SOURCE_DIR}/test/win32/*.*)
 	include_directories("${PROJECT_SOURCE_DIR}/src/platform/win32")
 else()
 	file(GLOB SourcesPlatform ${PROJECT_SOURCE_DIR}/src/platform/posix/*.*)
+	#file(GLOB SourcesTest ${PROJECT_SOURCE_DIR}/test/posix/*.*)
 	include_directories("${PROJECT_SOURCE_DIR}/src/platform/posix")
 endif()
 
@@ -71,6 +73,12 @@ source_group(
 	${SourcesMain}
 )
 
+source_group(
+	"test"
+	FILES
+	${SourcesTest}
+)
+
 
 # === Executable ===
 
@@ -80,6 +88,14 @@ add_library(
 	${HeadersAll}
 )
 
+add_executable(
+	test
+	${SourcesTest}
+)
+
+target_link_libraries(test pico_renderer)
+
 set_target_properties(pico_renderer PROPERTIES LINKER_LANGUAGE C)
+set_target_properties(test PROPERTIES LINKER_LANGUAGE C)
 
 

@@ -16,5 +16,7 @@
         m = NULL;       \
     }
 
+#define PR_ZERO_MEMORY(m) memset(&m, 0, sizeof(m))
+
 
 #endif

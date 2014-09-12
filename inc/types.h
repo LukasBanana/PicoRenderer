@@ -49,5 +49,8 @@ typedef size_t PRsizei;
 //! No type or used for void pointer.
 typedef void PRvoid;
 
+//! Object type.
+typedef void* PRobject;
+
 
 #endif
