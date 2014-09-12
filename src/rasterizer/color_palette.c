@@ -22,7 +22,7 @@ void _pr_color_palette_fill_r3g3b2(pr_color_palette* colorPalette)
         return;
     }
 
-    pr_color_rgb* clr = colorPalette->colors;
+    pr_color_bgr* clr = colorPalette->colors;
 
     // Color palettes for 3- and 2 bit color components
     const PRubyte palette3Bit[8] = { 0, 36, 73, 109, 146, 182, 219, 255 };
@@ -41,5 +41,13 @@ void _pr_color_palette_fill_r3g3b2(pr_color_palette* colorPalette)
             }
         }
     }
+}
+
+PRubyte _pr_color_to_colorindex_r3g3b2(PRubyte r, PRubyte g, PRubyte b)
+{
+    return
+        (((r / 36) & 0x07) << 5) |
+        (((g / 36) & 0x07) << 2) |
+        ( (b / 85) & 0x03      );
 }
 

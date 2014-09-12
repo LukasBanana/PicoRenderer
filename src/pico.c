@@ -54,14 +54,19 @@ void prContextPresent(PRobject context, PRobject framebuffer)
 
 PRobject prGenFramebuffer(PRuint width, PRuint height)
 {
-    #if 1//!!!
+    #if 0//!!!
     pr_framebuffer* fb = _pr_framebuffer_create(width, height);
 
     PRubyte c = 0;
-    for (PRuint i = 0, n = width*height; i < n; ++i)
+    for (PRuint y = 0; y < 16; ++y)
     {
-        fb->pixels[i].colorIndex = c;
-        ++c;
+        for (PRuint x = 0; x < 16; ++x)
+        {
+            PRuint i = y*width + x;
+
+            fb->pixels[i].colorIndex = c;
+            ++c;
+        }
     }
 
     return (PRobject)fb;
@@ -77,7 +82,12 @@ void prDeleteFramebuffer(PRobject framebuffer)
 
 void prClearFramebuffer(PRobject framebuffer, PRubyte clearColor, float depth)
 {
-    //...
+    _pr_framebuffer_clear((pr_framebuffer*)framebuffer, clearColor, depth);
+}
+
+PRubyte prGetColorIndex(PRubyte red, PRubyte green, PRubyte blue)
+{
+    return _pr_color_to_colorindex_r3g3b2(red, green, blue);
 }
 
 // --- vertexbuffer --- //

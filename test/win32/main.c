@@ -103,13 +103,12 @@ int main()
     // Create render context
     pr_context_desc contextDesc;
 
-    contextDesc.dc = GetDC(wnd);
+    contextDesc.wnd = wnd;
 
     context = prGenContext(&contextDesc, screenWidth, screenHeight);
 
     // Create frame buffer
     framebuffer = prGenFramebuffer(screenWidth, screenHeight);
-
 
     // Main loop
     while (!isQuit)
@@ -124,7 +123,7 @@ int main()
         }
 
         // Drawing
-        prClearFramebuffer(framebuffer, 0, 0.0f);
+        prClearFramebuffer(framebuffer, prGetColorIndex(0, 0, 120), 0.0f);
 
         //...
 

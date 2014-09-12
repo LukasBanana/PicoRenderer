@@ -12,7 +12,7 @@
 #include "types.h"
 #include "framebuffer.h"
 #include "color_palette.h"
-#include "color_rgb.h"
+#include "color_bgr.h"
 #include "platform.h"
 
 #include <Windows.h>
@@ -21,9 +21,14 @@
 //! Render context structure.
 typedef struct pr_context
 {
+    // GDI objects
+    HWND                wnd;
     HDC                 dc;
-    HBITMAP             dibSection;
-    pr_color_rgb*       colors;     //! Pointer to the RGB colors of the DIB section.
+    HDC                 dcBmp;
+    BITMAPINFO          bmpInfo;
+    HBITMAP             bmp;
+    // Renderer objects
+    pr_color_bgr*       colors;
     PRuint              width;
     PRuint              height;
     pr_color_palette*   colorPalette;

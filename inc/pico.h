@@ -76,6 +76,9 @@ Clears the specified framebuffer.
 */
 void prClearFramebuffer(PRobject framebuffer, PRubyte clearColor, float depth);
 
+//! Converts the specified RGB color into a color index.
+PRubyte prGetColorIndex(PRubyte red, PRubyte green, PRubyte blue);
+
 // --- vertexbuffer --- //
 
 /**

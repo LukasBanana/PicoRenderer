@@ -12,7 +12,7 @@
 
 pr_context* _pr_context_create(const pr_context_desc* desc, PRuint width, PRuint height)
 {
-    if (desc == NULL || desc->dc == NULL || width <= 0 || height <= 0)
+    if (desc == NULL || desc->wnd == NULL || width <= 0 || height <= 0)
     {
         _pr_error_set(PR_ERROR_INVALID_ARGUMENT);
         return NULL;
@@ -22,21 +22,26 @@ pr_context* _pr_context_create(const pr_context_desc* desc, PRuint width, PRuint
     pr_context* context = (pr_context*)malloc(sizeof(pr_context));
 
     // Setup bitmap info structure
-    BITMAPINFO bmi;
-    PR_ZERO_MEMORY(bmi);
+    BITMAPINFO* bmi = (&context->bmpInfo);
+    memset(bmi, 0, sizeof(BITMAPINFO));
 
-    bmi.bmiHeader.biSize        = sizeof(BITMAPINFOHEADER);
-    bmi.bmiHeader.biWidth       = (LONG)width;
-    bmi.bmiHeader.biHeight      = (LONG)height;
-    bmi.bmiHeader.biPlanes      = 1;
-    bmi.bmiHeader.biBitCount    = 24;
-    bmi.bmiHeader.biCompression = BI_RGB;
+    bmi->bmiHeader.biSize           = sizeof(BITMAPINFOHEADER);
+    bmi->bmiHeader.biWidth          = (LONG)width;
+    bmi->bmiHeader.biHeight         = (LONG)height;
+    bmi->bmiHeader.biPlanes         = 1;
+    bmi->bmiHeader.biBitCount       = 24;
+    bmi->bmiHeader.biCompression    = BI_RGB;
 
-    // Create DIB section
-    context->dc         = desc->dc;
-    context->dibSection = CreateDIBSection(desc->dc, &bmi, DIB_RGB_COLORS, (void**)(&context->colors), NULL, 0);
+    // Setup context
+    context->wnd        = desc->wnd;
+    context->dc         = GetDC(desc->wnd);
+    context->dcBmp      = CreateCompatibleDC(context->dc);
+    context->bmp        = CreateCompatibleBitmap(context->dc, width, height);
+    context->colors     = (pr_color_bgr*)calloc(width*height, sizeof(pr_color_bgr));
     context->width      = width;
     context->height     = height;
+
+    SelectObject(context->dcBmp, context->bmp);
 
     // Create color palette
     context->colorPalette = (pr_color_palette*)malloc(sizeof(pr_color_palette));
@@ -49,9 +54,12 @@ void _pr_context_delete(pr_context* context)
 {
     if (context != NULL)
     {
-        if (context->dibSection != NULL)
-            DeleteObject(context->dibSection);
+        if (context->bmp != NULL)
+            DeleteObject(context->bmp);
+        if (context->dcBmp != NULL)
+            DeleteDC(context->dcBmp);
         free(context->colorPalette);
+        free(context->colors);
         free(context);
     }
 }
@@ -70,14 +78,15 @@ void _pr_context_present(pr_context* context, const pr_framebuffer* framebuffer)
     }
 
     // Get iterators
-    pr_color_rgb* dst = context->colors;
+    const PRuint num = context->width*context->height;
+
+    pr_color_bgr* dst = context->colors;
+    pr_color_bgr* dstEnd = dst + num;
+
     const pr_pixel* pixels = framebuffer->pixels;
 
-    const PRuint num = context->width*context->height;
-    pr_color_rgb* dstEnd = dst + num;
-
-    const pr_color_rgb* palette = context->colorPalette->colors;
-    const pr_color_rgb* paletteColor;
+    const pr_color_bgr* palette = context->colorPalette->colors;
+    const pr_color_bgr* paletteColor;
 
     // Iterate over all pixels
     while (dst != dstEnd)
@@ -91,5 +100,9 @@ void _pr_context_present(pr_context* context, const pr_framebuffer* framebuffer)
         ++dst;
         ++pixels;
     }
+
+    // Show framebuffer on device context
+    SetDIBits(context->dc, context->bmp, 0, context->height, context->colors, &(context->bmpInfo), DIB_RGB_COLORS);
+    BitBlt(context->dc, 0, 0, context->width, context->height, context->dcBmp, 0, 0, SRCCOPY);
 }
 

@@ -9,19 +9,22 @@
 #define __PR_COLOR_PALETTE_H__
 
 
-#include "color_rgb.h"
+#include "color_bgr.h"
 
 
 //! Color palette for 8-bit color indices.
 typedef struct pr_color_palette
 {
-    pr_color_rgb colors[256];
+    pr_color_bgr colors[256];
 }
 pr_color_palette;
 
 
 //! Fills the specified color palette with the encoding R3G3B2.
 void _pr_color_palette_fill_r3g3b2(pr_color_palette* colorPalette);
+
+//! Converts the specified RGB color into a color index with encoding R3G3B2.
+PRubyte _pr_color_to_colorindex_r3g3b2(PRubyte r, PRubyte g, PRubyte b);
 
 
 #endif

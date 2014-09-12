@@ -29,5 +29,7 @@ pr_framebuffer;
 pr_framebuffer* _pr_framebuffer_create(PRuint width, PRuint height);
 void _pr_framebuffer_delete(pr_framebuffer* framebuffer);
 
+void _pr_framebuffer_clear(pr_framebuffer* framebuffer, PRubyte clearColor, float depth);
+
 
 #endif

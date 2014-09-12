@@ -9,6 +9,7 @@
 #include "error.h"
 
 #include <stdlib.h>
+#include <string.h>
 
 
 pr_framebuffer* _pr_framebuffer_create(PRuint width, PRuint height)
@@ -19,11 +20,15 @@ pr_framebuffer* _pr_framebuffer_create(PRuint width, PRuint height)
         return NULL;
     }
 
+    // Create framebuffer
     pr_framebuffer* framebuffer = (pr_framebuffer*)malloc(sizeof(pr_framebuffer));
 
     framebuffer->width = width;
     framebuffer->height = height;
     framebuffer->pixels = calloc(width*height, sizeof(pr_pixel));
+
+    // Initialize framebuffer
+    memset(framebuffer->pixels, 0, width*height*sizeof(pr_pixel));
 
     return framebuffer;
 }
@@ -35,4 +40,26 @@ void _pr_framebuffer_delete(pr_framebuffer* framebuffer)
         free(framebuffer->pixels);
         free(framebuffer);
     }
+}
+
+void _pr_framebuffer_clear(pr_framebuffer* framebuffer, PRubyte clearColor, float depth)
+{
+    if (framebuffer != NULL && framebuffer->pixels != NULL)
+    {
+        // Convert depth (32-bit) into pixel depth (16-bit)
+        PRushort clearDepth = _pr_pixel_write_depth(depth);
+
+        // Iterate over the entire framebuffer
+        pr_pixel* dst = framebuffer->pixels;
+        pr_pixel* dstEnd = dst + (framebuffer->width * framebuffer->height);
+
+        while (dst != dstEnd)
+        {
+            dst->colorIndex = clearColor;
+            dst->depth      = clearDepth;
+            ++dst;
+        }
+    }
+    else
+        _pr_error_set(PR_ERROR_NULL_POINTER);
 }

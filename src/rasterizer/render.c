@@ -58,6 +58,8 @@ static void _raster_triangle(pr_vertex* a, pr_vertex* b, pr_vertex* c)
 
 }
 
+// --- triangles --- //
+
 void _pr_render_triangles(PRuint numVertices, PRuint firstVertex, pr_vertexbuffer* vertexbuffer)
 {
     _vertexbuffer_transform(numVertices, firstVertex, vertexbuffer);
@@ -94,6 +96,50 @@ void _pr_render_indexed_triangle_strip(PRuint numVertices, PRuint firstVertex, p
 }
 
 void _pr_render_indexed_triangle_fan(PRuint numVertices, PRuint firstVertex, pr_vertexbuffer* vertexbuffer, const pr_indexbuffer* indexbuffer)
+{
+    _vertexbuffer_transform_all(vertexbuffer);
+
+
+}
+
+// --- lines --- //
+
+void _pr_render_lines(PRuint numVertices, PRuint firstVertex, pr_vertexbuffer* vertexbuffer)
+{
+    _vertexbuffer_transform(numVertices, firstVertex, vertexbuffer);
+
+
+}
+
+void _pr_render_line_strip(PRuint numVertices, PRuint firstVertex, pr_vertexbuffer* vertexbuffer)
+{
+    _vertexbuffer_transform(numVertices, firstVertex, vertexbuffer);
+
+
+}
+
+void _pr_render_line_loop(PRuint numVertices, PRuint firstVertex, pr_vertexbuffer* vertexbuffer)
+{
+    _vertexbuffer_transform(numVertices, firstVertex, vertexbuffer);
+
+
+}
+
+void _pr_render_indexed_lines(PRuint numVertices, PRuint firstVertex, pr_vertexbuffer* vertexbuffer, const pr_indexbuffer* indexbuffer)
+{
+    _vertexbuffer_transform_all(vertexbuffer);
+
+
+}
+
+void _pr_render_indexed_line_strip(PRuint numVertices, PRuint firstVertex, pr_vertexbuffer* vertexbuffer, const pr_indexbuffer* indexbuffer)
+{
+    _vertexbuffer_transform_all(vertexbuffer);
+
+
+}
+
+void _pr_render_indexed_line_loop(PRuint numVertices, PRuint firstVertex, pr_vertexbuffer* vertexbuffer, const pr_indexbuffer* indexbuffer)
 {
     _vertexbuffer_transform_all(vertexbuffer);
 
