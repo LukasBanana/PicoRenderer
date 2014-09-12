@@ -106,10 +106,12 @@ void prDeleteIndexbuffer(PRobject indexbuffer)
 
 void prProjectionMatrix(const PRfloat* matrix4x4)
 {
+    memcpy(&(_stateMachine.projectionMatrix), matrix4x4, sizeof(pr_matrix4));
 }
 
 void prModelViewMatrix(const PRfloat* matrix4x4)
 {
+    memcpy(&(_stateMachine.modelViewMatrix), matrix4x4, sizeof(pr_matrix4));
 }
 
 void prBuildPerspectiveProjection(PRfloat* matrix4x4, PRfloat aspectRatio, PRfloat nearPlane, PRfloat farPlane, PRfloat fov)
@@ -134,6 +136,7 @@ void prScale(PRfloat* matrix4x4, PRfloat x, PRfloat y, PRfloat z)
 
 void prLoadIdentity(PRfloat* matrix4x4)
 {
+    _pr_matrix_load_identity((pr_matrix4*)matrix4x4);
 }
 
 // --- drawing --- //

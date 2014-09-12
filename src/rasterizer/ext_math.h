@@ -19,6 +19,8 @@
 
 #define PR_SIGN(x)      (((x) > 0) ? 1 : ((x) < 0) ? -1 : 0)
 
+#define PR_SQ(x)        ((x)*(x))
+
 
 //! Computes an approximated and fast reciprocal square root.
 PRfloat _aprx_inv_sqrt(PRfloat x);

@@ -134,10 +134,14 @@ int main()
 
         // Drawing
         prClearFramebuffer(prGetColorIndex(0, 0, 120), 0.0f);
+        {
+            prDrawScreenLine(300, 200, 500, 200, prGetColorIndex(255, 0, 0));
+            prDrawScreenLine(500, 200, 500, 400, prGetColorIndex(0, 255, 0));
+            prDrawScreenLine(500, 400, 300, 400, prGetColorIndex(0, 0, 255));
+            prDrawScreenLine(300, 400, 300, 200, prGetColorIndex(0, 255, 255));
 
-        prDrawScreenLine(10, 10, mouseX, mouseY, prGetColorIndex(255, 255, 0));
-        //...
-
+            prDrawScreenLine(10, 10, mouseX, mouseY, prGetColorIndex(255, 255, 0));
+        }
         prContextPresent(context);
     }
 
