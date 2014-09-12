@@ -19,6 +19,7 @@
 
 
 //! Textures can have a maximum size of 256x256 texels.
+//! Textures store all their mip maps in a single texel array for compact memory access.
 typedef struct pr_texture
 {
     PRubyte width;      //!< Width of the first MIP level.

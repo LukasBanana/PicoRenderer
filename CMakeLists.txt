@@ -19,13 +19,39 @@ add_definitions(-D_CRT_SECURE_NO_WARNINGS)
 
 # === Global files ===
 
-file(GLOB_RECURSE SourcesAll ${PROJECT_SOURCE_DIR}/sources/*.c)
-file(GLOB_RECURSE HeadersAll ${PROJECT_SOURCE_DIR}/sources/*.h)
+file(GLOB_RECURSE SourcesAll ${PROJECT_SOURCE_DIR}/src/*.*)
+
+file(GLOB SourcesRasterizer ${PROJECT_SOURCE_DIR}/src/rasterizer/*.*)
+file(GLOB SourcesPlatformBase ${PROJECT_SOURCE_DIR}/src/platform/*.*)
+
+if(WIN32)
+	file(GLOB SourcesPlatform ${PROJECT_SOURCE_DIR}/src/platform/win32/*.*)
+	include_directories("${PROJECT_SOURCE_DIR}/src/platform/win32")
+else()
+	file(GLOB SourcesPlatform ${PROJECT_SOURCE_DIR}/src/platform/posix/*.*)
+	include_directories("${PROJECT_SOURCE_DIR}/src/platform/posix")
+endif()
 
 
 # === Include directories ===
 
-include_directories("${PROJECT_SOURCE_DIR}/sources")
+include_directories("${PROJECT_SOURCE_DIR}/src/rasterizer")
+
+
+# === Source groups ===
+
+source_group(
+	"src\\rasterizer"
+	FILES
+	${SourcesRasterizer}
+)
+
+source_group(
+	"src\\platform"
+	FILES
+	${SourcesPlatformBase}
+	${SourcesPlatform}
+)
 
 
 # === Executable ===
@@ -33,7 +59,6 @@ include_directories("${PROJECT_SOURCE_DIR}/sources")
 add_library(
 	pico_renderer
 	${SourcesAll}
-	${HeadersAll}
 )
 
 set_target_properties(pico_renderer PROPERTIES LINKER_LANGUAGE C)
