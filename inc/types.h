@@ -15,6 +15,8 @@
 #define PR_TRUE     1
 #define PR_FALSE    0
 
+#define PR_INLINE   _inline
+
 
 //! Boolean type.
 typedef char PRboolean;

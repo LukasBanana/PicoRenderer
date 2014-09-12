@@ -15,4 +15,12 @@ void _pr_state_machine_init(pr_state_machine* stateMachine)
     _pr_matrix_load_identity(&(stateMachine->modelViewMatrix));
     _pr_matrix_load_identity(&(stateMachine->projectionMatrix));
     _pr_viewport_init(&(stateMachine->viewport));
+    stateMachine->boundFramebuffer  = NULL;
+    stateMachine->originLeftTop     = PR_TRUE;
 }
+
+void _pr_state_machine_bind_framebuffer(pr_framebuffer* framebuffer)
+{
+    _stateMachine.boundFramebuffer = framebuffer;
+}
+

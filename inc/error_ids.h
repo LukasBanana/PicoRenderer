@@ -13,8 +13,9 @@
 #define PR_ERROR_NULL_POINTER           1
 #define PR_ERROR_INVALID_ARGUMENT       2
 #define PR_ERROR_INVALID_ID             3
-#define PR_ERROR_INDEX_OUT_OF_BOUNDS    4
-#define PR_ERROR_ARGUMENT_MISMATCH      5
+#define PR_ERROR_INVALID_STATE          4
+#define PR_ERROR_INDEX_OUT_OF_BOUNDS    5
+#define PR_ERROR_ARGUMENT_MISMATCH      6
 
 
 #endif

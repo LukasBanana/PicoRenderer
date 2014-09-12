@@ -5,6 +5,8 @@
  * See "LICENSE.txt" for license information.
  */
 
+#include <Windows.h>
+#include <windowsx.h>
 #include <stdio.h>
 #include <pico.h>
 
@@ -13,6 +15,8 @@
 PRobject context        = NULL;
 PRobject framebuffer    = NULL;
 PRboolean isQuit        = PR_FALSE;
+
+int mouseX = 0, mouseY = 0;
 
 
 // --- functions --- //
@@ -25,6 +29,13 @@ LRESULT CALLBACK window_callback(HWND wnd, UINT message, WPARAM wParam, LPARAM l
         {
             if (wParam == VK_ESCAPE)
                 isQuit = PR_TRUE;
+        }
+        break;
+
+        case WM_MOUSEMOVE:
+        {
+            mouseX = GET_X_LPARAM(lParam);
+            mouseY = GET_Y_LPARAM(lParam);
         }
         break;
 
@@ -96,19 +107,18 @@ int main()
 
     ShowWindow(wnd, SW_SHOW);
 
-    // Create bitmap
-
-
-
     // Create render context
     pr_context_desc contextDesc;
 
     contextDesc.wnd = wnd;
 
+    prInit();
+
     context = prGenContext(&contextDesc, screenWidth, screenHeight);
 
     // Create frame buffer
     framebuffer = prGenFramebuffer(screenWidth, screenHeight);
+    prBindFramebuffer(framebuffer);
 
     // Main loop
     while (!isQuit)
@@ -123,16 +133,19 @@ int main()
         }
 
         // Drawing
-        prClearFramebuffer(framebuffer, prGetColorIndex(0, 0, 120), 0.0f);
+        prClearFramebuffer(prGetColorIndex(0, 0, 120), 0.0f);
 
+        prDrawScreenLine(10, 10, mouseX, mouseY, prGetColorIndex(255, 255, 0));
         //...
 
-        prContextPresent(context, framebuffer);
+        prContextPresent(context);
     }
 
     // Clean up
     prDeleteFramebuffer(framebuffer);
     prDeleteContext(context);
+
+    prRelease();
 
     DestroyWindow(wnd);
 

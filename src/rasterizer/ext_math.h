@@ -12,10 +12,12 @@
 #include "types.h"
 
 
-#define PR_MATH_PI 3.14159265359f
+#define PR_MATH_PI      3.14159265359f
 
-#define PR_MIN(a, b) ((a) < (b) ? (a) : (b))
-#define PR_MAX(a, b) ((a) > (b) ? (a) : (b))
+#define PR_MIN(a, b)    ((a) < (b) ? (a) : (b))
+#define PR_MAX(a, b)    ((a) > (b) ? (a) : (b))
+
+#define PR_SIGN(x)      (((x) > 0) ? 1 : ((x) < 0) ? -1 : 0)
 
 
 //! Computes an approximated and fast reciprocal square root.
