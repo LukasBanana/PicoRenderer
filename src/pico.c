@@ -102,6 +102,40 @@ void prDeleteIndexbuffer(PRobject indexbuffer)
     _pr_indexbuffer_delete((pr_indexbuffer*)indexbuffer);
 }
 
+// --- matrices --- //
+
+void prProjectionMatrix(const PRfloat* matrix4x4)
+{
+}
+
+void prModelViewMatrix(const PRfloat* matrix4x4)
+{
+}
+
+void prBuildPerspectiveProjection(PRfloat* matrix4x4, PRfloat aspectRatio, PRfloat nearPlane, PRfloat farPlane, PRfloat fov)
+{
+}
+
+void prBuildOrthogonalProjection(PRfloat* matrix4x4, PRfloat width, PRfloat height, PRfloat nearPlane, PRfloat farPlane)
+{
+}
+
+void prTranslate(PRfloat* matrix4x4, PRfloat x, PRfloat y, PRfloat z)
+{
+}
+
+void prRotate(PRfloat* matrix4x4, PRfloat x, PRfloat y, PRfloat z, PRfloat angle)
+{
+}
+
+void prScale(PRfloat* matrix4x4, PRfloat x, PRfloat y, PRfloat z)
+{
+}
+
+void prLoadIdentity(PRfloat* matrix4x4)
+{
+}
+
 // --- drawing --- //
 
 void prColor(PRubyte colorIndex)

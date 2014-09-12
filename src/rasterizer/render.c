@@ -110,7 +110,7 @@ void _pr_render_points(PRuint numVertices, PRuint firstVertex, pr_vertexbuffer* 
         _pr_error_set(PR_ERROR_INVALID_ARGUMENT);
         return;
     }
-    
+     
     // Transform vertices
     _vertexbuffer_transform(numVertices, firstVertex, vertexbuffer);
     
