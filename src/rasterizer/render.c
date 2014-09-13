@@ -10,6 +10,7 @@
 #include "raster_triangle.h"
 #include "ext_math.h"
 #include "error.h"
+#include "static_config.h"
 
 
 // --- internals ---
@@ -69,19 +70,20 @@ void _pr_render_screenspace_point(PRint x, PRint y, PRubyte colorIndex)
 
     if (framebuffer == NULL)
     {
-        _pr_error_set(PR_ERROR_INVALID_STATE);
+        _pr_error_set(PR_ERROR_INVALID_STATE, __FUNCTION__);
         return;
     }
     
     if ( x < 0 || x >= (PRint)framebuffer->width ||
          y < 0 || y >= (PRint)framebuffer->height )
     {
-        _pr_error_set(PR_ERROR_INVALID_ARGUMENT);
+        _pr_error_set(PR_ERROR_INVALID_ARGUMENT, __FUNCTION__);
         return;
     }
 
-    if (_stateMachine.originLeftTop)
-        y = framebuffer->height - y - 1;
+    #ifdef PR_ORIGIN_LEFT_TOP
+    y = framebuffer->height - y - 1;
+    #endif
 
     // Plot screen space point
     _pr_framebuffer_plot(framebuffer, x, y, colorIndex);
@@ -94,20 +96,20 @@ void _pr_render_points(PRuint numVertices, PRuint firstVertex, pr_vertexbuffer* 
 
     if (framebuffer == NULL)
     {
-        _pr_error_set(PR_ERROR_INVALID_STATE);
+        _pr_error_set(PR_ERROR_INVALID_STATE, __FUNCTION__);
         return;
     }
 
     // Validate vertex buffer
     if (vertexbuffer == NULL)
     {
-        _pr_error_set(PR_ERROR_NULL_POINTER);
+        _pr_error_set(PR_ERROR_NULL_POINTER, __FUNCTION__);
         return;
     }
 
     if (firstVertex + numVertices >= vertexbuffer->numVertices)
     {
-        _pr_error_set(PR_ERROR_INVALID_ARGUMENT);
+        _pr_error_set(PR_ERROR_INVALID_ARGUMENT, __FUNCTION__);
         return;
     }
      
@@ -120,31 +122,19 @@ void _pr_render_points(PRuint numVertices, PRuint firstVertex, pr_vertexbuffer* 
     PRuint x, y;
     PRuint width = framebuffer->width, height = framebuffer->height;
 
-    if (_stateMachine.originLeftTop)
+    for (; firstVertex < numVertices; ++firstVertex)
     {
-        for (; firstVertex < numVertices; ++firstVertex)
-        {
-            vert = (vertexbuffer->vertices + firstVertex);
+        vert = (vertexbuffer->vertices + firstVertex);
 
-            x = (PRuint)(vert->ndc.x);
-            y = framebuffer->height - (PRuint)(vert->ndc.y) - 1;
+        x = (PRuint)(vert->ndc.x);
+        #ifdef PR_ORIGIN_LEFT_TOP
+        y = framebuffer->height - (PRuint)(vert->ndc.y) - 1;
+        #else
+        y = (PRuint)(vert->ndc.y);
+        #endif
 
-            if (x < width && y < height)
-                _pr_framebuffer_plot(framebuffer, x, y, _stateMachine.colorIndex);
-        }
-    }
-    else
-    {
-        for (; firstVertex < numVertices; ++firstVertex)
-        {
-            vert = (vertexbuffer->vertices + firstVertex);
-
-            x = (PRuint)(vert->ndc.x);
-            y = (PRuint)(vert->ndc.y);
-
-            if (x < width && y < height)
-                _pr_framebuffer_plot(framebuffer, x, y, _stateMachine.colorIndex);
-        }
+        if (x < width && y < height)
+            _pr_framebuffer_plot(framebuffer, x, y, _stateMachine.colorIndex);
     }
 }
 
@@ -164,7 +154,7 @@ void _pr_render_screenspace_line(PRint x1, PRint y1, PRint x2, PRint y2, PRubyte
 
     if (framebuffer == NULL)
     {
-        _pr_error_set(PR_ERROR_INVALID_STATE);
+        _pr_error_set(PR_ERROR_INVALID_STATE, __FUNCTION__);
         return;
     }
     
@@ -173,15 +163,14 @@ void _pr_render_screenspace_line(PRint x1, PRint y1, PRint x2, PRint y2, PRubyte
          y1 < 0 || y1 >= (PRint)framebuffer->height ||
          y2 < 0 || y2 >= (PRint)framebuffer->height )
     {
-        _pr_error_set(PR_ERROR_INVALID_ARGUMENT);
+        _pr_error_set(PR_ERROR_INVALID_ARGUMENT, __FUNCTION__);
         return;
     }
 
-    if (_stateMachine.originLeftTop)
-    {
-        y1 = framebuffer->height - y1 - 1;
-        y2 = framebuffer->height - y2 - 1;
-    }
+    #ifdef PR_ORIGIN_LEFT_TOP
+    y1 = framebuffer->height - y1 - 1;
+    y2 = framebuffer->height - y2 - 1;
+    #endif
 
     // Pre-compuations
     int dx = x2 - x1;
@@ -279,6 +268,118 @@ void _pr_render_indexed_line_loop(PRuint numVertices, PRuint firstVertex, pr_ver
 {
     _vertexbuffer_transform_all(vertexbuffer);
     //...
+}
+
+// --- images --- //
+
+static void _render_screenspace_image_textured(
+    pr_framebuffer* framebuffer, pr_texture* texture, PRint left, PRint top, PRint right, PRint bottom)
+{
+    // Clamp rectangle
+    left    = PR_CLAMP(left, 0, (PRint)framebuffer->width - 1);
+    top     = PR_CLAMP(top, 0, (PRint)framebuffer->height - 1);
+    right   = PR_CLAMP(right, 0, (PRint)framebuffer->width - 1);
+    bottom  = PR_CLAMP(bottom, 0, (PRint)framebuffer->height - 1);
+
+    // Flip vertical
+    #ifdef PR_ORIGIN_LEFT_TOP
+    top = framebuffer->height - top - 1;
+    bottom = framebuffer->height - bottom - 1;
+    #endif
+
+    if (top > bottom)
+        PR_SWAP(PRint, top, bottom);
+    if (left > right)
+        PR_SWAP(PRint, left, right);
+
+    // Select MIP level
+    PRtexsize width, height;
+    PRubyte mipLevel = _pr_texutre_compute_miplevel(texture, (PRfloat)(right - left)*(bottom - top), 1.0f);
+    PRubyte* texels = _pr_texture_select_miplevel(texture, mipLevel, &width, &height);
+
+    // Rasterize rectangle
+    pr_pixel* pixels = framebuffer->pixels;
+    const PRuint pitch = framebuffer->width;
+    pr_pixel* scaline;
+
+    PRfloat u = 0.0f;
+    #ifdef PR_ORIGIN_LEFT_TOP
+    PRfloat v = 1.0f;
+    #else
+    PRfloat v = 0.0f;
+    #endif
+
+    const PRfloat uStep = 1.0f / ((PRfloat)(right - left));
+    const PRfloat vStep = 1.0f / ((PRfloat)(bottom - top));
+
+    for (PRint y = top; y <= bottom; ++y)
+    {
+        scaline = pixels + (y * pitch + left);
+        
+        u = 0.0f;
+
+        for (PRint x = left; x <= right; ++x)
+        {
+            scaline->colorIndex = _pr_texture_sample_nearest(texels, width, height, u, v);
+            ++scaline;
+            u += uStep;
+        }
+
+        #ifdef PR_ORIGIN_LEFT_TOP
+        v -= vStep;
+        #else
+        v += vStep;
+        #endif
+    }
+}
+
+static void _render_screenspace_image_colored(
+    pr_framebuffer* framebuffer, PRubyte colorIndex, PRint left, PRint top, PRint right, PRint bottom)
+{
+    // Clamp rectangle
+    left    = PR_CLAMP(left, 0, (PRint)framebuffer->width - 1);
+    top     = PR_CLAMP(top, 0, (PRint)framebuffer->height - 1);
+    right   = PR_CLAMP(right, 0, (PRint)framebuffer->width - 1);
+    bottom  = PR_CLAMP(bottom, 0, (PRint)framebuffer->height - 1);
+
+    // Flip vertical
+    #ifdef PR_ORIGIN_LEFT_TOP
+    top = framebuffer->height - top - 1;
+    bottom = framebuffer->height - bottom - 1;
+    #endif
+
+    if (top > bottom)
+        PR_SWAP(PRint, top, bottom);
+    if (left > right)
+        PR_SWAP(PRint, left, right);
+
+    // Rasterize rectangle
+    pr_pixel* pixels = framebuffer->pixels;
+    const PRuint pitch = framebuffer->width;
+    pr_pixel* scaline;
+
+    for (PRint y = top; y <= bottom; ++y)
+    {
+        scaline = pixels + (y * pitch + left);
+        for (PRint x = left; x <= right; ++x)
+        {
+            scaline->colorIndex = colorIndex;
+            ++scaline;
+        }
+    }
+}
+
+void _pr_render_screenspace_image(PRint left, PRint top, PRint right, PRint bottom)
+{
+    if (_stateMachine.boundFramebuffer != NULL)
+    {
+        if (_stateMachine.boundTexture != NULL)
+            _render_screenspace_image_textured(_stateMachine.boundFramebuffer, _stateMachine.boundTexture, left, top, right, bottom);
+        else
+            _render_screenspace_image_colored(_stateMachine.boundFramebuffer, _stateMachine.colorIndex, left, top, right, bottom);
+    }
+    else
+        _pr_error_set(PR_ERROR_INVALID_STATE, __FUNCTION__);
 }
 
 // --- triangles --- //

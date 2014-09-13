@@ -7,6 +7,7 @@
 
 #include "framebuffer.h"
 #include "error.h"
+#include "helper.h"
 
 #include <stdlib.h>
 #include <string.h>
@@ -16,16 +17,16 @@ pr_framebuffer* _pr_framebuffer_create(PRuint width, PRuint height)
 {
     if (width == 0 || height == 0)
     {
-        _pr_error_set(PR_ERROR_INVALID_ARGUMENT);
+        _pr_error_set(PR_ERROR_INVALID_ARGUMENT, __FUNCTION__);
         return NULL;
     }
 
     // Create framebuffer
-    pr_framebuffer* framebuffer = (pr_framebuffer*)malloc(sizeof(pr_framebuffer));
+    pr_framebuffer* framebuffer = PR_MALLOC(pr_framebuffer);
 
     framebuffer->width = width;
     framebuffer->height = height;
-    framebuffer->pixels = calloc(width*height, sizeof(pr_pixel));
+    framebuffer->pixels = PR_CALLOC(pr_pixel, width*height);
 
     // Initialize framebuffer
     memset(framebuffer->pixels, 0, width*height*sizeof(pr_pixel));
@@ -61,5 +62,5 @@ void _pr_framebuffer_clear(pr_framebuffer* framebuffer, PRubyte clearColor, floa
         }
     }
     else
-        _pr_error_set(PR_ERROR_NULL_POINTER);
+        _pr_error_set(PR_ERROR_NULL_POINTER, __FUNCTION__);
 }

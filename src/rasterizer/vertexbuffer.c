@@ -8,16 +8,17 @@
 #include "vertexbuffer.h"
 #include "state_machine.h"
 #include "error.h"
+#include "helper.h"
 
 #include <stdlib.h>
 
 
 pr_vertexbuffer* _pr_vertexbuffer_create(PRsizei numVertices)
 {
-    pr_vertexbuffer* vertexbuffer = (pr_vertexbuffer*)malloc(sizeof(pr_vertexbuffer));
+    pr_vertexbuffer* vertexbuffer = PR_MALLOC(pr_vertexbuffer);
     
     vertexbuffer->numVertices = numVertices;
-    vertexbuffer->vertices = (pr_vertex*)calloc(numVertices, sizeof(pr_vertex));
+    vertexbuffer->vertices = PR_CALLOC(pr_vertex, numVertices);
 
     return vertexbuffer;
 }
@@ -62,7 +63,7 @@ PRboolean _pr_vertexbuffer_transform(
 
     if (lastVertex >= vertexbuffer->numVertices)
     {
-        _pr_error_set(PR_ERROR_INDEX_OUT_OF_BOUNDS);
+        _pr_error_set(PR_ERROR_INDEX_OUT_OF_BOUNDS, __FUNCTION__);
         return PR_FALSE;
     }
 

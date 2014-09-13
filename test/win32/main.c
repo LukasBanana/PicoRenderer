@@ -10,8 +10,8 @@
 #include <stdio.h>
 #include <pico.h>
 
-#define STB_IMAGE_IMPLEMENTATION
-#include "plugins/stb/stb_image.h"
+#include <rasterizer/image.h>
+
 
 // --- global members --- //
 
@@ -51,6 +51,11 @@ LRESULT CALLBACK window_callback(HWND wnd, UINT message, WPARAM wParam, LPARAM l
     return DefWindowProc(wnd, message, wParam, lParam);
 }
 
+void ErrorCallback(PRenum errorID, const char* info)
+{
+    printf("PicoRenderer Error (%i): %s", errorID, info);
+}
+
 int main()
 {
     // Register window class
@@ -80,8 +85,13 @@ int main()
     int desktopWidth    = GetSystemMetrics(SM_CXSCREEN);
     int desktopHeight   = GetSystemMetrics(SM_CYSCREEN);
 
-    PRuint screenWidth  = 800;
-    PRuint screenHeight = 600;
+    #if 1
+    const PRuint screenWidth  = 800;
+    const PRuint screenHeight = 600;
+    #else
+    const PRuint screenWidth  = 1600;
+    const PRuint screenHeight = 900;
+    #endif
 
     DWORD winStyle = WS_SYSMENU | WS_MINIMIZEBOX | WS_CAPTION;
 
@@ -117,6 +127,8 @@ int main()
 
     prInit();
 
+    prErrorHandler(ErrorCallback);
+
     context = prGenContext(&contextDesc, screenWidth, screenHeight);
 
     // Create frame buffer
@@ -124,54 +136,20 @@ int main()
     prBindFramebuffer(framebuffer);
 
     // Load image
-    typedef struct rgb
-    {
-        int r, g, b;
-    }
-    rgb;
+    #if 0
+    pr_image* image = _pr_image_load_from_file("media/pic.png");
 
-    int imageWidth, imageHeight, imageComp;
-    PRubyte* imageRawBuffer = (PRubyte*)stbi_load("media/pic.png", &imageWidth, &imageHeight, &imageComp, 3);
+    PRint imageWidth = image->width;
+    PRint imageHeight = image->height;
+    PRubyte* imageBuffer = (PRubyte*)calloc(imageWidth*imageHeight, sizeof(PRubyte));
+    _pr_image_color_to_colorindex_r3g3b2(imageBuffer, image, PR_TRUE);
 
-    rgb* imageBuffer = (rgb*)calloc(imageWidth*imageHeight, sizeof(rgb));
-
-    for (int i = 0, n = imageWidth*imageHeight; i < n; ++i)
-    {
-        imageBuffer[i].r = imageRawBuffer[i*3+0];
-        imageBuffer[i].g = imageRawBuffer[i*3+1];
-        imageBuffer[i].b = imageRawBuffer[i*3+2];
-    }
-
-    stbi_image_free(imageRawBuffer);
-
-    #define PIXEL(x, y) imageBuffer[(y)*imageWidth+(x)]
-    #define DITHER(c, s)                                    \
-        {                                                   \
-            int oldPixel = PIXEL(x, y).c;                   \
-            int newPixel = (oldPixel/s)*s;                  \
-            PIXEL(x, y).c = newPixel;                       \
-            int quantError = oldPixel - newPixel;           \
-            if (x+1 < imageWidth)                           \
-                PIXEL(x+1, y  ).c += quantError*7/16;       \
-            if (x > 0 && y+1 < imageHeight)                 \
-                PIXEL(x-1, y+1).c += quantError*3/16;       \
-            if (y+1 < imageHeight)                          \
-                PIXEL(x  , y+1).c += quantError*5/16;       \
-            if (x+1 < imageWidth && y+1 < imageHeight)      \
-                PIXEL(x+1, y+1).c += quantError*1/16;       \
-        }
-
-    #if 1
-    for (int y = 0; y < imageHeight; ++y)
-    {
-        for (int x = 0; x < imageWidth; ++x)
-        {
-            DITHER(r, 36);
-            DITHER(g, 36);
-            DITHER(b, 85);
-        }
-    }
+    _pr_image_delete(image);
     #endif
+
+    // Create texture
+    PRobject texture = prGenTexture();
+    prTextureImage2DFromFile(texture, "media/pic.png", PR_TRUE, PR_TRUE);
 
     // Main loop
     while (!isQuit)
@@ -189,28 +167,38 @@ int main()
         prClearFramebuffer(prGetColorIndex(255, 255, 255), 0.0f);
         {
             #if 0
+            
             prDrawScreenLine(300, 200, 500, 200, prGetColorIndex(255, 0, 0));
             prDrawScreenLine(500, 200, 500, 400, prGetColorIndex(0, 255, 0));
             prDrawScreenLine(500, 400, 300, 400, prGetColorIndex(0, 0, 255));
             prDrawScreenLine(300, 400, 300, 200, prGetColorIndex(0, 255, 255));
 
             prDrawScreenLine(10, 10, mouseX, mouseY, prGetColorIndex(255, 255, 0));
+            
             #elif 0
+            
             for (int y = 0; y < 256; ++y)
                 prDrawScreenLine(100, 100 + y, 356, 100 + y, prGetColorIndex(y, y, y));
-            #elif 1
+
+            #elif 0
 
             for (int y = 0; y < imageHeight; ++y)
             {
                 for (int x = 0; x < imageWidth; ++x)
                 {
-                    rgb* clr = &(PIXEL(x, y));
                     prDrawScreenPoint(
                         100 + x, 100 + y,
-                        prGetColorIndex(clr->r, clr->g, clr->b)
+                        imageBuffer[y*imageWidth + x]
                    );
                 }
             }
+
+            #elif 1
+
+            prColor(prGetColorIndex(255, 0, 0));
+            prBindTexture(texture);
+
+            prDrawScreenImage(100, 100, mouseX, mouseY);
 
             #endif
         }
@@ -218,8 +206,9 @@ int main()
     }
 
     // Clean up
-    free(imageBuffer);
+    //free(imageBuffer);
 
+    prDeleteTexture(texture);
     prDeleteFramebuffer(framebuffer);
     prDeleteContext(context);
 

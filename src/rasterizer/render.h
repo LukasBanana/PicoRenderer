@@ -34,6 +34,10 @@ void _pr_render_indexed_lines(PRuint numVertices, PRuint firstVertex, pr_vertexb
 void _pr_render_indexed_line_strip(PRuint numVertices, PRuint firstVertex, pr_vertexbuffer* vertexbuffer, const pr_indexbuffer* indexbuffer);
 void _pr_render_indexed_line_loop(PRuint numVertices, PRuint firstVertex, pr_vertexbuffer* vertexbuffer, const pr_indexbuffer* indexbuffer);
 
+// --- images --- //
+
+void _pr_render_screenspace_image(PRint left, PRint top, PRint right, PRint bottom);
+
 // --- triangles --- //
 
 void _pr_render_triangles(PRuint numVertices, PRuint firstVertex, pr_vertexbuffer* vertexbuffer);

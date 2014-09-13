@@ -43,9 +43,9 @@ void _pr_matrix_mul_vector4(pr_vector4* result, const pr_matrix4* lhs, const pr_
 
 void _pr_matrix_mul_matrix(pr_matrix4* result, const pr_matrix4* lhs, const pr_matrix4* rhs)
 {
-    float* m3 = &(result->m[0][0]);
-    const float* m1 = &(lhs->m[0][0]);
-    const float* m2 = &(rhs->m[0][0]);
+    PRfloat* m3 = &(result->m[0][0]);
+    const PRfloat* m1 = &(lhs->m[0][0]);
+    const PRfloat* m2 = &(rhs->m[0][0]);
 
     m3[ 0] = m1[0]*m2[ 0] + m1[4]*m2[ 1] + m1[ 8]*m2[ 2] + m1[12]*m2[ 3];
     m3[ 1] = m1[1]*m2[ 0] + m1[5]*m2[ 1] + m1[ 9]*m2[ 2] + m1[13]*m2[ 3];

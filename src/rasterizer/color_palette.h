@@ -12,6 +12,15 @@
 #include "color.h"
 
 
+#define PR_COLORINDEX_SCALE_RED     36
+#define PR_COLORINDEX_SCALE_GREEN   36
+#define PR_COLORINDEX_SCALE_BLUE    85
+
+#define PR_COLORINDEX_SELECT_RED    32
+#define PR_COLORINDEX_SELECT_GREEN  32
+#define PR_COLORINDEX_SELECT_BLUE   64
+
+
 //! Color palette for 8-bit color indices.
 typedef struct pr_color_palette
 {

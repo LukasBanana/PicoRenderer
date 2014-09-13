@@ -12,6 +12,7 @@
 #include "matrix4.h"
 #include "viewport.h"
 #include "framebuffer.h"
+#include "texture.h"
 
 
 typedef struct pr_state_machine
@@ -19,8 +20,10 @@ typedef struct pr_state_machine
     pr_matrix4      modelViewMatrix;
     pr_matrix4      projectionMatrix;
     pr_viewport     viewport;
+    
     pr_framebuffer* boundFramebuffer;
-    PRboolean       originLeftTop;      //!< Specifies whether the screen origin is left-top (true) or left-bottom (false). By default true.
+    pr_texture*     boundTexture;
+
     PRubyte         colorIndex;         //!< Acitve color index.
 }
 pr_state_machine;
@@ -32,6 +35,7 @@ extern pr_state_machine _stateMachine;
 void _pr_state_machine_init(pr_state_machine* stateMachine);
 
 void _pr_state_machine_bind_framebuffer(pr_framebuffer* framebuffer);
+void _pr_state_machine_bind_texture(pr_texture* texture);
 
 
 #endif

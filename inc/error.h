@@ -13,8 +13,11 @@
 #include "error_ids.h"
 
 
-void _pr_error_set(PRenum errorID);
+void _pr_error_set(PRenum errorID, const char* info);
 PRenum _pr_error_get();
+
+//! Sets the error event handler.
+void _pr_error_set_handler(PR_ERROR_HANDLER_PROC errorHandler);
 
 
 #endif

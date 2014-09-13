@@ -14,12 +14,12 @@ pr_context* _pr_context_create(const pr_context_desc* desc, PRuint width, PRuint
 {
     if (desc == NULL || desc->wnd == NULL || width <= 0 || height <= 0)
     {
-        _pr_error_set(PR_ERROR_INVALID_ARGUMENT);
+        _pr_error_set(PR_ERROR_INVALID_ARGUMENT, __FUNCTION__);
         return NULL;
     }
 
     // Create render context
-    pr_context* context = (pr_context*)malloc(sizeof(pr_context));
+    pr_context* context = PR_MALLOC(pr_context);
 
     // Setup bitmap info structure
     BITMAPINFO* bmi = (&context->bmpInfo);
@@ -37,14 +37,14 @@ pr_context* _pr_context_create(const pr_context_desc* desc, PRuint width, PRuint
     context->dc         = GetDC(desc->wnd);
     context->dcBmp      = CreateCompatibleDC(context->dc);
     context->bmp        = CreateCompatibleBitmap(context->dc, width, height);
-    context->colors     = (pr_color*)calloc(width*height, sizeof(pr_color));
+    context->colors     = PR_CALLOC(pr_color, width*height);
     context->width      = width;
     context->height     = height;
 
     SelectObject(context->dcBmp, context->bmp);
 
     // Create color palette
-    context->colorPalette = (pr_color_palette*)malloc(sizeof(pr_color_palette));
+    context->colorPalette = PR_MALLOC(pr_color_palette);
     _pr_color_palette_fill_r3g3b2(context->colorPalette);
 
     return context;
@@ -68,12 +68,12 @@ void _pr_context_present(pr_context* context, const pr_framebuffer* framebuffer)
 {
     if (context == NULL || framebuffer == NULL)
     {
-        _pr_error_set(PR_ERROR_NULL_POINTER);
+        _pr_error_set(PR_ERROR_NULL_POINTER, __FUNCTION__);
         return;
     }
     if (context->width != framebuffer->width || context->height != framebuffer->height)
     {
-        _pr_error_set(PR_ERROR_ARGUMENT_MISMATCH);
+        _pr_error_set(PR_ERROR_ARGUMENT_MISMATCH, __FUNCTION__);
         return;
     }
 

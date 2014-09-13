@@ -11,16 +11,14 @@
 #include "framebuffer.h"
 #include "vertexbuffer.h"
 #include "indexbuffer.h"
+#include "texture.h"
+#include "image.h"
 #include "state_machine.h"
 #include "render.h"
+#include "helper.h"
 
 
 // --- common --- //
-
-PRenum prGetError()
-{
-    return _pr_error_get();
-}
 
 PRboolean prInit()
 {
@@ -32,6 +30,16 @@ PRboolean prRelease()
 {
     //...
     return PR_TRUE;
+}
+
+PRenum prGetError()
+{
+    return _pr_error_get();
+}
+
+void prErrorHandler(PR_ERROR_HANDLER_PROC errorHandler)
+{
+    _pr_error_set_handler(errorHandler);
 }
 
 // --- context --- //
@@ -78,6 +86,48 @@ PRubyte prGetColorIndex(PRubyte red, PRubyte green, PRubyte blue)
     return _pr_color_to_colorindex_r3g3b2(red, green, blue);
 }
 
+// --- texture --- //
+
+PRobject prGenTexture()
+{
+    return (PRobject)_pr_texture_create();
+}
+
+void prDeleteTexture(PRobject texture)
+{
+    _pr_texture_delete((pr_texture*)texture);
+}
+
+void prBindTexture(PRobject texture)
+{
+    _pr_state_machine_bind_texture((pr_texture*)texture);
+}
+
+void prTextureImage2D(
+    PRobject texture, PRtexsize width, PRtexsize height, PRenum format,
+    const PRvoid* data, PRboolean dither, PRboolean generateMips)
+{
+    _pr_texture_image2d((pr_texture*)texture, width, height, format, data, dither, generateMips);
+}
+
+void prTextureImage2DFromFile(
+    PRobject texture, const char* filename, PRboolean dither, PRboolean generateMips)
+{
+    pr_image* image = _pr_image_load_from_file(filename);
+
+    _pr_texture_image2d(
+        (pr_texture*)texture,
+        (PRtexsize)(image->width),
+        (PRtexsize)(image->height),
+        PR_IMAGE_FORMAT_UBYTE_RGB,
+        image->colors,
+        dither,
+        generateMips
+    );
+
+    _pr_image_delete(image);
+}
+
 // --- vertexbuffer --- //
 
 PRobject prGenVertexbuffer(PRsizei numVertices)
@@ -114,11 +164,13 @@ void prModelViewMatrix(const PRfloat* matrix4x4)
     memcpy(&(_stateMachine.modelViewMatrix), matrix4x4, sizeof(pr_matrix4));
 }
 
-void prBuildPerspectiveProjection(PRfloat* matrix4x4, PRfloat aspectRatio, PRfloat nearPlane, PRfloat farPlane, PRfloat fov)
+void prBuildPerspectiveProjection(
+    PRfloat* matrix4x4, PRfloat aspectRatio, PRfloat nearPlane, PRfloat farPlane, PRfloat fov)
 {
 }
 
-void prBuildOrthogonalProjection(PRfloat* matrix4x4, PRfloat width, PRfloat height, PRfloat nearPlane, PRfloat farPlane)
+void prBuildOrthogonalProjection(
+    PRfloat* matrix4x4, PRfloat width, PRfloat height, PRfloat nearPlane, PRfloat farPlane)
 {
 }
 
@@ -154,6 +206,11 @@ void prDrawScreenPoint(PRint x, PRint y, PRubyte colorIndex)
 void prDrawScreenLine(PRint x1, PRint y1, PRint x2, PRint y2, PRubyte colorIndex)
 {
     _pr_render_screenspace_line(x1, y1, x2, y2, colorIndex);
+}
+
+void prDrawScreenImage(PRint left, PRint top, PRint right, PRint bottom)
+{
+    _pr_render_screenspace_image(left, top, right, bottom);
 }
 
 void prDraw(PRenum primitives, PRuint numVertices, PRuint firstVertex)

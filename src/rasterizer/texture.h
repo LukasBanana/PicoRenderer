@@ -10,20 +10,19 @@
 
 
 #include "types.h"
+#include "enums.h"
 
 
-#define PR_MIP_SIZE(size, mip) ((size) > (mip))
-
-#define PR_IMAGE_FORMAT_UBYTE_RGB   1
-#define PR_IMAGE_FORMAT_UBYTE_RGBA  2
+#define PR_MIP_SIZE(size, mip)      ((size) >> (mip))
+#define PR_TEXTURE_HAS_MIPS(tex)    ((tex)->mips > 1)
 
 
 //! Textures can have a maximum size of 256x256 texels.
 //! Textures store all their mip maps in a single texel array for compact memory access.
 typedef struct pr_texture
 {
-    PRubyte width;      //!< Width of the first MIP level.
-    PRubyte height;     //!< Height of the first MIP level.
+    PRtexsize width;    //!< Width of the first MIP level.
+    PRtexsize height;   //!< Height of the first MIP level.
     PRubyte mips;       //!< Number of MIP levels.
     PRubyte* texels;    //!< Texel MIP chain.
 }
@@ -33,21 +32,31 @@ pr_texture;
 pr_texture* _pr_texture_create();
 void _pr_texture_delete(pr_texture* texture);
 
+//! Sets the 2D image data to the specified texture.
 PRboolean _pr_texture_image2d(
     pr_texture* texture,
-    PRubyte width, PRubyte height,
-    PRenum format, const PRubyte* data
+    PRtexsize width, PRtexsize height,
+    PRenum format, const PRvoid* data, PRboolean dither, PRboolean generateMips
 );
 
 PRboolean _pr_texture_subimage2d(
     pr_texture* texture,
-    PRubyte mip, PRubyte x, PRubyte y,
-    PRubyte width, PRubyte height,
-    PRenum format, const PRubyte* data
+    PRubyte mip, PRtexsize x, PRtexsize y,
+    PRtexsize width, PRtexsize height,
+    PRenum format, const PRvoid* data, PRboolean dither
 );
 
 //! Returns the number of MIP levels for the specified maximal texture dimension (width or height).
 PRubyte _pr_texture_num_mips(PRubyte maxSize);
+
+//! Returns a pointer to the specified texture MIP level.
+PRubyte* _pr_texture_select_miplevel(pr_texture* texture, PRubyte mip, PRtexsize* width, PRtexsize* height);
+
+//! Returns the MIP level index for the specified texture.
+PRubyte _pr_texutre_compute_miplevel(pr_texture* texture, PRfloat pixelArea, PRfloat texelArea);
+
+//! Samples the nearest texels.
+PRubyte _pr_texture_sample_nearest(PRubyte* mipTexels, PRtexsize width, PRtexsize height, PRfloat u, PRfloat v);
 
 
 #endif

@@ -6,25 +6,26 @@
  */
 
 #include "indexbuffer.h"
+#include "helper.h"
 
 #include <stdlib.h>
 
 
 pr_indexbuffer* _pr_indexbuffer_create(PRsizei numIndices)
 {
-    pr_indexbuffer* indexbuffer = (pr_indexbuffer*)malloc(sizeof(pr_indexbuffer));
+    pr_indexbuffer* indexbuffer = PR_MALLOC(pr_indexbuffer);
     
     indexbuffer->numIndices = numIndices;
-    indexbuffer->indices = (PRushort*)calloc(numIndices, sizeof(PRushort));
+    indexbuffer->indices = PR_CALLOC(PRushort, numIndices);
 
     return indexbuffer;
 }
 
 void _pr_indexbuffer_delete(pr_indexbuffer* indexbuffer)
 {
-    if (indexbuffer != NULL && indexbuffer->indices != NULL)
+    if (indexbuffer != NULL)
     {
-        free(indexbuffer->indices);
-        free(indexbuffer);
+        PR_FREE(indexbuffer->indices);
+        PR_FREE(indexbuffer);
     }
 }

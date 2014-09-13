@@ -22,7 +22,7 @@ void _pr_color_palette_fill_r3g3b2(pr_color_palette* colorPalette)
 {
     if (colorPalette == NULL)
     {
-        _pr_error_set(PR_ERROR_NULL_POINTER);
+        _pr_error_set(PR_ERROR_NULL_POINTER, __FUNCTION__);
         return;
     }
 
@@ -54,8 +54,8 @@ PRubyte _pr_color_to_colorindex_r3g3b2(PRubyte r, PRubyte g, PRubyte b)
     since PRubyte cannot exceed the ranges.
     */
     return
-        ((r / 32) << 5) |
-        ((g / 32) << 2) |
-        ( b / 64      );
+        ((r / PR_COLORINDEX_SELECT_RED  ) << 5) |
+        ((g / PR_COLORINDEX_SELECT_GREEN) << 2) |
+        ( b / PR_COLORINDEX_SELECT_BLUE       );
 }
 

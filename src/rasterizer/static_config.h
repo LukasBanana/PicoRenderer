@@ -15,5 +15,8 @@
 //! Includes the STB image file handler plugin
 #define PR_INCLUDE_PLUGINS
 
+//! Flips the screen space vertical
+#define PR_ORIGIN_LEFT_TOP
+
 
 #endif

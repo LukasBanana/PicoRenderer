@@ -48,6 +48,9 @@ typedef unsigned int PRflags;
 //! Size type.
 typedef size_t PRsizei;
 
+//! Texture size type: 8-bit unsigned byte.
+typedef PRshort PRtexsize;
+
 //! No type or used for void pointer.
 typedef void PRvoid;
 
