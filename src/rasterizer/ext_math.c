@@ -11,6 +11,8 @@
 #include <math.h>
 
 
+// Fast inverse square root from "Quake III Arena"
+// See http://en.wikipedia.org/wiki/Fast_inverse_square_root
 PRfloat _aprx_inv_sqrt(PRfloat x)
 {
     float x2 = x * 0.5f;
@@ -22,6 +24,8 @@ PRfloat _aprx_inv_sqrt(PRfloat x)
     return y;
 }
 
+// Fast and accurate sine approximation
+// See http://lab.polygonal.de/?p=205
 PRfloat _aprx_sin(PRfloat x)
 {
     // Always wrap input angle to [-PI .. PI]

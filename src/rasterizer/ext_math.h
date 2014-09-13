@@ -10,6 +10,7 @@
 
 
 #include "types.h"
+#include "static_config.h"
 
 
 #define PR_MATH_PI          3.14159265359f
@@ -29,6 +30,16 @@
         a = b;              \
         b = _tmp;           \
     }
+
+#ifdef PR_FAST_MATH
+#   define PR_SIN(x)        _aprx_sin(x)
+#   define PR_COS(x)        _aprx_cos(x)
+#   define PR_INV_SQRT(x)   _aprx_inv_sqrt(x)
+#else
+#   define PR_SIN(x)        sinf(x)
+#   define PR_COS(x)        cosf(x)
+#   define PR_INV_SQRT(x)   (1.0f / sqrtf(x))
+#endif
 
 
 //! Computes an approximated and fast reciprocal square root.

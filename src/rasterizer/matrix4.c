@@ -7,6 +7,7 @@
 
 #include "matrix4.h"
 #include "error.h"
+#include "ext_math.h"
 
 #include <string.h>
 #include <math.h>
@@ -93,15 +94,15 @@ void _pr_matrix_rotate(pr_matrix4* result, PRfloat x, PRfloat y, PRfloat z, PRfl
 
     if (len != 0.0f && len != 1.0f)
     {
-        PRfloat invLen = 1.0f / sqrtf(len);
+        PRfloat invLen = PR_INV_SQRT(len);
         x *= invLen;
         y *= invLen;
         z *= invLen;
     }
 
     // Pre-compute rotation values
-    const PRfloat s = sinf(angle);
-    const PRfloat c = cosf(angle);
+    const PRfloat s = PR_SIN(angle);
+    const PRfloat c = PR_SIN(angle);
     const PRfloat cc = 1.0f - c;
 
     // Setup rotation matrix

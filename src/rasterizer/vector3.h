@@ -23,7 +23,5 @@ pr_vector3;
 
 void _pr_vector_normalize3(pr_vector3* vec);
 
-void _pr_vector_aprx_normalize3(pr_vector3* vec);
-
 
 #endif

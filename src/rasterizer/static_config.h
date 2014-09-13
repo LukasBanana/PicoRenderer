@@ -25,5 +25,8 @@
 //! Flips the screen space vertical
 #define PR_ORIGIN_LEFT_TOP
 
+//! Makes excessive use of the approximated math functions
+#define PR_FAST_MATH
+
 
 #endif
