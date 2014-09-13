@@ -167,23 +167,28 @@ void prModelViewMatrix(const PRfloat* matrix4x4)
 void prBuildPerspectiveProjection(
     PRfloat* matrix4x4, PRfloat aspectRatio, PRfloat nearPlane, PRfloat farPlane, PRfloat fov)
 {
+    _pr_matrix_build_perspective((pr_matrix4*)matrix4x4, aspectRatio, nearPlane, farPlane, fov);
 }
 
 void prBuildOrthogonalProjection(
     PRfloat* matrix4x4, PRfloat width, PRfloat height, PRfloat nearPlane, PRfloat farPlane)
 {
+    _pr_matrix_build_orthogonal((pr_matrix4*)matrix4x4, width, height, nearPlane, farPlane);
 }
 
 void prTranslate(PRfloat* matrix4x4, PRfloat x, PRfloat y, PRfloat z)
 {
+    _pr_matrix_translate((pr_matrix4*)matrix4x4, x, y, z);
 }
 
 void prRotate(PRfloat* matrix4x4, PRfloat x, PRfloat y, PRfloat z, PRfloat angle)
 {
+    _pr_matrix_rotate((pr_matrix4*)matrix4x4, x, y, z, angle);
 }
 
 void prScale(PRfloat* matrix4x4, PRfloat x, PRfloat y, PRfloat z)
 {
+    _pr_matrix_scale((pr_matrix4*)matrix4x4, x, y, z);
 }
 
 void prLoadIdentity(PRfloat* matrix4x4)
