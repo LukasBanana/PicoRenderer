@@ -24,7 +24,7 @@ pr_vertexbuffer;
 pr_vertexbuffer* _pr_vertexbuffer_create(PRsizei numVertices);
 void _pr_vertexbuffer_delete(pr_vertexbuffer* vertexbuffer);
 
-PRboolean _pr_vertexbuffer_transform(
+void _pr_vertexbuffer_transform(
     PRuint numVertices,
     PRuint firstVertex,
     pr_vertexbuffer* vertexbuffer,

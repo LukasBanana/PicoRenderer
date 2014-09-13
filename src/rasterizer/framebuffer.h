@@ -10,10 +10,7 @@
 
 
 #include "pixel.h"
-
-
-#define PR_DEFAULT_RESOLUTION_WIDTH     640
-#define PR_DEFAULT_RESOLUTION_HEIGHT    480
+#include "enums.h"
 
 
 //! Framebuffer structure.

@@ -12,12 +12,14 @@
 #include "types.h"
 
 
+//! The viewport has only floats, becuase they will be
+//! used to transform the raster_vertex coordinates.
 typedef struct pr_viewport
 {
-    PRint x;
-    PRint y;
-    PRint width;
-    PRint height;
+    PRfloat x;
+    PRfloat y;
+    PRfloat width;
+    PRfloat height;
     PRfloat minDepth;
     PRfloat maxDepth;
 }

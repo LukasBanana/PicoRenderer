@@ -21,6 +21,8 @@ PRboolean isQuit        = PR_FALSE;
 
 int mouseX = 0, mouseY = 0;
 
+#define PI 3.141592654f
+
 
 // --- functions --- //
 
@@ -120,14 +122,16 @@ int main()
 
     ShowWindow(wnd, SW_SHOW);
 
+    // Initialize renderer
+    prInit();
+    prErrorHandler(ErrorCallback);
+
+    printf("%s %s\n", prGetString(PR_STRING_RENDERER), prGetString(PR_STRING_VERSION));
+    
     // Create render context
     pr_context_desc contextDesc;
 
     contextDesc.wnd = wnd;
-
-    prInit();
-
-    prErrorHandler(ErrorCallback);
 
     context = prGenContext(&contextDesc, screenWidth, screenHeight);
 
@@ -137,7 +141,15 @@ int main()
 
     // Create texture
     PRobject texture = prGenTexture();
-    prTextureImage2DFromFile(texture, "media/cxcnstrctwoodb.bmp", PR_TRUE, PR_TRUE);
+    prTextureImage2DFromFile(texture, "media/banner.png", PR_TRUE, PR_TRUE);
+
+    // Setup matrices
+    float projection[16];
+    prBuildPerspectiveProjection(projection, (float)screenWidth/screenHeight, 0.1f, 100.0f, 74.0f);
+    prProjectionMatrix(projection);
+
+    float modelView[16];
+    float objRotation = 0.0f;
 
     // Main loop
     while (!isQuit)
@@ -150,6 +162,14 @@ int main()
             TranslateMessage(&msg);
             DispatchMessage(&msg);
         }
+
+        // Setup transformation
+        prLoadIdentity(modelView);
+        prTranslate(modelView, 0.0f, 0.0f, 3.0f);
+        prRotate(modelView, 1.0f, 1.0f, 1.0f, objRotation);
+        prModelViewMatrix(modelView);
+
+        objRotation += PI*0.1f;
 
         // Drawing
         prClearFramebuffer(prGetColorIndex(255, 255, 255), 0.0f);
@@ -167,19 +187,6 @@ int main()
             
             for (int y = 0; y < 256; ++y)
                 prDrawScreenLine(100, 100 + y, 356, 100 + y, prGetColorIndex(y, y, y));
-
-            #elif 0
-
-            for (int y = 0; y < imageHeight; ++y)
-            {
-                for (int x = 0; x < imageWidth; ++x)
-                {
-                    prDrawScreenPoint(
-                        100 + x, 100 + y,
-                        imageBuffer[y*imageWidth + x]
-                   );
-                }
-            }
 
             #elif 1
 

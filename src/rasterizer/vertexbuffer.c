@@ -50,12 +50,12 @@ static void _vertex_transform(
     vertex->ndc.z *= rhw;
 
     // Transform vertex to screen coordiante
-    vertex->ndc.x = (PRfloat)viewport->x + vertex->ndc.x * (PRfloat)viewport->width;
-    vertex->ndc.y = (PRfloat)viewport->y + vertex->ndc.y * (PRfloat)viewport->height;
+    vertex->ndc.x = viewport->x + vertex->ndc.x * viewport->width;
+    vertex->ndc.y = viewport->y + vertex->ndc.y * viewport->height;
     //...
 }
 
-PRboolean _pr_vertexbuffer_transform(
+void _pr_vertexbuffer_transform(
     PRuint numVertices, PRuint firstVertex, pr_vertexbuffer* vertexbuffer,
     const pr_matrix4* modelViewMatrix, const pr_matrix4* projectionMatrix, const pr_viewport* viewport)
 {
@@ -64,7 +64,7 @@ PRboolean _pr_vertexbuffer_transform(
     if (lastVertex >= vertexbuffer->numVertices)
     {
         _pr_error_set(PR_ERROR_INDEX_OUT_OF_BOUNDS, __FUNCTION__);
-        return PR_FALSE;
+        return;
     }
 
     for (PRuint i = firstVertex; i < lastVertex; ++i)
@@ -76,8 +76,6 @@ PRboolean _pr_vertexbuffer_transform(
             viewport
         );
     }
-
-    return PR_TRUE;
 }
 
 void _pr_vertexbuffer_transform_all(

@@ -9,6 +9,13 @@
 #define __PR_STATIC_CONFIG_H__
 
 
+// Version number
+#define PR_VERSION_MAJOR    0
+#define PR_VERSION_MINOR    1
+#define PR_VERSION_REVISION 0
+#define PR_VERSION_STATUS   "alpha"
+#define PR_VERSION_STR      "0.1 alpha"
+
 //! Use BGR color output instead of RGB (used for Win32 GDI)
 #define PR_BGR_COLOR_OUTPUT
 

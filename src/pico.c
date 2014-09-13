@@ -42,6 +42,18 @@ void prErrorHandler(PR_ERROR_HANDLER_PROC errorHandler)
     _pr_error_set_handler(errorHandler);
 }
 
+const char* prGetString(PRenum str)
+{
+    switch (str)
+    {
+        case PR_STRING_VERSION:
+            return PR_VERSION_STR;
+        case PR_STRING_RENDERER:
+            return "Pico Renderer";
+    }
+    return NULL;
+}
+
 // --- context --- //
 
 PRobject prGenContext(const pr_context_desc* desc, PRuint width, PRuint height)
@@ -156,12 +168,12 @@ void prDeleteIndexbuffer(PRobject indexbuffer)
 
 void prProjectionMatrix(const PRfloat* matrix4x4)
 {
-    memcpy(&(_stateMachine.projectionMatrix), matrix4x4, sizeof(pr_matrix4));
+    _pr_matrix_copy(&(_stateMachine.projectionMatrix), (pr_matrix4*)matrix4x4);
 }
 
 void prModelViewMatrix(const PRfloat* matrix4x4)
 {
-    memcpy(&(_stateMachine.modelViewMatrix), matrix4x4, sizeof(pr_matrix4));
+    _pr_matrix_copy(&(_stateMachine.modelViewMatrix), (pr_matrix4*)matrix4x4);
 }
 
 void prBuildPerspectiveProjection(

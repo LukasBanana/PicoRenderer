@@ -29,6 +29,9 @@ PRenum prGetError();
 //! Sets the error event handler.
 void prErrorHandler(PR_ERROR_HANDLER_PROC errorHandler);
 
+//! Returns the specified string or null if 'str' is invalid.
+const char* prGetString(PRenum str);
+
 // --- context --- //
 
 /**
