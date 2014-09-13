@@ -37,7 +37,7 @@ pr_context* _pr_context_create(const pr_context_desc* desc, PRuint width, PRuint
     context->dc         = GetDC(desc->wnd);
     context->dcBmp      = CreateCompatibleDC(context->dc);
     context->bmp        = CreateCompatibleBitmap(context->dc, width, height);
-    context->colors     = (pr_color_bgr*)calloc(width*height, sizeof(pr_color_bgr));
+    context->colors     = (pr_color*)calloc(width*height, sizeof(pr_color));
     context->width      = width;
     context->height     = height;
 
@@ -80,13 +80,13 @@ void _pr_context_present(pr_context* context, const pr_framebuffer* framebuffer)
     // Get iterators
     const PRuint num = context->width*context->height;
 
-    pr_color_bgr* dst = context->colors;
-    pr_color_bgr* dstEnd = dst + num;
+    pr_color* dst = context->colors;
+    pr_color* dstEnd = dst + num;
 
     const pr_pixel* pixels = framebuffer->pixels;
 
-    const pr_color_bgr* palette = context->colorPalette->colors;
-    const pr_color_bgr* paletteColor;
+    const pr_color* palette = context->colorPalette->colors;
+    const pr_color* paletteColor;
 
     // Iterate over all pixels
     while (dst != dstEnd)
@@ -101,8 +101,8 @@ void _pr_context_present(pr_context* context, const pr_framebuffer* framebuffer)
         ++pixels;
     }
 
-    // Show framebuffer on device context
-    SetDIBits(context->dc, context->bmp, 0, context->height, context->colors, &(context->bmpInfo), DIB_RGB_COLORS);
+    // Show framebuffer on device context ('SetDIBits' only needs a device context when 'DIB_PAL_COLORS' is used)
+    SetDIBits(NULL, context->bmp, 0, context->height, context->colors, &(context->bmpInfo), DIB_RGB_COLORS);
     BitBlt(context->dc, 0, 0, context->width, context->height, context->dcBmp, 0, 0, SRCCOPY);
 }
 

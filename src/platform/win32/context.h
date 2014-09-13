@@ -12,7 +12,7 @@
 #include "types.h"
 #include "framebuffer.h"
 #include "color_palette.h"
-#include "color_bgr.h"
+#include "color.h"
 #include "platform.h"
 
 #include <Windows.h>
@@ -28,7 +28,7 @@ typedef struct pr_context
     BITMAPINFO          bmpInfo;
     HBITMAP             bmp;
     // Renderer objects
-    pr_color_bgr*       colors;
+    pr_color*           colors;
     PRuint              width;
     PRuint              height;
     pr_color_palette*   colorPalette;

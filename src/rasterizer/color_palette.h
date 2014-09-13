@@ -9,13 +9,13 @@
 #define __PR_COLOR_PALETTE_H__
 
 
-#include "color_bgr.h"
+#include "color.h"
 
 
 //! Color palette for 8-bit color indices.
 typedef struct pr_color_palette
 {
-    pr_color_bgr colors[256];
+    pr_color colors[256];
 }
 pr_color_palette;
 
