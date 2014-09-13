@@ -135,21 +135,9 @@ int main()
     framebuffer = prGenFramebuffer(screenWidth, screenHeight);
     prBindFramebuffer(framebuffer);
 
-    // Load image
-    #if 0
-    pr_image* image = _pr_image_load_from_file("media/pic.png");
-
-    PRint imageWidth = image->width;
-    PRint imageHeight = image->height;
-    PRubyte* imageBuffer = (PRubyte*)calloc(imageWidth*imageHeight, sizeof(PRubyte));
-    _pr_image_color_to_colorindex_r3g3b2(imageBuffer, image, PR_TRUE);
-
-    _pr_image_delete(image);
-    #endif
-
     // Create texture
     PRobject texture = prGenTexture();
-    prTextureImage2DFromFile(texture, "media/pic.png", PR_TRUE, PR_TRUE);
+    prTextureImage2DFromFile(texture, "media/cxcnstrctwoodb.bmp", PR_TRUE, PR_TRUE);
 
     // Main loop
     while (!isQuit)

@@ -12,6 +12,8 @@
 #include "error.h"
 #include "static_config.h"
 
+#include <stdio.h>
+
 
 // --- internals ---
 
@@ -294,13 +296,13 @@ static void _render_screenspace_image_textured(
 
     // Select MIP level
     PRtexsize width, height;
-    PRubyte mipLevel = _pr_texutre_compute_miplevel(texture, (PRfloat)(right - left)*(bottom - top), 1.0f);
+    PRubyte mipLevel = _pr_texutre_compute_miplevel(texture, (PRfloat)PR_MIN(right - left, bottom - top), 1.0f);
     PRubyte* texels = _pr_texture_select_miplevel(texture, mipLevel, &width, &height);
 
     // Rasterize rectangle
     pr_pixel* pixels = framebuffer->pixels;
     const PRuint pitch = framebuffer->width;
-    pr_pixel* scaline;
+    pr_pixel* scanline;
 
     PRfloat u = 0.0f;
     #ifdef PR_ORIGIN_LEFT_TOP
@@ -314,14 +316,14 @@ static void _render_screenspace_image_textured(
 
     for (PRint y = top; y <= bottom; ++y)
     {
-        scaline = pixels + (y * pitch + left);
+        scanline = pixels + (y * pitch + left);
         
         u = 0.0f;
 
         for (PRint x = left; x <= right; ++x)
         {
-            scaline->colorIndex = _pr_texture_sample_nearest(texels, width, height, u, v);
-            ++scaline;
+            scanline->colorIndex = _pr_texture_sample_nearest(texels, width, height, u, v);
+            ++scanline;
             u += uStep;
         }
 

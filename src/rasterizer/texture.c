@@ -322,7 +322,7 @@ PRubyte* _pr_texture_select_miplevel(pr_texture* texture, PRubyte mip, PRtexsize
 
 PRubyte _pr_texutre_compute_miplevel(pr_texture* texture, PRfloat pixelArea, PRfloat texelArea)
 {
-    texelArea *= (PRfloat)(texture->width*texture->height) * 0.5f;
+    texelArea *= (PRfloat)PR_MIN(texture->width, texture->height) * 0.5f;
     return (PRubyte)PR_CLAMP(texelArea / pixelArea, 0, texture->mips - 1);
 }
 
