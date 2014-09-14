@@ -22,6 +22,7 @@ typedef struct pr_viewport
     PRfloat halfHeight;
     PRfloat minDepth;
     PRfloat maxDepth;
+    PRfloat depthSize;  // (maxDepth - minDepth)
 }
 pr_viewport;
 

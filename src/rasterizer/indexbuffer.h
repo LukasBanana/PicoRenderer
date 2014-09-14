@@ -11,10 +11,12 @@
 
 #include "types.h"
 
+#include <stdio.h>
+
 
 typedef struct pr_indexbuffer
 {
-    PRsizei numIndices;
+    PRushort numIndices;
     PRushort* indices;
 }
 pr_indexbuffer;
@@ -23,7 +25,8 @@ pr_indexbuffer;
 pr_indexbuffer* _pr_indexbuffer_create();
 void _pr_indexbuffer_delete(pr_indexbuffer* indexBuffer);
 
-void _pr_indexbuffer_data(pr_indexbuffer* indexBuffer, const PRushort* indices, PRsizei numIndices);
+void _pr_indexbuffer_data(pr_indexbuffer* indexBuffer, const PRushort* indices, PRushort numIndices);
+void _pr_indexbuffer_data_from_file(pr_indexbuffer* indexBuffer, PRushort* numIndices, FILE* file);
 
 
 #endif

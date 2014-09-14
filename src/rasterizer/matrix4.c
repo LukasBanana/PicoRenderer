@@ -124,9 +124,9 @@ void _pr_matrix_rotate(pr_matrix4* result, PRfloat x, PRfloat y, PRfloat z, PRfl
 void _pr_matrix_scale(pr_matrix4* result, PRfloat x, PRfloat y, PRfloat z)
 {
     PRfloat* m = &(result->m[0][0]);
-    m[0] *= x; m[4] *= x; m[ 8] *= x; m[12] *= x;
-    m[1] *= y; m[5] *= y; m[ 9] *= y; m[13] *= y;
-    m[2] *= z; m[6] *= z; m[10] *= z; m[14] *= z;
+    m[0] *= x; m[1] *= x; m[ 2] *= x; m[ 3] *= x;
+    m[4] *= y; m[5] *= y; m[ 6] *= y; m[ 7] *= y;
+    m[8] *= z; m[9] *= z; m[10] *= z; m[11] *= z;
 }
 
 void _pr_matrix_build_perspective(pr_matrix4* result, PRfloat aspectRatio, PRfloat nearPlane, PRfloat farPlane, PRfloat fov)

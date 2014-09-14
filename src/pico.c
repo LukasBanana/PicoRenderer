@@ -50,6 +50,12 @@ const char* prGetString(PRenum str)
             return PR_VERSION_STR;
         case PR_STRING_RENDERER:
             return "Pico Renderer";
+        case PR_STRING_PLUGINS:
+            #ifdef PR_INCLUDE_PLUGINS
+            return "stb_image;";
+            #else
+            return "";
+            #endif
     }
     return NULL;
 }
@@ -58,9 +64,7 @@ const char* prGetString(PRenum str)
 
 PRobject prGenContext(const pr_context_desc* desc, PRuint width, PRuint height)
 {
-    PRobject context = (PRobject)_pr_context_create(desc, width, height);
-    _pr_state_machine_viewport(0, 0, width, height);
-    return context;
+    return (PRobject)_pr_context_create(desc, width, height);
 }
 
 void prDeleteContext(PRobject context)
@@ -159,6 +163,11 @@ void prVertexBufferData(PRobject vertexBuffer, const PRvertex* vertices, PRsizei
     _pr_vertexbuffer_data((pr_vertexbuffer*)vertexBuffer, vertices, numVertices);
 }
 
+void prVertexBufferDataFromFile(PRobject vertexBuffer, PRushort* numVertices, FILE* file)
+{
+    _pr_vertexbuffer_data_from_file((pr_vertexbuffer*)vertexBuffer, numVertices, file);
+}
+
 void prBindVertexBuffer(PRobject vertexBuffer)
 {
     _pr_state_machine_bind_vertexbuffer((pr_vertexbuffer*)vertexBuffer);
@@ -179,6 +188,11 @@ void prDeleteIndexBuffer(PRobject indexBuffer)
 void prIndexBufferData(PRobject indexBuffer, const PRushort* indices, PRsizei numIndices)
 {
     _pr_indexbuffer_data((pr_indexbuffer*)indexBuffer, indices, numIndices);
+}
+
+void prIndexBufferDataFromFile(PRobject indexBuffer, PRushort* numIndices, FILE* file)
+{
+    _pr_indexbuffer_data_from_file((pr_indexbuffer*)indexBuffer, numIndices, file);
 }
 
 void prBindIndexBuffer(PRobject indexBuffer)
@@ -269,12 +283,12 @@ void prDrawScreenImage(PRint left, PRint top, PRint right, PRint bottom)
     _pr_render_screenspace_image(left, top, right, bottom);
 }
 
-void prDraw(PRenum primitives, PRuint numVertices, PRuint firstVertex)
+void prDraw(PRenum primitives, PRushort numVertices, PRushort firstVertex)
 {
     //...
 }
 
-void prDrawIndexed(PRenum primitives, PRuint numVertices, PRuint firstVertex)
+void prDrawIndexed(PRenum primitives, PRushort numVertices, PRushort firstVertex)
 {
     switch (primitives)
     {
@@ -298,6 +312,9 @@ void prDrawIndexed(PRenum primitives, PRuint numVertices, PRuint firstVertex)
             break;
         case PR_PRIMITIVE_TRIANGLE_FAN:
             _pr_render_indexed_triangle_fan(numVertices, firstVertex, PR_STATE_MACHINE.boundVertexBuffer, PR_STATE_MACHINE.boundIndexBuffer);
+            break;
+        default:
+            PR_ERROR(PR_ERROR_INVALID_ARGUMENT);
             break;
     }
 }

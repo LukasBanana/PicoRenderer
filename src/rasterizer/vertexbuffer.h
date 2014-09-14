@@ -13,10 +13,12 @@
 #include "viewport.h"
 #include "structs.h"
 
+#include <stdio.h>
+
 
 typedef struct pr_vertexbuffer
 {
-    PRsizei numVertices;
+    PRushort numVertices;
     pr_vertex* vertices;
 }
 pr_vertexbuffer;
@@ -26,8 +28,8 @@ pr_vertexbuffer* _pr_vertexbuffer_create();
 void _pr_vertexbuffer_delete(pr_vertexbuffer* vertexBuffer);
 
 void _pr_vertexbuffer_transform(
-    PRuint numVertices,
-    PRuint firstVertex,
+    PRushort numVertices,
+    PRushort firstVertex,
     pr_vertexbuffer* vertexBuffer,
     const pr_matrix4* worldViewProjectionMatrix,
     const pr_viewport* viewport
@@ -39,7 +41,8 @@ void _pr_vertexbuffer_transform_all(
     const pr_viewport* viewport
 );
 
-void _pr_vertexbuffer_data(pr_vertexbuffer* vertexBuffer, const PRvertex* vertices, PRsizei numVertices);
+void _pr_vertexbuffer_data(pr_vertexbuffer* vertexBuffer, const PRvertex* vertices, PRushort numVertices);
+void _pr_vertexbuffer_data_from_file(pr_vertexbuffer* vertexBuffer, PRushort* numVertices, FILE* file);
 
 
 #endif

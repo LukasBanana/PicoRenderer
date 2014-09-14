@@ -175,6 +175,10 @@ int main()
 
     // Create vertex buffer
     PRobject vertexBuffer = prGenVertexBuffer();
+    PRobject indexBuffer = prGenIndexBuffer();
+
+    #if 0
+
     PRvertex cubeVertices[8] =
     {
         { -1.0f,  1.0f, -1.0f, 0.0f, 0.0f },
@@ -188,24 +192,41 @@ int main()
     };
     prVertexBufferData(vertexBuffer, cubeVertices, 8);
 
-    PRobject indexBuffer = prGenIndexBuffer();
+    const PRushort numIndices = 24;
+
     PRushort cubeIndices[24] = {
         0,1, 1,2, 2,3, 3,0,
         4,5, 5,6, 6,7, 7,4,
         0,4, 1,5, 2,6, 3,7
     };
-    prIndexBufferData(indexBuffer, cubeIndices, 24);
+    prIndexBufferData(indexBuffer, cubeIndices, numIndices);
+
+    #else
+
+    PRushort numVertices = 0, numIndices = 0;
+
+    FILE* mdlFile = fopen("media/house.pico", "rb");
+    if (mdlFile)
+    {
+        prVertexBufferDataFromFile(vertexBuffer, &numVertices, mdlFile);
+        prIndexBufferDataFromFile(indexBuffer, &numIndices, mdlFile);
+        fclose(mdlFile);
+    }
+    else
+        puts("could not open model file!");
+
+    #endif
 
     // Setup matrices
-    float projection[16], worldMatrix[16], viewMatrix[16];
+    float projectionA[16], projectionB[16], worldMatrix[16], viewMatrix[16];
     float pitch = 0.0f, yaw = 0.0f;
+    float size[3] = { 0.7f, -0.7f, 0.7f };
 
     PRuint viewWidth = 200;//screenWidth;
     PRuint viewHeight = 200;//screenHeight;
 
-    prBuildPerspectiveProjection(projection, (float)viewWidth/viewHeight, 0.1f, 100.0f, 90.0f * PR_DEG2RAD);
-    //prBuildOrthogonalProjection(projection, 0.01f*viewWidth, 0.01f*viewHeight, 0.01f, 100.0f);
-    prProjectionMatrix(projection);
+    prBuildPerspectiveProjection(projectionA, (float)viewWidth/viewHeight, 0.1f, 100.0f, 90.0f * PR_DEG2RAD);
+    prBuildOrthogonalProjection(projectionB, 0.02f*viewWidth, 0.02f*viewHeight, 0.1f, 100.0f);
 
     prLoadIdentity(viewMatrix);
     prViewMatrix(viewMatrix);
@@ -269,28 +290,32 @@ int main()
             prColor(prGetColorIndex(0, 0, 255));
 
             // Setup transformation
+            prProjectionMatrix(projectionB);
             prLoadIdentity(worldMatrix);
             prTranslate(worldMatrix, 0.0f, 0.0f, 3.0f);
             prRotate(worldMatrix, 1.0f, 0.0f, 0.0f, pitch);
             prRotate(worldMatrix, 0.0f, 1.0f, 0.0f, -yaw);
+            prScale(worldMatrix, size[0], size[1], size[2]);
             prWorldMatrix(worldMatrix);
 
             // Draw lines
-            prDrawIndexed(PR_PRIMITIVE_LINES, 24, 0);
+            prDrawIndexed(PR_PRIMITIVE_LINES, numIndices, 0);
 
             // Setup view
             prViewport(viewWidth, 0, 600, 600);
             prColor(prGetColorIndex(255, 0, 0));
 
             // Setup transformation
+            prProjectionMatrix(projectionA);
             prLoadIdentity(worldMatrix);
             prTranslate(worldMatrix, 0.0f, 0.0f, 3.0f);
             prRotate(worldMatrix, 1.0f, 0.0f, 0.0f, pitch);
             prRotate(worldMatrix, 0.0f, 1.0f, 0.0f, yaw);
+            prScale(worldMatrix, size[0], size[1], size[2]);
             prWorldMatrix(worldMatrix);
 
             // Draw lines
-            prDrawIndexed(PR_PRIMITIVE_LINES, 24, 0);
+            prDrawIndexed(PR_PRIMITIVE_LINES, numIndices, 0);
 
             #endif
         }

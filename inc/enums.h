@@ -17,6 +17,7 @@
 
 #define PR_STRING_VERSION               1
 #define PR_STRING_RENDERER              2
+#define PR_STRING_PLUGINS               3
 
 #define PR_PRIMITIVE_POINTS             0x00000001
 #define PR_PRIMITIVE_LINES              0x00010001

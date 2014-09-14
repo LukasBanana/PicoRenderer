@@ -51,17 +51,17 @@ static void _vertex_transform(
     vertex->ndc.y *= rhw;
     vertex->ndc.z *= rhw;
 
-    // Transform vertex to screen coordiante
-    vertex->ndc.x = viewport->x + (vertex->ndc.x + 1.0f) * viewport->halfWidth;
-    vertex->ndc.y = viewport->y + (vertex->ndc.y + 1.0f) * viewport->halfHeight;
-    //...
+    // Transform vertex to screen coordiante (+0.5 is for rounding adjustment)
+    vertex->ndc.x = viewport->x + (vertex->ndc.x + 1.0f) * viewport->halfWidth + 0.5f;
+    vertex->ndc.y = viewport->y + (vertex->ndc.y + 1.0f) * viewport->halfHeight + 0.5f;
+    vertex->ndc.z = viewport->minDepth + vertex->ndc.z * viewport->depthSize;
 }
 
 void _pr_vertexbuffer_transform(
-    PRuint numVertices, PRuint firstVertex, pr_vertexbuffer* vertexBuffer,
+    PRushort numVertices, PRushort firstVertex, pr_vertexbuffer* vertexBuffer,
     const pr_matrix4* worldViewProjectionMatrix, const pr_viewport* viewport)
 {
-    const PRuint lastVertex = numVertices + firstVertex;
+    const PRushort lastVertex = numVertices + firstVertex;
 
     if (lastVertex >= vertexBuffer->numVertices)
     {
@@ -69,25 +69,19 @@ void _pr_vertexbuffer_transform(
         return;
     }
 
-    for (PRuint i = firstVertex; i < lastVertex; ++i)
+    for (PRushort i = firstVertex; i < lastVertex; ++i)
         _vertex_transform((vertexBuffer->vertices + i), worldViewProjectionMatrix, viewport);
 }
 
 void _pr_vertexbuffer_transform_all(
     pr_vertexbuffer* vertexBuffer, const pr_matrix4* worldViewProjectionMatrix, const pr_viewport* viewport)
 {
-    for (PRuint i = 0; i < vertexBuffer->numVertices; ++i)
+    for (PRushort i = 0; i < vertexBuffer->numVertices; ++i)
         _vertex_transform((vertexBuffer->vertices + i), worldViewProjectionMatrix, viewport);
 }
 
-void _pr_vertexbuffer_data(pr_vertexbuffer* vertexBuffer, const PRvertex* vertices, PRsizei numVertices)
+static _vertexbuffer_resize(pr_vertexbuffer* vertexBuffer, PRushort numVertices)
 {
-    if (vertexBuffer == NULL || vertices == NULL)
-    {
-        PR_ERROR(PR_ERROR_NULL_POINTER);
-        return;
-    }
-
     // Check if vertex buffer must be reallocated
     if (vertexBuffer->vertices == NULL || vertexBuffer->numVertices != numVertices)
     {
@@ -97,6 +91,17 @@ void _pr_vertexbuffer_data(pr_vertexbuffer* vertexBuffer, const PRvertex* vertic
         vertexBuffer->numVertices   = numVertices;
         vertexBuffer->vertices      = PR_CALLOC(pr_vertex, numVertices);
     }
+}
+
+void _pr_vertexbuffer_data(pr_vertexbuffer* vertexBuffer, const PRvertex* vertices, PRushort numVertices)
+{
+    if (vertexBuffer == NULL || vertices == NULL)
+    {
+        PR_ERROR(PR_ERROR_NULL_POINTER);
+        return;
+    }
+
+    _vertexbuffer_resize(vertexBuffer, numVertices);
 
     // Fill vertex buffer
     pr_vertex* vert = vertexBuffer->vertices;
@@ -112,6 +117,45 @@ void _pr_vertexbuffer_data(pr_vertexbuffer* vertexBuffer, const PRvertex* vertic
 
         ++vert;
         ++vertices;
+    }
+}
+
+void _pr_vertexbuffer_data_from_file(pr_vertexbuffer* vertexBuffer, PRushort* numVertices, FILE* file)
+{
+    if (vertexBuffer == NULL || numVertices == NULL || file == NULL)
+    {
+        PR_ERROR(PR_ERROR_NULL_POINTER);
+        return;
+    }
+    
+    // Read number of vertices
+    fread(numVertices, sizeof(PRushort), 1, file);
+
+    _vertexbuffer_resize(vertexBuffer, *numVertices);
+
+    // Read all vertices
+    PRvertex data;
+    pr_vertex* vert = vertexBuffer->vertices;
+
+    for (PRushort i = 0; i < *numVertices; ++i)
+    {
+        if (feof(file))
+        {
+            PR_ERROR(PR_ERROR_UNEXPECTED_EOF);
+            return;
+        }
+
+        // Read next vertex data
+        fread(&data, sizeof(PRvertex), 1, file);
+
+        vert->coord.x = data.x;
+        vert->coord.y = data.y;
+        vert->coord.z = data.z;
+
+        vert->invTexCoord.x = 1.0f / data.u;
+        vert->invTexCoord.y = 1.0f / data.v;
+
+        ++vert;
     }
 }
 

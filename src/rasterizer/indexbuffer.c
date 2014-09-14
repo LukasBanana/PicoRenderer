@@ -31,14 +31,8 @@ void _pr_indexbuffer_delete(pr_indexbuffer* indexBuffer)
     }
 }
 
-void _pr_indexbuffer_data(pr_indexbuffer* indexBuffer, const PRushort* indices, PRsizei numIndices)
+static void _indexbuffer_resize(pr_indexbuffer* indexBuffer, PRushort numIndices)
 {
-    if (indexBuffer == NULL || indices == NULL)
-    {
-        PR_ERROR(PR_ERROR_NULL_POINTER);
-        return;
-    }
-
     // Check if index buffer must be reallocated
     if (indexBuffer->indices == NULL || indexBuffer->numIndices != numIndices)
     {
@@ -48,8 +42,37 @@ void _pr_indexbuffer_data(pr_indexbuffer* indexBuffer, const PRushort* indices, 
         indexBuffer->numIndices = numIndices;
         indexBuffer->indices    = PR_CALLOC(PRushort, numIndices);
     }
+}
+
+void _pr_indexbuffer_data(pr_indexbuffer* indexBuffer, const PRushort* indices, PRushort numIndices)
+{
+    if (indexBuffer == NULL || indices == NULL)
+    {
+        PR_ERROR(PR_ERROR_NULL_POINTER);
+        return;
+    }
+
+    _indexbuffer_resize(indexBuffer, numIndices);
 
     // Fill index buffer
     while (numIndices-- > 0)
         indexBuffer->indices[numIndices] = indices[numIndices];
 }
+
+void _pr_indexbuffer_data_from_file(pr_indexbuffer* indexBuffer, PRushort* numIndices, FILE* file)
+{
+    if (indexBuffer == NULL || numIndices == NULL || file == NULL)
+    {
+        PR_ERROR(PR_ERROR_NULL_POINTER);
+        return;
+    }
+    
+    // Read number of indices
+    fread(numIndices, sizeof(PRushort), 1, file);
+
+    _indexbuffer_resize(indexBuffer, *numIndices);
+
+    // Read all indices
+    fread(indexBuffer->indices, sizeof(PRushort), *numIndices, file);
+}
+

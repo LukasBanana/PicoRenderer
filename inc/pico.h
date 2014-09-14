@@ -16,6 +16,8 @@
 #include "structs.h"
 #include "consts.h"
 
+#include <stdio.h>
+
 
 // --- common --- //
 
@@ -31,7 +33,10 @@ PRenum prGetError();
 //! Sets the error event handler.
 void prErrorHandler(PR_ERROR_HANDLER_PROC errorHandler);
 
-//! Returns the specified string or null if 'str' is invalid.
+/**
+Returns the specified string or null if 'str' is invalid.
+\param[in] str Specifies the string which is to be returned. Must begin with 'PR_STRING_...'.
+*/
 const char* prGetString(PRenum str);
 
 // --- context --- //
@@ -173,6 +178,20 @@ Sets the vertex buffer data.
 void prVertexBufferData(PRobject vertexBuffer, const PRvertex* vertices, PRsizei numVertices);
 
 /**
+Reads and sets the vertex buffer data from the specified file.
+\param[in] vertexBuffer Specifies the vertex buffer whose vertex data is to be set.
+\param[out] numVertices Specifies the resulting number of vertices.
+\param[in] file Pointer to the file object. This file must be opened in binary read mode: fopen(filename, "rb").
+\code
+// File format:
+numVertices: 16-bit unsigned integer
+vertices[numVertices]: 'numVertices' * (five 32-bit floating point values for: x, y, z, u, v) (see 'PRvertex').
+\endcode
+\see PRvertex
+*/
+void prVertexBufferDataFromFile(PRobject vertexBuffer, PRushort* numVertices, FILE* file);
+
+/**
 Binds the specified vertex buffer.
 \param[in] vertexBuffer Specifies the vertex buffer which is to be bound.
 If this is zero, no vertex buffer is bound.
@@ -206,6 +225,19 @@ Sets the index buffer data.
 void prIndexBufferData(PRobject indexBuffer, const PRushort* indices, PRsizei numIndices);
 
 /**
+Reads and sets the index buffer data from the specified file.
+\param[in] indexBuffer Specifies the index buffer whose index data is to be set.
+\param[out] numIndices Specifies the resulting number of indices.
+\param[in] file Pointer to the file object. This file must be opened in binary read mode: fopen(filename, "rb").
+\code
+// File format:
+numIndices: 16-bit unsigned integer
+indices[numVertices]: 'numIndices' * (16-bit unsigned integer).
+\endcode
+*/
+void prIndexBufferDataFromFile(PRobject indexBuffer, PRushort* numIndices, FILE* file);
+
+/**
 Binds the specified index buffer.
 \param[in] indexBuffer Specifies the index buffer which is to be bound.
 If this is zero, no index buffer is bound.
@@ -216,21 +248,21 @@ void prBindIndexBuffer(PRobject indexBuffer);
 
 /**
 Sets the projection matrix.
-\param[in] matrix4x4 Raw pointer to a 4x4 left-handed projection matrix.
+\param[in] matrix4x4 Raw pointer to a 4x4 left-handed projection matrix (in projection space).
+\see prBuildPerspectiveProjection
+\see prBuildOrthogonalProjection
 */
 void prProjectionMatrix(const PRfloat* matrix4x4);
 
 /**
-Sets the view matrix and update the internal view-projection matrix.
-\param[in] matrix4x4 Raw pointer to a 4x4 left-handed view matrix.
-\note The projection matrix must be set before this matrix!
+Sets the view matrix.
+\param[in] matrix4x4 Raw pointer to a 4x4 left-handed view matrix (in view space).
 */
 void prViewMatrix(const PRfloat* matrix4x4);
 
 /**
-Sets the world matrix and updates the internal world-view-projection matrix.
-\param[in] matrix4x4 Raw pointer to a 4x4 left-handed model matrix.
-\note The projection- and view matrices must be set before this matrix!
+Sets the world matrix.
+\param[in] matrix4x4 Raw pointer to a 4x4 left-handed world matrix (in world space).
 */
 void prWorldMatrix(const PRfloat* matrix4x4);
 
@@ -290,8 +322,18 @@ void prLoadIdentity(PRfloat* matrix4x4);
 
 // --- viewports/ scissors --- //
 
+/**
+Sets the viewport for the currently bound framebuffer.
+\note A frame buffer must be bound before this function can be used!
+\see prBindFrameBuffer
+*/
 void prViewport(PRuint x, PRuint y, PRuint width, PRuint height);
 
+/**
+Sets the depth range for the currently bound framebuffer.
+\note A frame buffer must be bound before this function can be used!
+\see prBindFrameBuffer
+*/
 void prDepthRange(PRfloat minDepth, PRfloat maxDepth);
 
 // --- drawing --- //
@@ -316,7 +358,7 @@ Draws the specified amount of primitives.
 \remarks A vertex buffer must be bound.
 \see prBindVertexBuffer
 */
-void prDraw(PRenum primitives, PRuint numVertices, PRuint firstVertex);
+void prDraw(PRenum primitives, PRushort numVertices, PRushort firstVertex);
 
 /**
 Draws the specified amount of primitives.
@@ -327,7 +369,7 @@ Draws the specified amount of primitives.
 \see prBindVertexBuffer
 \see prBindIndexBuffer
 */
-void prDrawIndexed(PRenum primitives, PRuint numVertices, PRuint firstVertex);
+void prDrawIndexed(PRenum primitives, PRushort numVertices, PRushort firstVertex);
 
 
 #endif
