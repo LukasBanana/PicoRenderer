@@ -13,7 +13,8 @@
 #include "error_ids.h"
 
 
-#define PR_ERROR(err) _pr_error_set(err, __FUNCTION__)
+#define PR_ERROR(err)           _pr_error_set(err, __FUNCTION__)
+#define PR_SET_ERROR_FATAL(msg) _pr_error_set(PR_ERROR_FATAL, msg)
 
 
 void _pr_error_set(PRenum errorID, const char* info);

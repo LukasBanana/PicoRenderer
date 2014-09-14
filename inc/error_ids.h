@@ -20,6 +20,7 @@ typedef void (*PR_ERROR_HANDLER_PROC)(PRenum errorID, const char* info);
 #define PR_ERROR_INDEX_OUT_OF_BOUNDS    5
 #define PR_ERROR_ARGUMENT_MISMATCH      6
 #define PR_ERROR_MISSING_PLUGIN         7
+#define PR_ERROR_FATAL                  8
 
 
 #endif

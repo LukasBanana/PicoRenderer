@@ -20,8 +20,10 @@ typedef struct pr_indexbuffer
 pr_indexbuffer;
 
 
-pr_indexbuffer* _pr_indexbuffer_create(PRsizei numIndices);
-void _pr_indexbuffer_delete(pr_indexbuffer* indexbuffer);
+pr_indexbuffer* _pr_indexbuffer_create();
+void _pr_indexbuffer_delete(pr_indexbuffer* indexBuffer);
+
+void _pr_indexbuffer_data(pr_indexbuffer* indexBuffer, const PRushort* indices, PRsizei numIndices);
 
 
 #endif

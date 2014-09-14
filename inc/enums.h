@@ -18,5 +18,13 @@
 #define PR_STRING_VERSION               1
 #define PR_STRING_RENDERER              2
 
+#define PR_PRIMITIVE_POINTS             0x00000001
+#define PR_PRIMITIVE_LINES              0x00010001
+#define PR_PRIMITIVE_LINE_STRIP         0x00010002
+#define PR_PRIMITIVE_LINE_LOOP          0x00010003
+#define PR_PRIMITIVE_TRIANGLES          0x00020001
+#define PR_PRIMITIVE_TRIANGLE_STRIP     0x00020002
+#define PR_PRIMITIVE_TRIANGLE_FAN       0x00020003
+
 
 #endif

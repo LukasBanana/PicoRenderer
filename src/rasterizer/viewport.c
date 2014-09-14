@@ -14,12 +14,12 @@ void _pr_viewport_init(pr_viewport* viewport)
 {
     if (viewport != NULL)
     {
-        viewport->x         = 0.0f;
-        viewport->y         = 0.0f;
-        viewport->width     = (PRfloat)PR_DEFAULT_RESOLUTION_WIDTH;
-        viewport->height    = (PRfloat)PR_DEFAULT_RESOLUTION_HEIGHT;
-        viewport->minDepth  = 0.0f;
-        viewport->maxDepth  = 1.0f;
+        viewport->x             = 0.0f;
+        viewport->y             = 0.0f;
+        viewport->halfWidth     = 0.5f * (PRfloat)PR_DEFAULT_RESOLUTION_WIDTH;
+        viewport->halfHeight    = 0.5f * (PRfloat)PR_DEFAULT_RESOLUTION_HEIGHT;
+        viewport->minDepth      = 0.0f;
+        viewport->maxDepth      = 1.0f;
     }
     else
         _pr_error_set(PR_ERROR_NULL_POINTER, __FUNCTION__);

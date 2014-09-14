@@ -11,9 +11,8 @@
 
 #include "types.h"
 #include "static_config.h"
+#include "consts.h"
 
-
-#define PR_MATH_PI          3.14159265359f
 
 #define PR_MIN(a, b)        ((a) < (b) ? (a) : (b))
 #define PR_MAX(a, b)        ((a) > (b) ? (a) : (b))

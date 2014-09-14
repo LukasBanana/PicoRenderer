@@ -22,7 +22,7 @@
 
 PRboolean prInit()
 {
-    _pr_state_machine_init(&_stateMachine);
+    _pr_state_machine_init_null();
     return PR_TRUE;
 }
 
@@ -58,7 +58,9 @@ const char* prGetString(PRenum str)
 
 PRobject prGenContext(const pr_context_desc* desc, PRuint width, PRuint height)
 {
-    return (PRobject)_pr_context_create(desc, width, height);
+    PRobject context = (PRobject)_pr_context_create(desc, width, height);
+    _pr_state_machine_viewport(0, 0, width, height);
+    return context;
 }
 
 void prDeleteContext(PRobject context)
@@ -68,7 +70,7 @@ void prDeleteContext(PRobject context)
 
 void prPresent(PRobject context)
 {
-    _pr_context_present((pr_context*)context, _stateMachine.boundFrameBuffer);
+    _pr_context_present((pr_context*)context, PR_STATE_MACHINE.boundFrameBuffer);
 }
 
 // --- framebuffer --- //
@@ -90,7 +92,7 @@ void prBindFrameBuffer(PRobject frameBuffer)
 
 void prClearFrameBuffer(PRubyte clearColor, float depth)
 {
-    _pr_framebuffer_clear(_stateMachine.boundFrameBuffer, clearColor, depth);
+    _pr_framebuffer_clear(PR_STATE_MACHINE.boundFrameBuffer, clearColor, depth);
 }
 
 PRubyte prGetColorIndex(PRubyte red, PRubyte green, PRubyte blue)
@@ -157,16 +159,31 @@ void prVertexBufferData(PRobject vertexBuffer, const PRvertex* vertices, PRsizei
     _pr_vertexbuffer_data((pr_vertexbuffer*)vertexBuffer, vertices, numVertices);
 }
 
-// --- indexbuffer --- //
-
-PRobject prGenIndexbuffer(PRsizei numIndices)
+void prBindVertexBuffer(PRobject vertexBuffer)
 {
-    return (PRobject)_pr_indexbuffer_create(numIndices);
+    _pr_state_machine_bind_vertexbuffer((pr_vertexbuffer*)vertexBuffer);
 }
 
-void prDeleteIndexbuffer(PRobject indexbuffer)
+// --- indexbuffer --- //
+
+PRobject prGenIndexBuffer()
 {
-    _pr_indexbuffer_delete((pr_indexbuffer*)indexbuffer);
+    return (PRobject)_pr_indexbuffer_create();
+}
+
+void prDeleteIndexBuffer(PRobject indexBuffer)
+{
+    _pr_indexbuffer_delete((pr_indexbuffer*)indexBuffer);
+}
+
+void prIndexBufferData(PRobject indexBuffer, const PRushort* indices, PRsizei numIndices)
+{
+    _pr_indexbuffer_data((pr_indexbuffer*)indexBuffer, indices, numIndices);
+}
+
+void prBindIndexBuffer(PRobject indexBuffer)
+{
+    _pr_state_machine_bind_indexbuffer((pr_indexbuffer*)indexBuffer);
 }
 
 // --- matrices --- //
@@ -218,11 +235,23 @@ void prLoadIdentity(PRfloat* matrix4x4)
     _pr_matrix_load_identity((pr_matrix4*)matrix4x4);
 }
 
+// --- viewports/ scissors --- //
+
+void prViewport(PRuint x, PRuint y, PRuint width, PRuint height)
+{
+    _pr_state_machine_viewport(x, y, width, height);
+}
+
+void prDepthRange(PRfloat minDepth, PRfloat maxDepth)
+{
+    _pr_state_machine_depth_range(minDepth, maxDepth);
+}
+
 // --- drawing --- //
 
 void prColor(PRubyte colorIndex)
 {
-    _stateMachine.colorIndex = colorIndex;
+    PR_STATE_MACHINE.colorIndex = colorIndex;
 }
 
 void prDrawScreenPoint(PRint x, PRint y, PRubyte colorIndex)
@@ -247,6 +276,29 @@ void prDraw(PRenum primitives, PRuint numVertices, PRuint firstVertex)
 
 void prDrawIndexed(PRenum primitives, PRuint numVertices, PRuint firstVertex)
 {
-    //...
+    switch (primitives)
+    {
+        case PR_PRIMITIVE_POINTS:
+            _pr_render_indexed_points(numVertices, firstVertex, PR_STATE_MACHINE.boundVertexBuffer, PR_STATE_MACHINE.boundIndexBuffer);
+            break;
+        case PR_PRIMITIVE_LINES:
+            _pr_render_indexed_lines(numVertices, firstVertex, PR_STATE_MACHINE.boundVertexBuffer, PR_STATE_MACHINE.boundIndexBuffer);
+            break;
+        case PR_PRIMITIVE_LINE_STRIP:
+            _pr_render_indexed_line_strip(numVertices, firstVertex, PR_STATE_MACHINE.boundVertexBuffer, PR_STATE_MACHINE.boundIndexBuffer);
+            break;
+        case PR_PRIMITIVE_LINE_LOOP:
+            _pr_render_indexed_line_loop(numVertices, firstVertex, PR_STATE_MACHINE.boundVertexBuffer, PR_STATE_MACHINE.boundIndexBuffer);
+            break;
+        case PR_PRIMITIVE_TRIANGLES:
+            _pr_render_indexed_triangles(numVertices, firstVertex, PR_STATE_MACHINE.boundVertexBuffer, PR_STATE_MACHINE.boundIndexBuffer);
+            break;
+        case PR_PRIMITIVE_TRIANGLE_STRIP:
+            _pr_render_indexed_triangle_strip(numVertices, firstVertex, PR_STATE_MACHINE.boundVertexBuffer, PR_STATE_MACHINE.boundIndexBuffer);
+            break;
+        case PR_PRIMITIVE_TRIANGLE_FAN:
+            _pr_render_indexed_triangle_fan(numVertices, firstVertex, PR_STATE_MACHINE.boundVertexBuffer, PR_STATE_MACHINE.boundIndexBuffer);
+            break;
+    }
 }
 

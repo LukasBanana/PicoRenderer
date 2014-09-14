@@ -28,5 +28,8 @@
 //! Makes excessive use of the approximated math functions
 #define PR_FAST_MATH
 
+//! Enables extended debug information
+#define PR_DEBUG
+
 
 #endif

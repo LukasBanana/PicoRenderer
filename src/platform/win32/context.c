@@ -10,6 +10,8 @@
 #include "helper.h"
 
 
+pr_context* _currentContext = NULL;
+
 pr_context* _pr_context_create(const pr_context_desc* desc, PRuint width, PRuint height)
 {
     if (desc == NULL || desc->wnd == NULL || width <= 0 || height <= 0)
@@ -47,6 +49,10 @@ pr_context* _pr_context_create(const pr_context_desc* desc, PRuint width, PRuint
     context->colorPalette = PR_MALLOC(pr_color_palette);
     _pr_color_palette_fill_r3g3b2(context->colorPalette);
 
+    // Initialize state machine
+    _pr_state_machine_init(&(context->stateMachine));
+    _pr_context_makecurrent(context);
+
     return context;
 }
 
@@ -62,6 +68,15 @@ void _pr_context_delete(pr_context* context)
         free(context->colors);
         free(context);
     }
+}
+
+void _pr_context_makecurrent(pr_context* context)
+{
+    _currentContext = context;
+    if (context != NULL)
+        _pr_state_machine_makecurrent(&(context->stateMachine));
+    else
+        _pr_state_machine_makecurrent(NULL);
 }
 
 void _pr_context_present(pr_context* context, const pr_framebuffer* framebuffer)

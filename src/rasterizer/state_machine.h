@@ -12,33 +12,49 @@
 #include "matrix4.h"
 #include "viewport.h"
 #include "framebuffer.h"
+#include "vertexbuffer.h"
+#include "indexbuffer.h"
 #include "texture.h"
+
+
+#define PR_STATE_MACHINE (*_stateMachine)
 
 
 typedef struct pr_state_machine
 {
-    pr_matrix4      projectionMatrix;
-    pr_matrix4      viewMatrix;
-    pr_matrix4      worldMatrix;
-    pr_matrix4      viewProjectionMatrix;
-    pr_matrix4      worldViewProjectionMatrix;
-    pr_viewport     viewport;
+    pr_matrix4          projectionMatrix;
+    pr_matrix4          viewMatrix;
+    pr_matrix4          worldMatrix;
+    pr_matrix4          viewProjectionMatrix;
+    pr_matrix4          worldViewProjectionMatrix;
+    pr_viewport         viewport;
     
-    pr_framebuffer* boundFrameBuffer;
-    pr_texture*     boundTexture;
+    pr_framebuffer*     boundFrameBuffer;
+    pr_vertexbuffer*    boundVertexBuffer;
+    pr_indexbuffer*     boundIndexBuffer;
+    pr_texture*         boundTexture;
 
-    PRubyte         colorIndex;         //!< Acitve color index.
+    PRubyte             colorIndex;                 //!< Acitve color index.
 }
 pr_state_machine;
 
 
-extern pr_state_machine _stateMachine;
+//! Reference to the state machine of the current context.
+extern pr_state_machine* _stateMachine;
 
 
 void _pr_state_machine_init(pr_state_machine* stateMachine);
+void _pr_state_machine_init_null();
 
-void _pr_state_machine_bind_framebuffer(pr_framebuffer* framebuffer);
+void _pr_state_machine_makecurrent(pr_state_machine* stateMachine);
+
+void _pr_state_machine_bind_framebuffer(pr_framebuffer* frameBuffer);
+void _pr_state_machine_bind_vertexbuffer(pr_vertexbuffer* vertexBuffer);
+void _pr_state_machine_bind_indexbuffer(pr_indexbuffer* indexBuffer);
 void _pr_state_machine_bind_texture(pr_texture* texture);
+
+void _pr_state_machine_viewport(PRuint x, PRuint y, PRuint width, PRuint height);
+void _pr_state_machine_depth_range(PRfloat minDepth, PRfloat maxDepth);
 
 void _pr_state_machine_projection_matrix(const pr_matrix4* matrix);
 void _pr_state_machine_view_matrix(const pr_matrix4* matrix);

@@ -52,8 +52,8 @@ static void _vertex_transform(
     vertex->ndc.z *= rhw;
 
     // Transform vertex to screen coordiante
-    vertex->ndc.x = viewport->x + vertex->ndc.x * viewport->width;
-    vertex->ndc.y = viewport->y + vertex->ndc.y * viewport->height;
+    vertex->ndc.x = viewport->x + (vertex->ndc.x + 1.0f) * viewport->halfWidth;
+    vertex->ndc.y = viewport->y + (vertex->ndc.y + 1.0f) * viewport->halfHeight;
     //...
 }
 

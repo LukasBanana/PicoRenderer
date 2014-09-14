@@ -102,7 +102,7 @@ void _pr_matrix_rotate(pr_matrix4* result, PRfloat x, PRfloat y, PRfloat z, PRfl
 
     // Pre-compute rotation values
     const PRfloat s = PR_SIN(angle);
-    const PRfloat c = PR_SIN(angle);
+    const PRfloat c = PR_COS(angle);
     const PRfloat cc = 1.0f - c;
 
     // Setup rotation matrix
@@ -133,14 +133,14 @@ void _pr_matrix_build_perspective(pr_matrix4* result, PRfloat aspectRatio, PRflo
 {
     if (result == NULL)
     {
-        _pr_error_set(PR_ERROR_NULL_POINTER, __FUNCTION__);
+        PR_ERROR(PR_ERROR_NULL_POINTER);
         return;
     }
 
     const PRfloat h = 1.0f / tanf(fov * 0.5f);
     const PRfloat w = h / aspectRatio;
 
-    PRfloat* m = (PRfloat*)(result->m);
+    PRfloat* m = &(result->m[0][0]);
 
     m[ 0] = w;
     m[ 1] = 0.0f;
@@ -167,11 +167,11 @@ void _pr_matrix_build_orthogonal(pr_matrix4* result, PRfloat width, PRfloat heig
 {
     if (result == NULL)
     {
-        _pr_error_set(PR_ERROR_NULL_POINTER, __FUNCTION__);
+        PR_ERROR(PR_ERROR_NULL_POINTER);
         return;
     }
 
-    PRfloat* m = (PRfloat*)(result->m);
+    PRfloat* m = &(result->m[0][0]);
 
     m[ 0] = 2.0f / width;
     m[ 1] = 0.0f;
@@ -179,7 +179,7 @@ void _pr_matrix_build_orthogonal(pr_matrix4* result, PRfloat width, PRfloat heig
     m[ 3] = 0.0f;
 
     m[ 4] = 0.0f;
-    m[ 5] = 2.0f / width;
+    m[ 5] = 2.0f / height;
     m[ 6] = 0.0f;
     m[ 7] = 0.0f;
 

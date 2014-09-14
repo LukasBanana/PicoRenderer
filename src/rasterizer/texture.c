@@ -291,7 +291,7 @@ PRubyte _pr_texture_num_mips(PRubyte maxSize)
 TODO: This should be optimized:
 add "PRubyte** mipTexels" member to "pr_texture" structure with pointer offsets.
 */
-PRubyte* _pr_texture_select_miplevel(pr_texture* texture, PRubyte mip, PRtexsize* width, PRtexsize* height)
+const PRubyte* _pr_texture_select_miplevel(const pr_texture* texture, PRubyte mip, PRtexsize* width, PRtexsize* height)
 {
     mip = PR_CLAMP(mip, 0, texture->mips - 1);
 
@@ -303,7 +303,7 @@ PRubyte* _pr_texture_select_miplevel(pr_texture* texture, PRubyte mip, PRtexsize
     *height = PR_MIP_SIZE(h, mip);
 
     // Select MIP level texels
-    PRubyte* texels = texture->texels;
+    const PRubyte* texels = texture->texels;
 
     while (mip > 0)
     {
@@ -320,13 +320,13 @@ PRubyte* _pr_texture_select_miplevel(pr_texture* texture, PRubyte mip, PRtexsize
     return texels;
 }
 
-PRubyte _pr_texutre_compute_miplevel(pr_texture* texture, PRfloat pixelArea, PRfloat texelArea)
+PRubyte _pr_texutre_compute_miplevel(const pr_texture* texture, PRfloat pixelArea, PRfloat texelArea)
 {
     texelArea *= (PRfloat)PR_MIN(texture->width, texture->height) * 0.5f;
     return (PRubyte)PR_CLAMP(texelArea / pixelArea, 0, texture->mips - 1);
 }
 
-PRubyte _pr_texture_sample_nearest(PRubyte* mipTexels, PRtexsize width, PRtexsize height, PRfloat u, PRfloat v)
+PRubyte _pr_texture_sample_nearest(const PRubyte* mipTexels, PRtexsize width, PRtexsize height, PRfloat u, PRfloat v)
 {
     // Clamp texture coordinates
     PRint x = (PRint)((u - (PRint)u)*width);

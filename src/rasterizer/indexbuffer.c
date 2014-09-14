@@ -7,25 +7,49 @@
 
 #include "indexbuffer.h"
 #include "helper.h"
+#include "error.h"
 
 #include <stdlib.h>
 
 
-pr_indexbuffer* _pr_indexbuffer_create(PRsizei numIndices)
+pr_indexbuffer* _pr_indexbuffer_create()
 {
-    pr_indexbuffer* indexbuffer = PR_MALLOC(pr_indexbuffer);
+    pr_indexbuffer* indexBuffer = PR_MALLOC(pr_indexbuffer);
     
-    indexbuffer->numIndices = numIndices;
-    indexbuffer->indices = PR_CALLOC(PRushort, numIndices);
+    indexBuffer->numIndices = 0;
+    indexBuffer->indices    = NULL;
 
-    return indexbuffer;
+    return indexBuffer;
 }
 
-void _pr_indexbuffer_delete(pr_indexbuffer* indexbuffer)
+void _pr_indexbuffer_delete(pr_indexbuffer* indexBuffer)
 {
-    if (indexbuffer != NULL)
+    if (indexBuffer != NULL)
     {
-        PR_FREE(indexbuffer->indices);
-        PR_FREE(indexbuffer);
+        PR_FREE(indexBuffer->indices);
+        PR_FREE(indexBuffer);
     }
+}
+
+void _pr_indexbuffer_data(pr_indexbuffer* indexBuffer, const PRushort* indices, PRsizei numIndices)
+{
+    if (indexBuffer == NULL || indices == NULL)
+    {
+        PR_ERROR(PR_ERROR_NULL_POINTER);
+        return;
+    }
+
+    // Check if index buffer must be reallocated
+    if (indexBuffer->indices == NULL || indexBuffer->numIndices != numIndices)
+    {
+        // Create new index buffer data
+        PR_FREE(indexBuffer->indices);
+
+        indexBuffer->numIndices = numIndices;
+        indexBuffer->indices    = PR_CALLOC(PRushort, numIndices);
+    }
+
+    // Fill index buffer
+    while (numIndices-- > 0)
+        indexBuffer->indices[numIndices] = indices[numIndices];
 }

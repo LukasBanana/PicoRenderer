@@ -9,6 +9,7 @@
 #include <windowsx.h>
 #include <stdio.h>
 #include <pico.h>
+#include <stdbool.h>
 
 #include <rasterizer/image.h>
 
@@ -20,6 +21,9 @@ PRobject frameBuffer    = NULL;
 PRboolean isQuit        = PR_FALSE;
 
 int mouseX = 0, mouseY = 0;
+int mouseSpeedX = 0, mouseSpeedY = 0;
+int mouseWheel = 0;
+bool buttonDown[2] = { 0 };
 
 #define PI 3.141592654f
 
@@ -39,10 +43,36 @@ LRESULT CALLBACK window_callback(HWND wnd, UINT message, WPARAM wParam, LPARAM l
 
         case WM_MOUSEMOVE:
         {
-            mouseX = GET_X_LPARAM(lParam);
-            mouseY = GET_Y_LPARAM(lParam);
+            int x = GET_X_LPARAM(lParam);
+            int y = GET_Y_LPARAM(lParam);
+
+            mouseSpeedX = x - mouseX;
+            mouseSpeedY = y - mouseY;
+
+            mouseX = x;
+            mouseY = y;
         }
         break;
+
+        case WM_LBUTTONDOWN:
+            buttonDown[0] = true;
+            break;
+        case WM_LBUTTONUP:
+            buttonDown[0] = false;
+            break;
+
+        case WM_RBUTTONDOWN:
+            buttonDown[1] = true;
+            break;
+        case WM_RBUTTONUP:
+            buttonDown[1] = false;
+            break;
+
+        case WM_MOUSEWHEEL:
+        {
+            mouseWheel = GET_WHEEL_DELTA_WPARAM(wParam) / WHEEL_DELTA;
+        }
+        return 0;
 
         case WM_CLOSE:
         {
@@ -55,7 +85,7 @@ LRESULT CALLBACK window_callback(HWND wnd, UINT message, WPARAM wParam, LPARAM l
 
 void ErrorCallback(PRenum errorID, const char* info)
 {
-    printf("PicoRenderer Error (%i): %s", errorID, info);
+    printf("PicoRenderer Error (%i): %s\n", errorID, info);
 }
 
 int main()
@@ -143,17 +173,51 @@ int main()
     PRobject texture = prGenTexture();
     prTextureImage2DFromFile(texture, "media/banner.png", PR_TRUE, PR_TRUE);
 
+    // Create vertex buffer
+    PRobject vertexBuffer = prGenVertexBuffer();
+    PRvertex cubeVertices[8] =
+    {
+        { -1.0f,  1.0f, -1.0f, 0.0f, 0.0f },
+        { -1.0f,  1.0f,  1.0f, 0.0f, 0.0f },
+        {  1.0f,  1.0f,  1.0f, 0.0f, 0.0f },
+        {  1.0f,  1.0f, -1.0f, 0.0f, 0.0f },
+        { -1.0f, -1.0f, -1.0f, 0.0f, 0.0f },
+        { -1.0f, -1.0f,  1.0f, 0.0f, 0.0f },
+        {  1.0f, -1.0f,  1.0f, 0.0f, 0.0f },
+        {  1.0f, -1.0f, -1.0f, 0.0f, 0.0f }
+    };
+    prVertexBufferData(vertexBuffer, cubeVertices, 8);
+
+    PRobject indexBuffer = prGenIndexBuffer();
+    PRushort cubeIndices[24] = {
+        0,1, 1,2, 2,3, 3,0,
+        4,5, 5,6, 6,7, 7,4,
+        0,4, 1,5, 2,6, 3,7
+    };
+    prIndexBufferData(indexBuffer, cubeIndices, 24);
+
     // Setup matrices
-    float projection[16];
-    prBuildPerspectiveProjection(projection, (float)screenWidth/screenHeight, 0.1f, 100.0f, 74.0f);
+    float projection[16], worldMatrix[16], viewMatrix[16];
+    float pitch = 0.0f, yaw = 0.0f;
+
+    PRuint viewWidth = 200;//screenWidth;
+    PRuint viewHeight = 200;//screenHeight;
+
+    prBuildPerspectiveProjection(projection, (float)viewWidth/viewHeight, 0.1f, 100.0f, 90.0f * PR_DEG2RAD);
+    //prBuildOrthogonalProjection(projection, 0.01f*viewWidth, 0.01f*viewHeight, 0.01f, 100.0f);
     prProjectionMatrix(projection);
 
-    float worldMatrix[16];
-    float objRotation = 0.0f;
+    prLoadIdentity(viewMatrix);
+    prViewMatrix(viewMatrix);
 
     // Main loop
     while (!isQuit)
     {
+        // Reset input states
+        mouseSpeedX = 0;
+        mouseSpeedY = 0;
+        mouseWheel = 0;
+
         // Window event handling
         MSG msg;
 
@@ -163,13 +227,12 @@ int main()
             DispatchMessage(&msg);
         }
 
-        // Setup transformation
-        prLoadIdentity(worldMatrix);
-        prTranslate(worldMatrix, 0.0f, 0.0f, 3.0f);
-        prRotate(worldMatrix, 1.0f, 1.0f, 1.0f, objRotation);
-        prWorldMatrix(worldMatrix);
-
-        objRotation += PI*0.1f;
+        // Update user input
+        if (buttonDown[0])
+        {
+            yaw     -= PI*0.0025f*(float)mouseSpeedX;
+            pitch   += PI*0.0025f*(float)mouseSpeedY;
+        }
 
         // Drawing
         prClearFrameBuffer(prGetColorIndex(255, 255, 255), 0.0f);
@@ -188,12 +251,46 @@ int main()
             for (int y = 0; y < 256; ++y)
                 prDrawScreenLine(100, 100 + y, 356, 100 + y, prGetColorIndex(y, y, y));
 
-            #elif 1
+            #elif 0
 
             prColor(prGetColorIndex(255, 0, 0));
             prBindTexture(texture);
 
             prDrawScreenImage(100, 100, mouseX, mouseY);
+
+            #elif 1
+
+            // Bind buffers
+            prBindVertexBuffer(vertexBuffer);
+            prBindIndexBuffer(indexBuffer);
+            
+            // Setup view
+            prViewport(0, 0, viewWidth, viewHeight);
+            prColor(prGetColorIndex(0, 0, 255));
+
+            // Setup transformation
+            prLoadIdentity(worldMatrix);
+            prTranslate(worldMatrix, 0.0f, 0.0f, 3.0f);
+            prRotate(worldMatrix, 1.0f, 0.0f, 0.0f, pitch);
+            prRotate(worldMatrix, 0.0f, 1.0f, 0.0f, -yaw);
+            prWorldMatrix(worldMatrix);
+
+            // Draw lines
+            prDrawIndexed(PR_PRIMITIVE_LINES, 24, 0);
+
+            // Setup view
+            prViewport(viewWidth, 0, 600, 600);
+            prColor(prGetColorIndex(255, 0, 0));
+
+            // Setup transformation
+            prLoadIdentity(worldMatrix);
+            prTranslate(worldMatrix, 0.0f, 0.0f, 3.0f);
+            prRotate(worldMatrix, 1.0f, 0.0f, 0.0f, pitch);
+            prRotate(worldMatrix, 0.0f, 1.0f, 0.0f, yaw);
+            prWorldMatrix(worldMatrix);
+
+            // Draw lines
+            prDrawIndexed(PR_PRIMITIVE_LINES, 24, 0);
 
             #endif
         }

@@ -18,8 +18,8 @@ typedef struct pr_viewport
 {
     PRfloat x;
     PRfloat y;
-    PRfloat width;
-    PRfloat height;
+    PRfloat halfWidth;
+    PRfloat halfHeight;
     PRfloat minDepth;
     PRfloat maxDepth;
 }
