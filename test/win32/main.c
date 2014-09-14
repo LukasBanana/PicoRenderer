@@ -16,7 +16,7 @@
 // --- global members --- //
 
 PRobject context        = NULL;
-PRobject framebuffer    = NULL;
+PRobject frameBuffer    = NULL;
 PRboolean isQuit        = PR_FALSE;
 
 int mouseX = 0, mouseY = 0;
@@ -136,8 +136,8 @@ int main()
     context = prGenContext(&contextDesc, screenWidth, screenHeight);
 
     // Create frame buffer
-    framebuffer = prGenFramebuffer(screenWidth, screenHeight);
-    prBindFramebuffer(framebuffer);
+    frameBuffer = prGenFrameBuffer(screenWidth, screenHeight);
+    prBindFrameBuffer(frameBuffer);
 
     // Create texture
     PRobject texture = prGenTexture();
@@ -148,7 +148,7 @@ int main()
     prBuildPerspectiveProjection(projection, (float)screenWidth/screenHeight, 0.1f, 100.0f, 74.0f);
     prProjectionMatrix(projection);
 
-    float modelView[16];
+    float worldMatrix[16];
     float objRotation = 0.0f;
 
     // Main loop
@@ -164,15 +164,15 @@ int main()
         }
 
         // Setup transformation
-        prLoadIdentity(modelView);
-        prTranslate(modelView, 0.0f, 0.0f, 3.0f);
-        prRotate(modelView, 1.0f, 1.0f, 1.0f, objRotation);
-        prModelViewMatrix(modelView);
+        prLoadIdentity(worldMatrix);
+        prTranslate(worldMatrix, 0.0f, 0.0f, 3.0f);
+        prRotate(worldMatrix, 1.0f, 1.0f, 1.0f, objRotation);
+        prWorldMatrix(worldMatrix);
 
         objRotation += PI*0.1f;
 
         // Drawing
-        prClearFramebuffer(prGetColorIndex(255, 255, 255), 0.0f);
+        prClearFrameBuffer(prGetColorIndex(255, 255, 255), 0.0f);
         {
             #if 0
             
@@ -197,14 +197,12 @@ int main()
 
             #endif
         }
-        prContextPresent(context);
+        prPresent(context);
     }
 
     // Clean up
-    //free(imageBuffer);
-
     prDeleteTexture(texture);
-    prDeleteFramebuffer(framebuffer);
+    prDeleteFrameBuffer(frameBuffer);
     prDeleteContext(context);
 
     prRelease();

@@ -11,6 +11,7 @@
 
 #include "vertex.h"
 #include "viewport.h"
+#include "structs.h"
 
 
 typedef struct pr_vertexbuffer
@@ -21,24 +22,24 @@ typedef struct pr_vertexbuffer
 pr_vertexbuffer;
 
 
-pr_vertexbuffer* _pr_vertexbuffer_create(PRsizei numVertices);
-void _pr_vertexbuffer_delete(pr_vertexbuffer* vertexbuffer);
+pr_vertexbuffer* _pr_vertexbuffer_create();
+void _pr_vertexbuffer_delete(pr_vertexbuffer* vertexBuffer);
 
 void _pr_vertexbuffer_transform(
     PRuint numVertices,
     PRuint firstVertex,
-    pr_vertexbuffer* vertexbuffer,
-    const pr_matrix4* modelViewMatrix,
-    const pr_matrix4* projectionMatrix,
+    pr_vertexbuffer* vertexBuffer,
+    const pr_matrix4* worldViewProjectionMatrix,
     const pr_viewport* viewport
 );
 
 void _pr_vertexbuffer_transform_all(
-    pr_vertexbuffer* vertexbuffer,
-    const pr_matrix4* modelViewMatrix,
-    const pr_matrix4* projectionMatrix,
+    pr_vertexbuffer* vertexBuffer,
+    const pr_matrix4* worldViewProjectionMatrix,
     const pr_viewport* viewport
 );
+
+void _pr_vertexbuffer_data(pr_vertexbuffer* vertexBuffer, const PRvertex* vertices, PRsizei numVertices);
 
 
 #endif

@@ -23,8 +23,7 @@ static void _vertexbuffer_transform(PRuint numVertices, PRuint firstVertex, pr_v
         numVertices,
         firstVertex,
         vertexbuffer,
-        &(_stateMachine.modelViewMatrix),
-        &(_stateMachine.projectionMatrix),
+        &(_stateMachine.worldViewProjectionMatrix),
         &(_stateMachine.viewport)
     );
 }
@@ -33,8 +32,7 @@ static void _vertexbuffer_transform_all(pr_vertexbuffer* vertexbuffer)
 {
     _pr_vertexbuffer_transform_all(
         vertexbuffer,
-        &(_stateMachine.modelViewMatrix),
-        &(_stateMachine.projectionMatrix),
+        &(_stateMachine.worldViewProjectionMatrix),
         &(_stateMachine.viewport)
     );
 }
@@ -67,36 +65,36 @@ static void _raster_triangle(pr_vertex* a, pr_vertex* b, pr_vertex* c)
 
 void _pr_render_screenspace_point(PRint x, PRint y, PRubyte colorIndex)
 {
-    // Validate bound framebuffer
-    pr_framebuffer* framebuffer = _stateMachine.boundFramebuffer;
+    // Validate bound frame buffer
+    pr_framebuffer* frameBuffer = _stateMachine.boundFrameBuffer;
 
-    if (framebuffer == NULL)
+    if (frameBuffer == NULL)
     {
         _pr_error_set(PR_ERROR_INVALID_STATE, __FUNCTION__);
         return;
     }
     
-    if ( x < 0 || x >= (PRint)framebuffer->width ||
-         y < 0 || y >= (PRint)framebuffer->height )
+    if ( x < 0 || x >= (PRint)frameBuffer->width ||
+         y < 0 || y >= (PRint)frameBuffer->height )
     {
         _pr_error_set(PR_ERROR_INVALID_ARGUMENT, __FUNCTION__);
         return;
     }
 
     #ifdef PR_ORIGIN_LEFT_TOP
-    y = framebuffer->height - y - 1;
+    y = frameBuffer->height - y - 1;
     #endif
 
     // Plot screen space point
-    _pr_framebuffer_plot(framebuffer, x, y, colorIndex);
+    _pr_framebuffer_plot(frameBuffer, x, y, colorIndex);
 }
 
 void _pr_render_points(PRuint numVertices, PRuint firstVertex, pr_vertexbuffer* vertexbuffer)
 {
-    // Validate bound framebuffer
-    pr_framebuffer* framebuffer = _stateMachine.boundFramebuffer;
+    // Validate bound frame buffer
+    pr_framebuffer* frameBuffer = _stateMachine.boundFrameBuffer;
 
-    if (framebuffer == NULL)
+    if (frameBuffer == NULL)
     {
         _pr_error_set(PR_ERROR_INVALID_STATE, __FUNCTION__);
         return;
@@ -122,7 +120,7 @@ void _pr_render_points(PRuint numVertices, PRuint firstVertex, pr_vertexbuffer* 
     pr_vertex* vert;
 
     PRuint x, y;
-    PRuint width = framebuffer->width, height = framebuffer->height;
+    PRuint width = frameBuffer->width, height = frameBuffer->height;
 
     for (; firstVertex < numVertices; ++firstVertex)
     {
@@ -130,13 +128,13 @@ void _pr_render_points(PRuint numVertices, PRuint firstVertex, pr_vertexbuffer* 
 
         x = (PRuint)(vert->ndc.x);
         #ifdef PR_ORIGIN_LEFT_TOP
-        y = framebuffer->height - (PRuint)(vert->ndc.y) - 1;
+        y = frameBuffer->height - (PRuint)(vert->ndc.y) - 1;
         #else
         y = (PRuint)(vert->ndc.y);
         #endif
 
         if (x < width && y < height)
-            _pr_framebuffer_plot(framebuffer, x, y, _stateMachine.colorIndex);
+            _pr_framebuffer_plot(frameBuffer, x, y, _stateMachine.colorIndex);
     }
 }
 
@@ -151,27 +149,27 @@ void _pr_render_indexed_points(PRuint numVertices, PRuint firstVertex, pr_vertex
 // This function implements the line "bresenham" algorithm.
 void _pr_render_screenspace_line(PRint x1, PRint y1, PRint x2, PRint y2, PRubyte colorIndex)
 {
-    // Get bound framebuffer
-    pr_framebuffer* framebuffer = _stateMachine.boundFramebuffer;
+    // Get bound frame buffer
+    pr_framebuffer* frameBuffer = _stateMachine.boundFrameBuffer;
 
-    if (framebuffer == NULL)
+    if (frameBuffer == NULL)
     {
         _pr_error_set(PR_ERROR_INVALID_STATE, __FUNCTION__);
         return;
     }
     
-    if ( x1 < 0 || x1 >= (PRint)framebuffer->width ||
-         x2 < 0 || x2 >= (PRint)framebuffer->width ||
-         y1 < 0 || y1 >= (PRint)framebuffer->height ||
-         y2 < 0 || y2 >= (PRint)framebuffer->height )
+    if ( x1 < 0 || x1 >= (PRint)frameBuffer->width ||
+         x2 < 0 || x2 >= (PRint)frameBuffer->width ||
+         y1 < 0 || y1 >= (PRint)frameBuffer->height ||
+         y2 < 0 || y2 >= (PRint)frameBuffer->height )
     {
         _pr_error_set(PR_ERROR_INVALID_ARGUMENT, __FUNCTION__);
         return;
     }
 
     #ifdef PR_ORIGIN_LEFT_TOP
-    y1 = framebuffer->height - y1 - 1;
-    y2 = framebuffer->height - y2 - 1;
+    y1 = frameBuffer->height - y1 - 1;
+    y2 = frameBuffer->height - y2 - 1;
     #endif
 
     // Pre-compuations
@@ -218,7 +216,7 @@ void _pr_render_screenspace_line(PRint x1, PRint y1, PRint x2, PRint y2, PRubyte
     for (int t = 0; t < el; ++t)
     {
         // Render pixel
-        _pr_framebuffer_plot(_stateMachine.boundFramebuffer, (PRuint)x, (PRuint)y, colorIndex);
+        _pr_framebuffer_plot(_stateMachine.boundFrameBuffer, (PRuint)x, (PRuint)y, colorIndex);
 
         // Move to next pixel
         err -= es;
@@ -275,18 +273,18 @@ void _pr_render_indexed_line_loop(PRuint numVertices, PRuint firstVertex, pr_ver
 // --- images --- //
 
 static void _render_screenspace_image_textured(
-    pr_framebuffer* framebuffer, pr_texture* texture, PRint left, PRint top, PRint right, PRint bottom)
+    pr_framebuffer* frameBuffer, pr_texture* texture, PRint left, PRint top, PRint right, PRint bottom)
 {
     // Clamp rectangle
-    left    = PR_CLAMP(left, 0, (PRint)framebuffer->width - 1);
-    top     = PR_CLAMP(top, 0, (PRint)framebuffer->height - 1);
-    right   = PR_CLAMP(right, 0, (PRint)framebuffer->width - 1);
-    bottom  = PR_CLAMP(bottom, 0, (PRint)framebuffer->height - 1);
+    left    = PR_CLAMP(left, 0, (PRint)frameBuffer->width - 1);
+    top     = PR_CLAMP(top, 0, (PRint)frameBuffer->height - 1);
+    right   = PR_CLAMP(right, 0, (PRint)frameBuffer->width - 1);
+    bottom  = PR_CLAMP(bottom, 0, (PRint)frameBuffer->height - 1);
 
     // Flip vertical
     #ifdef PR_ORIGIN_LEFT_TOP
-    top = framebuffer->height - top - 1;
-    bottom = framebuffer->height - bottom - 1;
+    top = frameBuffer->height - top - 1;
+    bottom = frameBuffer->height - bottom - 1;
     #endif
 
     if (top > bottom)
@@ -300,8 +298,8 @@ static void _render_screenspace_image_textured(
     PRubyte* texels = _pr_texture_select_miplevel(texture, mipLevel, &width, &height);
 
     // Rasterize rectangle
-    pr_pixel* pixels = framebuffer->pixels;
-    const PRuint pitch = framebuffer->width;
+    pr_pixel* pixels = frameBuffer->pixels;
+    const PRuint pitch = frameBuffer->width;
     pr_pixel* scanline;
 
     PRfloat u = 0.0f;
@@ -336,18 +334,18 @@ static void _render_screenspace_image_textured(
 }
 
 static void _render_screenspace_image_colored(
-    pr_framebuffer* framebuffer, PRubyte colorIndex, PRint left, PRint top, PRint right, PRint bottom)
+    pr_framebuffer* frameBuffer, PRubyte colorIndex, PRint left, PRint top, PRint right, PRint bottom)
 {
     // Clamp rectangle
-    left    = PR_CLAMP(left, 0, (PRint)framebuffer->width - 1);
-    top     = PR_CLAMP(top, 0, (PRint)framebuffer->height - 1);
-    right   = PR_CLAMP(right, 0, (PRint)framebuffer->width - 1);
-    bottom  = PR_CLAMP(bottom, 0, (PRint)framebuffer->height - 1);
+    left    = PR_CLAMP(left, 0, (PRint)frameBuffer->width - 1);
+    top     = PR_CLAMP(top, 0, (PRint)frameBuffer->height - 1);
+    right   = PR_CLAMP(right, 0, (PRint)frameBuffer->width - 1);
+    bottom  = PR_CLAMP(bottom, 0, (PRint)frameBuffer->height - 1);
 
     // Flip vertical
     #ifdef PR_ORIGIN_LEFT_TOP
-    top = framebuffer->height - top - 1;
-    bottom = framebuffer->height - bottom - 1;
+    top = frameBuffer->height - top - 1;
+    bottom = frameBuffer->height - bottom - 1;
     #endif
 
     if (top > bottom)
@@ -356,8 +354,8 @@ static void _render_screenspace_image_colored(
         PR_SWAP(PRint, left, right);
 
     // Rasterize rectangle
-    pr_pixel* pixels = framebuffer->pixels;
-    const PRuint pitch = framebuffer->width;
+    pr_pixel* pixels = frameBuffer->pixels;
+    const PRuint pitch = frameBuffer->width;
     pr_pixel* scaline;
 
     for (PRint y = top; y <= bottom; ++y)
@@ -373,12 +371,12 @@ static void _render_screenspace_image_colored(
 
 void _pr_render_screenspace_image(PRint left, PRint top, PRint right, PRint bottom)
 {
-    if (_stateMachine.boundFramebuffer != NULL)
+    if (_stateMachine.boundFrameBuffer != NULL)
     {
         if (_stateMachine.boundTexture != NULL)
-            _render_screenspace_image_textured(_stateMachine.boundFramebuffer, _stateMachine.boundTexture, left, top, right, bottom);
+            _render_screenspace_image_textured(_stateMachine.boundFrameBuffer, _stateMachine.boundTexture, left, top, right, bottom);
         else
-            _render_screenspace_image_colored(_stateMachine.boundFramebuffer, _stateMachine.colorIndex, left, top, right, bottom);
+            _render_screenspace_image_colored(_stateMachine.boundFrameBuffer, _stateMachine.colorIndex, left, top, right, bottom);
     }
     else
         _pr_error_set(PR_ERROR_INVALID_STATE, __FUNCTION__);

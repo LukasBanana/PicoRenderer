@@ -66,31 +66,31 @@ void prDeleteContext(PRobject context)
     _pr_context_delete((pr_context*)context);
 }
 
-void prContextPresent(PRobject context)
+void prPresent(PRobject context)
 {
-    _pr_context_present((pr_context*)context, _stateMachine.boundFramebuffer);
+    _pr_context_present((pr_context*)context, _stateMachine.boundFrameBuffer);
 }
 
 // --- framebuffer --- //
 
-PRobject prGenFramebuffer(PRuint width, PRuint height)
+PRobject prGenFrameBuffer(PRuint width, PRuint height)
 {
     return (PRobject)_pr_framebuffer_create(width, height);
 }
 
-void prDeleteFramebuffer(PRobject framebuffer)
+void prDeleteFrameBuffer(PRobject frameBuffer)
 {
-    _pr_framebuffer_delete((pr_framebuffer*)framebuffer);
+    _pr_framebuffer_delete((pr_framebuffer*)frameBuffer);
 }
 
-void prBindFramebuffer(PRobject framebuffer)
+void prBindFrameBuffer(PRobject frameBuffer)
 {
-    _pr_state_machine_bind_framebuffer((pr_framebuffer*)framebuffer);
+    _pr_state_machine_bind_framebuffer((pr_framebuffer*)frameBuffer);
 }
 
-void prClearFramebuffer(PRubyte clearColor, float depth)
+void prClearFrameBuffer(PRubyte clearColor, float depth)
 {
-    _pr_framebuffer_clear(_stateMachine.boundFramebuffer, clearColor, depth);
+    _pr_framebuffer_clear(_stateMachine.boundFrameBuffer, clearColor, depth);
 }
 
 PRubyte prGetColorIndex(PRubyte red, PRubyte green, PRubyte blue)
@@ -142,14 +142,19 @@ void prTextureImage2DFromFile(
 
 // --- vertexbuffer --- //
 
-PRobject prGenVertexbuffer(PRsizei numVertices)
+PRobject prGenVertexBuffer()
 {
-    return (PRobject)_pr_vertexbuffer_create(numVertices);
+    return (PRobject)_pr_vertexbuffer_create();
 }
 
-void prDeleteVertexbuffer(PRobject vertexbuffer)
+void prDeleteVertexBuffer(PRobject vertexBuffer)
 {
-    _pr_vertexbuffer_delete((pr_vertexbuffer*)vertexbuffer);
+    _pr_vertexbuffer_delete((pr_vertexbuffer*)vertexBuffer);
+}
+
+void prVertexBufferData(PRobject vertexBuffer, const PRvertex* vertices, PRsizei numVertices)
+{
+    _pr_vertexbuffer_data((pr_vertexbuffer*)vertexBuffer, vertices, numVertices);
 }
 
 // --- indexbuffer --- //
@@ -168,12 +173,17 @@ void prDeleteIndexbuffer(PRobject indexbuffer)
 
 void prProjectionMatrix(const PRfloat* matrix4x4)
 {
-    _pr_matrix_copy(&(_stateMachine.projectionMatrix), (pr_matrix4*)matrix4x4);
+    _pr_state_machine_projection_matrix((pr_matrix4*)matrix4x4);
 }
 
-void prModelViewMatrix(const PRfloat* matrix4x4)
+void prViewMatrix(const PRfloat* matrix4x4)
 {
-    _pr_matrix_copy(&(_stateMachine.modelViewMatrix), (pr_matrix4*)matrix4x4);
+    _pr_state_machine_view_matrix((pr_matrix4*)matrix4x4);
+}
+
+void prWorldMatrix(const PRfloat* matrix4x4)
+{
+    _pr_state_machine_world_matrix((pr_matrix4*)matrix4x4);
 }
 
 void prBuildPerspectiveProjection(

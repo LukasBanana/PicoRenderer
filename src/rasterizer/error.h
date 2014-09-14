@@ -13,6 +13,9 @@
 #include "error_ids.h"
 
 
+#define PR_ERROR(err) _pr_error_set(err, __FUNCTION__)
+
+
 void _pr_error_set(PRenum errorID, const char* info);
 PRenum _pr_error_get();
 
