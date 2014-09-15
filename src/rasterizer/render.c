@@ -348,7 +348,7 @@ static void _render_screenspace_image_textured(const pr_texture* texture, PRint 
 
     // Select MIP level
     PRtexsize width, height;
-    PRubyte mipLevel = _pr_texutre_compute_miplevel(texture, (PRfloat)PR_MIN(right - left, bottom - top), 1.0f);
+    PRubyte mipLevel = _pr_texutre_compute_miplevel(texture, 1.0f / (PRfloat)(right - left), 0.0f, 0.0f, 1.0f / (PRfloat)(bottom - top));
     const PRubyte* texels = _pr_texture_select_miplevel(texture, mipLevel, &width, &height);
 
     // Rasterize rectangle

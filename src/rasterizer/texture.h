@@ -53,7 +53,7 @@ PRubyte _pr_texture_num_mips(PRubyte maxSize);
 const PRubyte* _pr_texture_select_miplevel(const pr_texture* texture, PRubyte mip, PRtexsize* width, PRtexsize* height);
 
 //! Returns the MIP level index for the specified texture.
-PRubyte _pr_texutre_compute_miplevel(const pr_texture* texture, PRfloat pixelArea, PRfloat texelArea);
+PRubyte _pr_texutre_compute_miplevel(const pr_texture* texture, PRfloat dux, PRfloat duy, PRfloat dvx, PRfloat dvy);
 
 //! Samples the nearest texels.
 PRubyte _pr_texture_sample_nearest(const PRubyte* mipTexels, PRtexsize width, PRtexsize height, PRfloat u, PRfloat v);

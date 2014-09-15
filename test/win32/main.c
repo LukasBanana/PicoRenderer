@@ -171,7 +171,7 @@ int main()
 
     // Create texture
     PRobject texture = prGenTexture();
-    prTextureImage2DFromFile(texture, "media/banner.png", PR_TRUE, PR_TRUE);
+    prTextureImage2DFromFile(texture, "media/crate.png", PR_TRUE, PR_TRUE);
 
     // Create vertex buffer
     PRobject vertexBuffer = prGenVertexBuffer();
@@ -272,7 +272,7 @@ int main()
             for (int y = 0; y < 256; ++y)
                 prDrawScreenLine(100, 100 + y, 356, 100 + y, prGetColorIndex(y, y, y));
 
-            #elif 0
+            #elif 1
 
             prColor(prGetColorIndex(255, 0, 0));
             prBindTexture(texture);

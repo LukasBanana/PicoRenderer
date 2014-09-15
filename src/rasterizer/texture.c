@@ -284,7 +284,7 @@ PRboolean _pr_texture_subimage2d(
 
 PRubyte _pr_texture_num_mips(PRubyte maxSize)
 {
-    return maxSize > 0 ? (PRubyte)(ceilf(log2f(maxSize))) + 1 : 0;
+    return maxSize > 0 ? (PRubyte)(floorf(log2f(maxSize))) + 1 : 0;
 }
 
 /*
@@ -293,8 +293,6 @@ add "PRubyte** mipTexels" member to "pr_texture" structure with pointer offsets.
 */
 const PRubyte* _pr_texture_select_miplevel(const pr_texture* texture, PRubyte mip, PRtexsize* width, PRtexsize* height)
 {
-    mip = PR_CLAMP(mip, 0, texture->mips - 1);
-
     PRtexsize w = texture->width;
     PRtexsize h = texture->height;
 
@@ -320,10 +318,21 @@ const PRubyte* _pr_texture_select_miplevel(const pr_texture* texture, PRubyte mi
     return texels;
 }
 
-PRubyte _pr_texutre_compute_miplevel(const pr_texture* texture, PRfloat pixelArea, PRfloat texelArea)
+PRubyte _pr_texutre_compute_miplevel(const pr_texture* texture, PRfloat dux, PRfloat duy, PRfloat dvx, PRfloat dvy)
 {
-    texelArea *= (PRfloat)PR_MIN(texture->width, texture->height) * 0.5f;
-    return (PRubyte)PR_CLAMP(texelArea / pixelArea, 0, texture->mips - 1);
+    // Compute derivation of u and v vectors
+    PRfloat ux = fabsf(dux) * texture->width;
+    PRfloat uy = fabsf(duy) * texture->height;
+
+    PRfloat vx = fabsf(dvx) * texture->width;
+    PRfloat vy = fabsf(dvy) * texture->height;
+
+    // Select LOD by maximal derivation vector length (using dot product)
+    PRfloat d = PR_MAX(ux*ux + uy*uy, vx*vx + vy*vy);
+    
+    // Clamp LOD to [0 .. texture->texture->mips)
+    PRint lod = _int_log2(d * 1.5f) * 2 / 3;
+    return (PRubyte)PR_CLAMP(lod, 0, texture->mips - 1);
 }
 
 PRubyte _pr_texture_sample_nearest(const PRubyte* mipTexels, PRtexsize width, PRtexsize height, PRfloat u, PRfloat v)
