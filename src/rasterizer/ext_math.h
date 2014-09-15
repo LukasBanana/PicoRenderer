@@ -30,15 +30,24 @@
         b = _tmp;           \
     }
 
+#define PR_SWAP_INT(a, b)   \
+    {                       \
+        a ^= b;             \
+        b ^= a;             \
+        a ^= b;             \
+    }
+
 #ifdef PR_FAST_MATH
 #   define PR_SIN(x)        _aprx_sin(x)
 #   define PR_COS(x)        _aprx_cos(x)
+#   define PR_TAN(x)        (_aprx_sin(x)/_aprx_cos(x))
 #   define PR_INV_SQRT(x)   _aprx_inv_sqrt(x)
 #   define PR_LOG2(x)       _aprx_log2(x)
 #   define PR_LOG(x)        _aprx_log(x)
 #else
 #   define PR_SIN(x)        sinf(x)
 #   define PR_COS(x)        cosf(x)
+#   define PR_TAN(x)        tanf(x)
 #   define PR_INV_SQRT(x)   (1.0f / sqrtf(x))
 #   define PR_LOG2(x)       log2f(x)
 #   define PR_LOG(x)        logf(x)

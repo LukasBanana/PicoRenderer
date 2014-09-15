@@ -31,5 +31,8 @@
 //! Enables extended debug information
 #define PR_DEBUG
 
+//! Use perspective corrected depth and texture coordinates
+#define PR_PERSPECTIVE_CORRECTED
+
 
 #endif

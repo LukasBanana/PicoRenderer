@@ -20,8 +20,9 @@ typedef struct pr_vertex
 {
     // Before vertex processing
     pr_vector3 coord;       //!< Original coordinate.
-    pr_vector2 invTexCoord; //!< Inverse texture-coordinate.
+    pr_vector2 texCoord;    //!< Texture-coordinate.
     pr_vector4 ndc;         //!< Normalized device coordinate.
+    pr_vector2 invTexCoord; //!< Inverse texture-coordinates.
 }
 pr_vertex;
 

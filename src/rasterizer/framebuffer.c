@@ -22,37 +22,41 @@ pr_framebuffer* _pr_framebuffer_create(PRuint width, PRuint height)
     }
 
     // Create framebuffer
-    pr_framebuffer* framebuffer = PR_MALLOC(pr_framebuffer);
+    pr_framebuffer* frameBuffer = PR_MALLOC(pr_framebuffer);
 
-    framebuffer->width = width;
-    framebuffer->height = height;
-    framebuffer->pixels = PR_CALLOC(pr_pixel, width*height);
+    frameBuffer->width = width;
+    frameBuffer->height = height;
+    frameBuffer->pixels = PR_CALLOC(pr_pixel, width*height);
+    frameBuffer->scanlinesStart = PR_CALLOC(pr_scaline_side, height);
+    frameBuffer->scanlinesEnd = PR_CALLOC(pr_scaline_side, height);
 
     // Initialize framebuffer
-    memset(framebuffer->pixels, 0, width*height*sizeof(pr_pixel));
+    memset(frameBuffer->pixels, 0, width*height*sizeof(pr_pixel));
 
-    return framebuffer;
+    return frameBuffer;
 }
 
-void _pr_framebuffer_delete(pr_framebuffer* framebuffer)
+void _pr_framebuffer_delete(pr_framebuffer* frameBuffer)
 {
-    if (framebuffer != NULL && framebuffer->pixels != NULL)
+    if (frameBuffer != NULL)
     {
-        free(framebuffer->pixels);
-        free(framebuffer);
+        PR_FREE(frameBuffer->pixels);
+        PR_FREE(frameBuffer->scanlinesStart);
+        PR_FREE(frameBuffer->scanlinesEnd);
+        PR_FREE(frameBuffer);
     }
 }
 
-void _pr_framebuffer_clear(pr_framebuffer* framebuffer, PRubyte clearColor, float depth)
+void _pr_framebuffer_clear(pr_framebuffer* frameBuffer, PRubyte clearColor, float depth)
 {
-    if (framebuffer != NULL && framebuffer->pixels != NULL)
+    if (frameBuffer != NULL && frameBuffer->pixels != NULL)
     {
         // Convert depth (32-bit) into pixel depth (16-bit)
         PRushort clearDepth = _pr_pixel_write_depth(depth);
 
         // Iterate over the entire framebuffer
-        pr_pixel* dst = framebuffer->pixels;
-        pr_pixel* dstEnd = dst + (framebuffer->width * framebuffer->height);
+        pr_pixel* dst = frameBuffer->pixels;
+        pr_pixel* dstEnd = dst + (frameBuffer->width * frameBuffer->height);
 
         while (dst != dstEnd)
         {
@@ -64,3 +68,45 @@ void _pr_framebuffer_clear(pr_framebuffer* framebuffer, PRubyte clearColor, floa
     else
         _pr_error_set(PR_ERROR_NULL_POINTER, __FUNCTION__);
 }
+
+void _pr_framebuffer_setup_scanlines(
+    pr_framebuffer* frameBuffer, pr_scaline_side* sides, pr_raster_vertex start, pr_raster_vertex end)
+{
+    pr_pixel* pixels = frameBuffer->pixels;
+    PRuint pitch = frameBuffer->width;
+    PRint len = end.y - start.y;
+
+    if (len <= 0)
+    {
+        sides[start.y].offset = start.y * pitch + start.x;
+        return;
+    }
+
+    // Compute offsets
+    PRfloat offsetStart = (PRfloat)(start.y * pitch + start.x);
+    PRfloat offsetEnd   = (PRfloat)(end.y * pitch + end.x);
+
+    PRfloat offsetStep  = (offsetEnd - offsetStart) / len;
+    PRfloat zStep       = (end.z - start.z) / len;
+    PRfloat uStep       = (end.u - start.u) / len;
+    PRfloat vStep       = (end.v - start.v) / len;
+
+    // Fill scanline sides
+    pr_scaline_side* sidesEnd = sides + end.y;
+
+    for (sides += start.y; sides <= sidesEnd; ++sides)
+    {
+        // Setup scanline side
+        sides->offset = (PRint)(offsetStart + 0.5f);
+        sides->z = start.z;
+        sides->u = start.u;
+        sides->v = start.v;
+
+        // Next step
+        offsetStart += offsetStep;
+        start.z += zStep;
+        start.u += uStep;
+        start.v += vStep;
+    }
+}
+

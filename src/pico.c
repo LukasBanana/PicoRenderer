@@ -298,6 +298,7 @@ void prDrawIndexed(PRenum primitives, PRushort numVertices, PRushort firstVertex
         case PR_PRIMITIVE_POINTS:
             _pr_render_indexed_points(numVertices, firstVertex, PR_STATE_MACHINE.boundVertexBuffer, PR_STATE_MACHINE.boundIndexBuffer);
             break;
+
         case PR_PRIMITIVE_LINES:
             _pr_render_indexed_lines(numVertices, firstVertex, PR_STATE_MACHINE.boundVertexBuffer, PR_STATE_MACHINE.boundIndexBuffer);
             break;
@@ -307,6 +308,7 @@ void prDrawIndexed(PRenum primitives, PRushort numVertices, PRushort firstVertex
         case PR_PRIMITIVE_LINE_LOOP:
             _pr_render_indexed_line_loop(numVertices, firstVertex, PR_STATE_MACHINE.boundVertexBuffer, PR_STATE_MACHINE.boundIndexBuffer);
             break;
+
         case PR_PRIMITIVE_TRIANGLES:
             _pr_render_indexed_triangles(numVertices, firstVertex, PR_STATE_MACHINE.boundVertexBuffer, PR_STATE_MACHINE.boundIndexBuffer);
             break;
@@ -316,6 +318,7 @@ void prDrawIndexed(PRenum primitives, PRushort numVertices, PRushort firstVertex
         case PR_PRIMITIVE_TRIANGLE_FAN:
             _pr_render_indexed_triangle_fan(numVertices, firstVertex, PR_STATE_MACHINE.boundVertexBuffer, PR_STATE_MACHINE.boundIndexBuffer);
             break;
+
         default:
             PR_ERROR(PR_ERROR_INVALID_ARGUMENT);
             break;

@@ -9,6 +9,7 @@
 #include "state_machine.h"
 #include "error.h"
 #include "helper.h"
+#include "static_config.h"
 
 #include <stdlib.h>
 
@@ -55,6 +56,12 @@ static void _vertex_transform(
     vertex->ndc.x = viewport->x + (vertex->ndc.x + 1.0f) * viewport->halfWidth + 0.5f;
     vertex->ndc.y = viewport->y + (vertex->ndc.y + 1.0f) * viewport->halfHeight + 0.5f;
     vertex->ndc.z = viewport->minDepth + vertex->ndc.z * viewport->depthSize;
+
+    #ifdef PR_PERSPECTIVE_CORRECTED
+    // Setup inverse-texture coordinates
+    vertex->invTexCoord.x = vertex->texCoord.x;// / vertex->ndc.z;
+    vertex->invTexCoord.y = vertex->texCoord.y;// / vertex->ndc.z;
+    #endif
 }
 
 void _pr_vertexbuffer_transform(
@@ -112,8 +119,8 @@ void _pr_vertexbuffer_data(pr_vertexbuffer* vertexBuffer, const PRvertex* vertic
         vert->coord.y = vertices->y;
         vert->coord.z = vertices->z;
 
-        vert->invTexCoord.x = 1.0f / vertices->u;
-        vert->invTexCoord.y = 1.0f / vertices->v;
+        vert->texCoord.x = vertices->u;
+        vert->texCoord.y = vertices->v;
 
         ++vert;
         ++vertices;
@@ -152,8 +159,8 @@ void _pr_vertexbuffer_data_from_file(pr_vertexbuffer* vertexBuffer, PRushort* nu
         vert->coord.y = data.y;
         vert->coord.z = data.z;
 
-        vert->invTexCoord.x = 1.0f / data.u;
-        vert->invTexCoord.y = 1.0f / data.v;
+        vert->texCoord.x = data.u;
+        vert->texCoord.y = data.v;
 
         ++vert;
     }

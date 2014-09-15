@@ -14,6 +14,8 @@
 
 #include <stdio.h>
 
+#include <math.h>//!!!
+
 
 // --- internals ---
 
@@ -39,11 +41,18 @@ static void _vertexbuffer_transform_all(pr_vertexbuffer* vertexBuffer)
 
 static void _setup_triangle_vertex(pr_raster_vertex* rasterVert, const pr_vertex* vert)
 {
-    rasterVert->x = (PRint)(vert->ndc.x + 0.5f);
-    rasterVert->y = (PRint)(vert->ndc.y + 0.5f);
+    rasterVert->x = (PRint)(vert->ndc.x);
+    rasterVert->y = (PRint)(vert->ndc.y);
+    
     rasterVert->z = vert->ndc.z;
+
+    #ifdef PR_PERSPECTIVE_CORRECTED
     rasterVert->u = vert->invTexCoord.x;
     rasterVert->v = vert->invTexCoord.y;
+    #else
+    rasterVert->u = vert->texCoord.x;
+    rasterVert->v = vert->texCoord.y;
+    #endif
 }
 
 // --- points --- //
@@ -439,7 +448,106 @@ void _pr_render_screenspace_image(PRint left, PRint top, PRint right, PRint bott
 
 // --- triangles --- //
 
-static void _raster_triangle(pr_vertex* a, pr_vertex* b, pr_vertex* c)
+static void _index_inc(PRint* x, PRint numVertices)
+{
+    ++(*x);
+    if (*x >= numVertices)
+        *x = 0;
+}
+
+static void _index_dec(PRint* x, PRint numVertices)
+{
+    --(*x);
+    if (*x < 0)
+        *x = numVertices - 1;
+}
+
+static void _rasterize_polygon_textured(
+    pr_framebuffer* frameBuffer, const pr_texture* texture, const pr_raster_vertex* vertices, PRint numVertices, PRubyte mipLevel)
+{
+    // Select MIP level
+    PRtexsize mipWidth, mipHeight;
+    const PRubyte* texels = _pr_texture_select_miplevel(texture, mipLevel, &mipWidth, &mipHeight);
+
+    // Find left- and right sided polygon edges
+    PRint x, y, top = 0, bottom = 0;
+
+    for (x = 1; x < numVertices; ++x)
+    {
+        if (vertices[top].y > vertices[x].y)
+            top = x;
+        if (vertices[bottom].y < vertices[x].y)
+            bottom = x;
+    }
+
+    // Setup raster scanline sides
+    pr_scaline_side* leftSide = frameBuffer->scanlinesStart;
+    pr_scaline_side* rightSide = frameBuffer->scanlinesEnd;
+
+    x = y = top;
+    for (_index_dec(&y, numVertices); x != bottom; x = y, _index_dec(&y, numVertices))
+        _pr_framebuffer_setup_scanlines(frameBuffer, leftSide, vertices[x], vertices[y]);
+
+    x = y = top;
+    for (_index_inc(&y, numVertices); x != bottom; x = y, _index_inc(&y, numVertices))
+        _pr_framebuffer_setup_scanlines(frameBuffer, rightSide, vertices[x], vertices[y]);
+
+    // Check if sides must be swaped
+    long midIndex = (vertices[bottom].y + vertices[top].y) / 2;
+    if (frameBuffer->scanlinesStart[midIndex].offset > frameBuffer->scanlinesEnd[midIndex].offset)
+        PR_SWAP(pr_scaline_side*, leftSide, rightSide);
+
+    // Start rasterizing the polygon
+    PRint len, offset;
+    PRfloat z, zStep;
+    PRfloat u, uStep;
+    PRfloat v, vStep;
+
+    PRint yStart = vertices[top].y;
+    PRint yEnd = vertices[bottom].y;
+
+    PRubyte colorIndex;
+
+    // Rasterize each scanline
+    for (y = yStart; y <= yEnd; ++y)
+    {
+        len = rightSide[y].offset - leftSide[y].offset;
+        if (len <= 0)
+            continue;
+
+        zStep = (rightSide[y].z - leftSide[y].z) / len;
+        uStep = (rightSide[y].u - leftSide[y].u) / len;
+        vStep = (rightSide[y].v - leftSide[y].v) / len;
+
+        offset = leftSide[y].offset;
+        z = leftSide[y].z;
+        u = leftSide[y].u;
+        v = leftSide[y].v;
+
+        // Rasterize current scanline
+        while (len-- > 0)
+        {
+            // Check depth test
+            //if ()
+            {
+                // Sample texture
+                colorIndex = _pr_texture_sample_nearest(texels, mipWidth, mipHeight, u, v);
+                
+                // Rasterize current pixel
+                _pr_framebuffer_plot_indexed(frameBuffer, offset, colorIndex);
+            }
+
+            // Next pixel
+            ++offset;
+            z += zStep;
+            u += uStep;
+            v += vStep;
+        }
+    }
+}
+
+static _pr_rasterize_triangle_textured(
+    pr_framebuffer* frameBuffer, const pr_texture* texture, const pr_vertex* a, const pr_vertex* b, const pr_vertex* c)
 {
     // To raster a triangle we copy the vertex data into a 'raster_triangle' structure,
     // which is much smaller and compact to reduce memory overhead.
@@ -451,6 +559,78 @@ static void _raster_triangle(pr_vertex* a, pr_vertex* b, pr_vertex* c)
     _setup_triangle_vertex(&(triangle.b), b);
     _setup_triangle_vertex(&(triangle.c), c);
 
+    #if 0//!!!
+
+    // Select MIP level
+    float tc0x = b->texCoord.x - a->texCoord.x;
+    float tc0y = b->texCoord.y - a->texCoord.y;
+
+    float tc1x = c->texCoord.x - a->texCoord.x;
+    float tc1y = c->texCoord.y - a->texCoord.y;
+
+    float c0x = b->ndc.x - a->ndc.x;
+    float c0y = b->ndc.y - a->ndc.y;
+
+    float c1x = c->ndc.x - a->ndc.x;
+    float c1y = c->ndc.y - a->ndc.y;
+
+    float len0 = sqrtf(c0x*c0x + c0y*c0y);
+    float len1 = sqrtf(c1x*c1x + c1y*c1y);
+
+    PRubyte mipLevel = _pr_texutre_compute_miplevel(
+        texture,
+        /*(b->texCoord.x - a->texCoord.x) * (b->ndc.x - a->ndc.x),
+        (b->texCoord.y - a->texCoord.y) * (b->ndc.y - a->ndc.y),
+        (c->texCoord.x - a->texCoord.x) * (c->ndc.x - a->ndc.x),
+        (c->texCoord.y - a->texCoord.y) * (c->ndc.y - a->ndc.y)*/
+        tc0x / len0,
+        tc0y / len0,
+        tc1x / len1,
+        tc1y / len1
+    );
+
+    #else
+
+    PRubyte mipLevel = 0;
+
+    #endif
+
+    // Rasterize polygon with 3 vertices
+    _rasterize_polygon_textured(frameBuffer, texture, &(triangle.a), 3, mipLevel);
+}
+
+static void _render_indexed_triangles_textured(
+    const pr_texture* texture, PRushort numVertices, PRushort firstVertex, pr_vertexbuffer* vertexBuffer, const pr_indexbuffer* indexBuffer)
+{
+    // Iterate over the index buffer
+    for (PRushort i = firstVertex, n = numVertices + firstVertex; i + 2 < n; i += 3)
+    {
+        // Fetch indices
+        PRushort indexA = indexBuffer->indices[i];
+        PRushort indexB = indexBuffer->indices[i + 1];
+        PRushort indexC = indexBuffer->indices[i + 2];
+
+        #ifdef PR_DEBUG
+        if (indexA >= vertexBuffer->numVertices || indexB >= vertexBuffer->numVertices || indexC >= vertexBuffer->numVertices)
+        {
+            PR_SET_ERROR_FATAL("element in index buffer out of bounds");
+            return;
+        }
+        #endif
+
+        // Fetch vertices
+        const pr_vertex* vertexA = (vertexBuffer->vertices + indexA);
+        const pr_vertex* vertexB = (vertexBuffer->vertices + indexB);
+        const pr_vertex* vertexC = (vertexBuffer->vertices + indexC);
+
+        // Rasterize triangle
+        _pr_rasterize_triangle_textured(PR_STATE_MACHINE.boundFrameBuffer, texture, vertexA, vertexB, vertexC);
+    }
+}
+
+static void _render_indexed_triangles_colored(
+    PRubyte colorIndex, PRushort numVertices, PRushort firstVertex, pr_vertexbuffer* vertexBuffer, const pr_indexbuffer* indexBuffer)
+{
     //...
 }
 
@@ -474,8 +654,28 @@ void _pr_render_triangle_fan(PRushort numVertices, PRushort firstVertex, pr_vert
 
 void _pr_render_indexed_triangles(PRushort numVertices, PRushort firstVertex, pr_vertexbuffer* vertexBuffer, const pr_indexbuffer* indexBuffer)
 {
+    if (PR_STATE_MACHINE.boundFrameBuffer == NULL)
+    {
+        PR_ERROR(PR_ERROR_INVALID_STATE);
+        return;
+    }
+    if (vertexBuffer == NULL || indexBuffer == NULL)
+    {
+        PR_ERROR(PR_ERROR_NULL_POINTER);
+        return;
+    }
+    if (firstVertex + numVertices > indexBuffer->numIndices)
+    {
+        PR_ERROR(PR_ERROR_INVALID_ARGUMENT);
+        return;
+    }
+
     _vertexbuffer_transform_all(vertexBuffer);
-    //...
+
+    if (PR_STATE_MACHINE.boundTexture != NULL)
+        _render_indexed_triangles_textured(PR_STATE_MACHINE.boundTexture, numVertices, firstVertex, vertexBuffer, indexBuffer);
+    else
+        _render_indexed_triangles_colored(PR_STATE_MACHINE.colorIndex, numVertices, firstVertex, vertexBuffer, indexBuffer);
 }
 
 void _pr_render_indexed_triangle_strip(PRushort numVertices, PRushort firstVertex, pr_vertexbuffer* vertexBuffer, const pr_indexbuffer* indexBuffer)

@@ -177,31 +177,69 @@ int main()
     PRobject vertexBuffer = prGenVertexBuffer();
     PRobject indexBuffer = prGenIndexBuffer();
 
-    #if 0
+    #if 1
 
-    PRvertex cubeVertices[8] =
+    #define NUM_VERTICES 24
+
+    PRvertex cubeVertices[NUM_VERTICES] =
     {
+        // front
         { -1.0f,  1.0f, -1.0f, 0.0f, 0.0f },
-        { -1.0f,  1.0f,  1.0f, 0.0f, 0.0f },
+        {  1.0f,  1.0f, -1.0f, 1.0f, 0.0f },
+        {  1.0f, -1.0f, -1.0f, 1.0f, 1.0f },
+        { -1.0f, -1.0f, -1.0f, 0.0f, 1.0f },
+
+        // back
         {  1.0f,  1.0f,  1.0f, 0.0f, 0.0f },
+        { -1.0f,  1.0f,  1.0f, 1.0f, 0.0f },
+        { -1.0f, -1.0f,  1.0f, 1.0f, 1.0f },
+        {  1.0f, -1.0f,  1.0f, 0.0f, 1.0f },
+
+        // left
+        { -1.0f,  1.0f,  1.0f, 0.0f, 0.0f },
+        { -1.0f,  1.0f, -1.0f, 1.0f, 0.0f },
+        { -1.0f, -1.0f, -1.0f, 1.0f, 1.0f },
+        { -1.0f, -1.0f,  1.0f, 0.0f, 1.0f },
+
+        // right
         {  1.0f,  1.0f, -1.0f, 0.0f, 0.0f },
+        {  1.0f,  1.0f,  1.0f, 1.0f, 0.0f },
+        {  1.0f, -1.0f,  1.0f, 1.0f, 1.0f },
+        {  1.0f, -1.0f, -1.0f, 0.0f, 1.0f },
+
+        // top
+        { -1.0f,  1.0f,  1.0f, 0.0f, 0.0f },
+        {  1.0f,  1.0f,  1.0f, 1.0f, 0.0f },
+        {  1.0f,  1.0f, -1.0f, 1.0f, 1.0f },
+        { -1.0f,  1.0f, -1.0f, 0.0f, 1.0f },
+
+        // bottom
         { -1.0f, -1.0f, -1.0f, 0.0f, 0.0f },
-        { -1.0f, -1.0f,  1.0f, 0.0f, 0.0f },
-        {  1.0f, -1.0f,  1.0f, 0.0f, 0.0f },
-        {  1.0f, -1.0f, -1.0f, 0.0f, 0.0f }
+        {  1.0f, -1.0f, -1.0f, 1.0f, 0.0f },
+        {  1.0f, -1.0f,  1.0f, 1.0f, 1.0f },
+        { -1.0f, -1.0f,  1.0f, 0.0f, 1.0f }
     };
-    prVertexBufferData(vertexBuffer, cubeVertices, 8);
+    prVertexBufferData(vertexBuffer, cubeVertices, NUM_VERTICES);
 
-    const PRushort numIndices = 24;
+    #define NUM_INDICES 36
 
-    PRushort cubeIndices[24] = {
-        0,1, 1,2, 2,3, 3,0,
-        4,5, 5,6, 6,7, 7,4,
-        0,4, 1,5, 2,6, 3,7
+    PRushort cubeIndices[NUM_INDICES] =
+    {
+         0, 1, 2,    0, 2, 3, // front
+         4, 5, 6,    4, 6, 7, // back
+         8, 9,10,    8,10,11, // left
+        12,13,14,   12,14,15, // right
+        16,17,18,   16,18,19, // top
+        20,21,22,   20,22,23, // bottom
     };
-    prIndexBufferData(indexBuffer, cubeIndices, numIndices);
+    prIndexBufferData(indexBuffer, cubeIndices, NUM_INDICES);
+
+    float size[3] = { 1.0f, 1.0f, 1.0f };
 
     #else
+
+    #define NUM_VERTICES numVertices
+    #define NUM_INDICES numIndices
 
     PRushort numVertices = 0, numIndices = 0;
 
@@ -215,18 +253,26 @@ int main()
     else
         puts("could not open model file!");
 
+    float size[3] = { 0.7f, -0.7f, 0.7f };
+
     #endif
 
     // Setup matrices
     float projectionA[16], projectionB[16], worldMatrix[16], viewMatrix[16];
     float pitch = 0.0f, yaw = 0.0f;
-    float size[3] = { 0.7f, -0.7f, 0.7f };
+    float posZ = 3.0f;
 
-    PRuint viewWidth = 200;//screenWidth;
-    PRuint viewHeight = 200;//screenHeight;
+    #if 0
+    PRuint viewWidth = 200;
+    PRuint viewHeight = 200;
+    #else
+    PRuint viewWidth = screenWidth;
+    PRuint viewHeight = screenHeight;
+    #endif
 
+    float orthoSize = 0.007f;//0.02f;
     prBuildPerspectiveProjection(projectionA, (float)viewWidth/viewHeight, 0.1f, 100.0f, 90.0f * PR_DEG2RAD);
-    prBuildOrthogonalProjection(projectionB, 0.02f*viewWidth, 0.02f*viewHeight, 0.1f, 100.0f);
+    prBuildOrthogonalProjection(projectionB, orthoSize*viewWidth, orthoSize*viewHeight, 0.1f, 100.0f);
 
     prLoadIdentity(viewMatrix);
     prViewMatrix(viewMatrix);
@@ -255,6 +301,8 @@ int main()
             pitch   += PI*0.0025f*(float)mouseSpeedY;
         }
 
+        posZ += 0.1f * mouseWheel;
+
         // Drawing
         prClearFrameBuffer(prGetColorIndex(255, 255, 255), 0.0f);
         {
@@ -272,14 +320,14 @@ int main()
             for (int y = 0; y < 256; ++y)
                 prDrawScreenLine(100, 100 + y, 356, 100 + y, prGetColorIndex(y, y, y));
 
-            #elif 1
+            #elif 0
 
             prColor(prGetColorIndex(255, 0, 0));
             prBindTexture(texture);
 
             prDrawScreenImage(100, 100, mouseX, mouseY);
 
-            #elif 1
+            #elif 0
 
             // Bind buffers
             prBindVertexBuffer(vertexBuffer);
@@ -292,14 +340,14 @@ int main()
             // Setup transformation
             prProjectionMatrix(projectionB);
             prLoadIdentity(worldMatrix);
-            prTranslate(worldMatrix, 0.0f, 0.0f, 3.0f);
+            prTranslate(worldMatrix, 0.0f, 0.0f, posZ);
             prRotate(worldMatrix, 1.0f, 0.0f, 0.0f, pitch);
             prRotate(worldMatrix, 0.0f, 1.0f, 0.0f, -yaw);
             prScale(worldMatrix, size[0], size[1], size[2]);
             prWorldMatrix(worldMatrix);
 
             // Draw lines
-            prDrawIndexed(PR_PRIMITIVE_LINES, numIndices, 0);
+            prDrawIndexed(PR_PRIMITIVE_LINES, NUM_INDICES, 0);
 
             // Setup view
             prViewport(viewWidth, 0, 600, 600);
@@ -308,14 +356,36 @@ int main()
             // Setup transformation
             prProjectionMatrix(projectionA);
             prLoadIdentity(worldMatrix);
-            prTranslate(worldMatrix, 0.0f, 0.0f, 3.0f);
+            prTranslate(worldMatrix, 0.0f, 0.0f, posZ);
             prRotate(worldMatrix, 1.0f, 0.0f, 0.0f, pitch);
             prRotate(worldMatrix, 0.0f, 1.0f, 0.0f, yaw);
             prScale(worldMatrix, size[0], size[1], size[2]);
             prWorldMatrix(worldMatrix);
 
             // Draw lines
-            prDrawIndexed(PR_PRIMITIVE_LINES, numIndices, 0);
+            prDrawIndexed(PR_PRIMITIVE_LINES, NUM_INDICES, 0);
+
+            #elif 1
+
+            // Bind buffers
+            prBindVertexBuffer(vertexBuffer);
+            prBindIndexBuffer(indexBuffer);
+            prBindTexture(texture);
+
+            // Setup view
+            prViewport(0, 0, viewWidth, viewHeight);
+
+            // Setup transformation
+            prProjectionMatrix(projectionA);
+            prLoadIdentity(worldMatrix);
+            prTranslate(worldMatrix, 0.0f, 0.0f, posZ);
+            prRotate(worldMatrix, 1.0f, 0.0f, 0.0f, pitch);
+            prRotate(worldMatrix, 0.0f, 1.0f, 0.0f, yaw);
+            prScale(worldMatrix, size[0], size[1], size[2]);
+            prWorldMatrix(worldMatrix);
+
+            // Draw lines
+            prDrawIndexed(PR_PRIMITIVE_TRIANGLES, NUM_INDICES, 0);
 
             #endif
         }
