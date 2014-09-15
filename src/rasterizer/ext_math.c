@@ -63,3 +63,39 @@ PRfloat _aprx_cos(PRfloat x)
 {
     return _aprx_sin(x + PR_MATH_PI*0.5f);
 }
+
+// See http://stackoverflow.com/questions/9411823/fast-log2float-x-implementation-c
+PRfloat _aprx_log2(PRfloat x)
+{
+    long* const expPtr = (long*)(&x);
+    long y = *expPtr;
+    const long lg2 = ((y >> 23) & 255) - 128;
+    
+    y &= ~(255 << 23);
+    y += 127 << 23;
+    
+    *expPtr = y;
+
+    x = ((-1.0f/3) * x + 2) * x - 2.0f/3;
+
+    return (x + lg2);
+}
+
+PRfloat _aprx_log(PRfloat x)
+{
+    return _aprx_log2(x) * 0.69314718f;
+}
+
+PRint _int_log2(PRfloat x)
+{
+    #ifdef PR_FAST_MATH
+    unsigned long* ix = (unsigned long*)(&x);
+    unsigned long exp = ((*ix) >> 23) & 0xff;
+    return (PRint)exp - 127;
+    #else
+    int y;
+    frexpf(x, &y);
+    return y - 1;
+    #endif
+}
+

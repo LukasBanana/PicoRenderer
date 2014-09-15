@@ -18,11 +18,24 @@
 #include "helper.h"
 
 
+#include "ext_math.h"
+#include <math.h>
+
 // --- common --- //
 
 PRboolean prInit()
 {
     _pr_state_machine_init_null();
+
+    #if 1
+    float x = 253.212f;
+    printf("log2(%f) = %f\n", x, log2f(x));
+    printf("_aprx_log2(%f) = %f\n", x, _aprx_log2(x));
+    printf("_int_log2(%f) = %i\n", x, _int_log2(x));
+    printf("log(%f) = %f\n", x, logf(x));
+    printf("_aprx_log(%f) = %f\n", x, _aprx_log(x));
+    #endif
+
     return PR_TRUE;
 }
 

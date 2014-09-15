@@ -11,6 +11,8 @@
 
 #include "types.h"
 
+#include <limits.h>
+
 
 //! Frame buffer pixel structure.
 typedef struct pr_pixel
@@ -25,10 +27,16 @@ pr_pixel;
 Writes the specified real depth value to a pixel depth.
 \param[in] z Specifies the real z value. This must be in the range [0.0 .. 1.0].
 */
-PRushort _pr_pixel_write_depth(PRfloat z);
+PR_INLINE PRushort _pr_pixel_write_depth(PRfloat z)
+{
+    return (PRushort)(z * (PRfloat)USHRT_MAX);
+}
 
 //! Reads the specified pixel depth to a real depth value.
-PRfloat _pr_pixel_read_depth(PRushort z);
+PR_INLINE PRfloat _pr_pixel_read_depth(PRushort z)
+{
+    return ((PRfloat)z) / ((PRushort)USHRT_MAX);
+}
 
 
 #endif

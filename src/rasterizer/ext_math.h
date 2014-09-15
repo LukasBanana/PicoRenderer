@@ -50,5 +50,14 @@ PRfloat _aprx_sin(PRfloat x);
 //! Computes an approximated and fast cosine.
 PRfloat _aprx_cos(PRfloat x);
 
+//! Computes an approximated and fast logarithm of base 2.
+PRfloat _aprx_log2(PRfloat x);
+
+//! Computes an approximated and fast logarithm of base e (natural logartihm 'ln').
+PRfloat _aprx_log(PRfloat x);
+
+//! Computes the integral value of the logarithm of base 2.
+PRint _int_log2(PRfloat x);
+
 
 #endif
