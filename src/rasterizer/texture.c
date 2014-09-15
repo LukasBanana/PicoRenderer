@@ -338,8 +338,8 @@ PRubyte _pr_texutre_compute_miplevel(const pr_texture* texture, PRfloat dux, PRf
 PRubyte _pr_texture_sample_nearest(const PRubyte* mipTexels, PRtexsize width, PRtexsize height, PRfloat u, PRfloat v)
 {
     // Clamp texture coordinates
-    PRint x = (PRint)((u - (PRint)u)*width);
-    PRint y = (PRint)((v - (PRint)v)*height);
+    PRint x = (PRint)((u - (PRint)u)*(width - 1));
+    PRint y = (PRint)((v - (PRint)v)*(height - 1));
 
     if (x < 0)
         x += width;

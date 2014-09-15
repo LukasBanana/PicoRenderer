@@ -97,7 +97,7 @@ void prBindFrameBuffer(PRobject frameBuffer)
     _pr_state_machine_bind_framebuffer((pr_framebuffer*)frameBuffer);
 }
 
-void prClearFrameBuffer(PRubyte clearColor, float depth)
+void prClearFrameBuffer(PRubyte clearColor, PRfloat depth)
 {
     _pr_framebuffer_clear(PR_STATE_MACHINE.boundFrameBuffer, clearColor, depth);
 }
@@ -252,7 +252,7 @@ void prLoadIdentity(PRfloat* matrix4x4)
     _pr_matrix_load_identity((pr_matrix4*)matrix4x4);
 }
 
-// --- viewports/ scissors --- //
+// --- states --- //
 
 void prViewport(PRuint x, PRuint y, PRuint width, PRuint height)
 {
@@ -262,6 +262,11 @@ void prViewport(PRuint x, PRuint y, PRuint width, PRuint height)
 void prDepthRange(PRfloat minDepth, PRfloat maxDepth)
 {
     _pr_state_machine_depth_range(minDepth, maxDepth);
+}
+
+void prCullMode(PRenum mode)
+{
+    _pr_state_machine_cull_mode(mode);
 }
 
 // --- drawing --- //

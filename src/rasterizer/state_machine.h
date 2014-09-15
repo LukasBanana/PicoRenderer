@@ -35,6 +35,7 @@ typedef struct pr_state_machine
     pr_texture*         boundTexture;
 
     PRubyte             colorIndex;                 //!< Acitve color index.
+    PRenum              cullMode;
 }
 pr_state_machine;
 
@@ -55,6 +56,7 @@ void _pr_state_machine_bind_texture(pr_texture* texture);
 
 void _pr_state_machine_viewport(PRuint x, PRuint y, PRuint width, PRuint height);
 void _pr_state_machine_depth_range(PRfloat minDepth, PRfloat maxDepth);
+void _pr_state_machine_cull_mode(PRenum mode);
 
 void _pr_state_machine_projection_matrix(const pr_matrix4* matrix);
 void _pr_state_machine_view_matrix(const pr_matrix4* matrix);

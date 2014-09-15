@@ -39,7 +39,7 @@ pr_framebuffer;
 pr_framebuffer* _pr_framebuffer_create(PRuint width, PRuint height);
 void _pr_framebuffer_delete(pr_framebuffer* frameBuffer);
 
-void _pr_framebuffer_clear(pr_framebuffer* frameBuffer, PRubyte clearColor, float depth);
+void _pr_framebuffer_clear(pr_framebuffer* frameBuffer, PRubyte clearColor, PRfloat depth);
 
 //! Sets the start and end offsets of the specified scanlines.
 void _pr_framebuffer_setup_scanlines(
@@ -49,11 +49,6 @@ void _pr_framebuffer_setup_scanlines(
 PR_INLINE void _pr_framebuffer_plot(pr_framebuffer* frameBuffer, PRuint x, PRuint y, PRubyte colorIndex)
 {
     frameBuffer->pixels[y * frameBuffer->width + x].colorIndex = colorIndex;
-}
-
-PR_INLINE void _pr_framebuffer_plot_indexed(pr_framebuffer* frameBuffer, PRuint index, PRubyte colorIndex)
-{
-    frameBuffer->pixels[index].colorIndex = colorIndex;
 }
 
 

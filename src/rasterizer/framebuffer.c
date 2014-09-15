@@ -47,12 +47,12 @@ void _pr_framebuffer_delete(pr_framebuffer* frameBuffer)
     }
 }
 
-void _pr_framebuffer_clear(pr_framebuffer* frameBuffer, PRubyte clearColor, float depth)
+void _pr_framebuffer_clear(pr_framebuffer* frameBuffer, PRubyte clearColor, PRfloat depth)
 {
     if (frameBuffer != NULL && frameBuffer->pixels != NULL)
     {
-        // Convert depth (32-bit) into pixel depth (16-bit)
-        PRushort clearDepth = _pr_pixel_write_depth(depth);
+        // Convert depth (32-bit) into pixel depth (16-bit or 8-bit)
+        PRdepthtype clearDepth = _pr_pixel_write_depth(depth);
 
         // Iterate over the entire framebuffer
         pr_pixel* dst = frameBuffer->pixels;
@@ -73,7 +73,7 @@ void _pr_framebuffer_setup_scanlines(
     pr_framebuffer* frameBuffer, pr_scaline_side* sides, pr_raster_vertex start, pr_raster_vertex end)
 {
     pr_pixel* pixels = frameBuffer->pixels;
-    PRuint pitch = frameBuffer->width;
+    PRint pitch = (PRint)frameBuffer->width;
     PRint len = end.y - start.y;
 
     if (len <= 0)
@@ -82,22 +82,22 @@ void _pr_framebuffer_setup_scanlines(
         return;
     }
 
-    // Compute offsets
-    PRfloat offsetStart = (PRfloat)(start.y * pitch + start.x);
-    PRfloat offsetEnd   = (PRfloat)(end.y * pitch + end.x);
+    // Compute offsets (need doubles for offset for better precision, because the range is larger)
+    PRdouble offsetStart = (PRdouble)(start.y * pitch + start.x);
+    PRdouble offsetEnd   = (PRdouble)(end.y * pitch + end.x);
+    PRdouble offsetStep  = (offsetEnd - offsetStart) / len;
 
-    PRfloat offsetStep  = (offsetEnd - offsetStart) / len;
     PRfloat zStep       = (end.z - start.z) / len;
     PRfloat uStep       = (end.u - start.u) / len;
     PRfloat vStep       = (end.v - start.v) / len;
 
     // Fill scanline sides
-    pr_scaline_side* sidesEnd = sides + end.y;
+    pr_scaline_side* sidesEnd = &(sides[end.y]);
 
     for (sides += start.y; sides <= sidesEnd; ++sides)
     {
         // Setup scanline side
-        sides->offset = (PRint)(offsetStart + 0.5f);
+        sides->offset = (PRint)(offsetStart + 0.5);
         sides->z = start.z;
         sides->u = start.u;
         sides->v = start.v;

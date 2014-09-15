@@ -47,20 +47,19 @@ static void _vertex_transform(
     _pr_matrix_mul_float4(&(vertex->ndc.x), worldViewProjectionMatrix, &(coordVS.x));
 
     // Transform coordinate into normalized device coordinates
-    PRfloat rhw = 1.0f / vertex->ndc.w;
-    vertex->ndc.x *= rhw;
-    vertex->ndc.y *= rhw;
-    vertex->ndc.z *= rhw;
+    vertex->ndc.z = 1.0f / vertex->ndc.w;
+    vertex->ndc.x *= vertex->ndc.z;
+    vertex->ndc.y *= vertex->ndc.z;
 
     // Transform vertex to screen coordiante (+0.5 is for rounding adjustment)
     vertex->ndc.x = viewport->x + (vertex->ndc.x + 1.0f) * viewport->halfWidth + 0.5f;
     vertex->ndc.y = viewport->y + (vertex->ndc.y + 1.0f) * viewport->halfHeight + 0.5f;
-    vertex->ndc.z = viewport->minDepth + vertex->ndc.z * viewport->depthSize;
+    //vertex->ndc.z = viewport->minDepth + vertex->ndc.z * viewport->depthSize;
 
     #ifdef PR_PERSPECTIVE_CORRECTED
     // Setup inverse-texture coordinates
-    vertex->invTexCoord.x = vertex->texCoord.x;// / vertex->ndc.z;
-    vertex->invTexCoord.y = vertex->texCoord.y;// / vertex->ndc.z;
+    vertex->invTexCoord.x = vertex->texCoord.x * vertex->ndc.z;
+    vertex->invTexCoord.y = vertex->texCoord.y * vertex->ndc.z;
     #endif
 }
 

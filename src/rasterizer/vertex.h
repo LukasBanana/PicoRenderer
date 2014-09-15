@@ -13,6 +13,7 @@
 #include "vector3.h"
 #include "vector4.h"
 #include "matrix4.h"
+#include "static_config.h"
 
 
 //! Simple vertex with 3D coordinate and 2D texture-coordinate.
@@ -22,7 +23,9 @@ typedef struct pr_vertex
     pr_vector3 coord;       //!< Original coordinate.
     pr_vector2 texCoord;    //!< Texture-coordinate.
     pr_vector4 ndc;         //!< Normalized device coordinate.
+    #ifdef PR_PERSPECTIVE_CORRECTED
     pr_vector2 invTexCoord; //!< Inverse texture-coordinates.
+    #endif
 }
 pr_vertex;
 

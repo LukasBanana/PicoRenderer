@@ -26,6 +26,9 @@ void _pr_state_machine_init(pr_state_machine* stateMachine)
     stateMachine->boundVertexBuffer = NULL;
     stateMachine->boundIndexBuffer  = NULL;
     stateMachine->boundTexture      = NULL;
+
+    stateMachine->colorIndex        = 0;
+    stateMachine->cullMode          = PR_CULL_NONE;
 }
 
 void _pr_state_machine_init_null()
@@ -91,6 +94,11 @@ void _pr_state_machine_depth_range(PRfloat minDepth, PRfloat maxDepth)
     PR_STATE_MACHINE.viewport.minDepth = minDepth;
     PR_STATE_MACHINE.viewport.maxDepth = maxDepth;
     PR_STATE_MACHINE.viewport.depthSize = maxDepth - minDepth;
+}
+
+void _pr_state_machine_cull_mode(PRenum mode)
+{
+    PR_STATE_MACHINE.cullMode = mode;
 }
 
 static void _update_viewprojection_matrix()

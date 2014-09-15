@@ -27,5 +27,9 @@
 #define PR_PRIMITIVE_TRIANGLE_STRIP     0x00020002
 #define PR_PRIMITIVE_TRIANGLE_FAN       0x00020003
 
+#define PR_CULL_NONE                    0
+#define PR_CULL_FRONT                   1
+#define PR_CULL_BACK                    2
+
 
 #endif

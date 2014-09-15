@@ -169,9 +169,12 @@ int main()
     frameBuffer = prGenFrameBuffer(screenWidth, screenHeight);
     prBindFrameBuffer(frameBuffer);
 
-    // Create texture
-    PRobject texture = prGenTexture();
-    prTextureImage2DFromFile(texture, "media/crate.png", PR_TRUE, PR_TRUE);
+    // Create textures
+    PRobject textureA = prGenTexture();
+    prTextureImage2DFromFile(textureA, "media/crate.png", PR_TRUE, PR_TRUE);
+
+    PRobject textureB = prGenTexture();
+    prTextureImage2DFromFile(textureB, "media/front.png", PR_TRUE, PR_TRUE);
 
     // Create vertex buffer
     PRobject vertexBuffer = prGenVertexBuffer();
@@ -277,6 +280,8 @@ int main()
     prLoadIdentity(viewMatrix);
     prViewMatrix(viewMatrix);
 
+    prCullMode(PR_CULL_BACK);
+
     // Main loop
     while (!isQuit)
     {
@@ -323,7 +328,7 @@ int main()
             #elif 0
 
             prColor(prGetColorIndex(255, 0, 0));
-            prBindTexture(texture);
+            prBindTexture(textureA);
 
             prDrawScreenImage(100, 100, mouseX, mouseY);
 
@@ -370,7 +375,7 @@ int main()
             // Bind buffers
             prBindVertexBuffer(vertexBuffer);
             prBindIndexBuffer(indexBuffer);
-            prBindTexture(texture);
+            prBindTexture(textureA);
 
             // Setup view
             prViewport(0, 0, viewWidth, viewHeight);
@@ -384,8 +389,23 @@ int main()
             prScale(worldMatrix, size[0], size[1], size[2]);
             prWorldMatrix(worldMatrix);
 
-            // Draw lines
+            // Draw triangles
+            //prDepthRange(0.0f, 0.5f);
             prDrawIndexed(PR_PRIMITIVE_TRIANGLES, NUM_INDICES, 0);
+
+            #   if 1
+            // Setup transformation
+            prLoadIdentity(worldMatrix);
+            prTranslate(worldMatrix, 1.5f, 0.0f, posZ);
+            prRotate(worldMatrix, 1.0f, 1.0f, 1.0f, pitch);
+            prWorldMatrix(worldMatrix);
+
+            prBindTexture(textureB);
+
+            // Draw triangles
+            //prDepthRange(0.5f, 1.0f);
+            prDrawIndexed(PR_PRIMITIVE_TRIANGLES, NUM_INDICES, 0);
+            #   endif
 
             #endif
         }
@@ -393,7 +413,10 @@ int main()
     }
 
     // Clean up
-    prDeleteTexture(texture);
+    prDeleteTexture(textureA);
+    prDeleteTexture(textureB);
+    prDeleteVertexBuffer(vertexBuffer);
+    prDeleteIndexBuffer(indexBuffer);
     prDeleteFrameBuffer(frameBuffer);
     prDeleteContext(context);
 

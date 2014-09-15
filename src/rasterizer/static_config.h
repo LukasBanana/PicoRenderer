@@ -34,5 +34,8 @@
 //! Use perspective corrected depth and texture coordinates
 #define PR_PERSPECTIVE_CORRECTED
 
+//! Use an 8-bit depth buffer (instead of 16 bit)
+//#define PR_DEPTH_BUFFER_8BIT
+
 
 #endif

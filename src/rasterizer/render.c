@@ -55,6 +55,29 @@ static void _setup_triangle_vertex(pr_raster_vertex* rasterVert, const pr_vertex
     #endif
 }
 
+// Returns PR_TRUE if the specified triangle vertices are culled.
+static PRboolean _is_triangle_culled(const pr_vertex* a, const pr_vertex* b, const pr_vertex* c)
+{
+    if (PR_STATE_MACHINE.cullMode != PR_CULL_NONE)
+    {
+        const PRfloat vis =
+            (b->ndc.x - a->ndc.x)*(c->ndc.y - a->ndc.y) -
+            (b->ndc.y - a->ndc.y)*(c->ndc.x - a->ndc.x);
+
+        if (PR_STATE_MACHINE.cullMode == PR_CULL_FRONT)
+        {
+            if (vis > 0.0f)
+                return PR_TRUE;
+        }
+        else
+        {
+            if (vis < 0.0f)
+                return PR_TRUE;
+        }
+    }
+    return PR_FALSE;
+}
+
 // --- points --- //
 
 void _pr_render_screenspace_point(PRint x, PRint y, PRubyte colorIndex)
@@ -499,14 +522,14 @@ static void _rasterize_polygon_textured(
 
     // Start rasterizing the polygon
     PRint len, offset;
-    PRfloat z, zStep;
-    PRfloat u, uStep;
-    PRfloat v, vStep;
+    PRfloat z, zAct, zStep;
+    PRfloat u, uAct, uStep;
+    PRfloat v, vAct, vStep;
 
     PRint yStart = vertices[top].y;
     PRint yEnd = vertices[bottom].y;
 
-    PRubyte colorIndex;
+    pr_pixel* pixel;
 
     // Rasterize each scanline
     for (y = yStart; y <= yEnd; ++y)
@@ -520,41 +543,61 @@ static void _rasterize_polygon_textured(
         vStep = (rightSide[y].v - leftSide[y].v) / len;
 
         offset = leftSide[y].offset;
-        z = leftSide[y].z;
-        u = leftSide[y].u;
-        v = leftSide[y].v;
+        zAct = leftSide[y].z;
+        uAct = leftSide[y].u;
+        vAct = leftSide[y].v;
 
         // Rasterize current scanline
         while (len-- > 0)
         {
-            // Check depth test
-            //if ()
+            // Fetch pixel from framebuffer
+            pixel = &(frameBuffer->pixels[offset]);
+
+            // Make depth test
+            PRdepthtype depth = _pr_pixel_write_depth(zAct);
+
+            if (depth > pixel->depth)
             {
+                pixel->depth = depth;
+
+                #ifdef PR_PERSPECTIVE_CORRECTED
+                // Compute perspective coorected coordinates
+                z = 1.0f / zAct;
+                u = uAct * z;
+                v = vAct * z;
+                #else
+                z = zAct;
+                u = uAct;
+                v = vAct;
+                #endif
+
                 // Sample texture
-                colorIndex = _pr_texture_sample_nearest(texels, mipWidth, mipHeight, u, v);
-                
-                // Rasterize current pixel
-                _pr_framebuffer_plot_indexed(frameBuffer, offset, colorIndex);
+                pixel->colorIndex = _pr_texture_sample_nearest(texels, mipWidth, mipHeight, u, v);
+                //pixel->colorIndex = (PRubyte)(zAct * (PRfloat)UCHAR_MAX);
             }
 
             // Next pixel
             ++offset;
-            z += zStep;
-            u += uStep;
-            v += vStep;
+            zAct += zStep;
+            uAct += uStep;
+            vAct += vStep;
         }
     }
 }
 
-static _pr_rasterize_triangle_textured(
+static void _pr_rasterize_triangle_textured(
     pr_framebuffer* frameBuffer, const pr_texture* texture, const pr_vertex* a, const pr_vertex* b, const pr_vertex* c)
 {
+    pr_raster_triangle triangle;
+
+    // Make culling test
+    if (_is_triangle_culled(a, b, c))
+        return;
+
     // To raster a triangle we copy the vertex data into a 'raster_triangle' structure,
     // which is much smaller and compact to reduce memory overhead.
     // This is necessary because during triangle rasterization we will
     // access this memory a lot of times.
-    pr_raster_triangle triangle;
-
     _setup_triangle_vertex(&(triangle.a), a);
     _setup_triangle_vertex(&(triangle.b), b);
     _setup_triangle_vertex(&(triangle.c), c);

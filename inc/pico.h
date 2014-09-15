@@ -95,7 +95,7 @@ Clears the specified frame buffer.
 \param[in] clearColor Specifies the color index to clear the frame buffer colors.
 \param[in] depth Specifies the depth value to clear the frame buffer depths.
 */
-void prClearFrameBuffer(PRubyte clearColor, float depth);
+void prClearFrameBuffer(PRubyte clearColor, PRfloat depth);
 
 //! Converts the specified RGB color into a color index.
 PRubyte prGetColorIndex(PRubyte red, PRubyte green, PRubyte blue);
@@ -320,7 +320,7 @@ Loads the identity of  the specified 4x4 left-handed matrix.
 */
 void prLoadIdentity(PRfloat* matrix4x4);
 
-// --- viewports/ scissors --- //
+// --- states --- //
 
 /**
 Sets the viewport for the currently bound framebuffer.
@@ -335,6 +335,14 @@ Sets the depth range for the currently bound framebuffer.
 \see prBindFrameBuffer
 */
 void prDepthRange(PRfloat minDepth, PRfloat maxDepth);
+
+/**
+Sets the face culling mode.
+\param[in] mode Specifies the new culling mode.
+This must be PR_CULL_NONE, PR_CULL_FRONT or PR_CULL_BACK.
+By default PR_CULL_NONE.
+*/
+void prCullMode(PRenum mode);
 
 // --- drawing --- //
 
