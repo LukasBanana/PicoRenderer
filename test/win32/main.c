@@ -246,7 +246,7 @@ int main()
 
     PRushort numVertices = 0, numIndices = 0;
 
-    FILE* mdlFile = fopen("media/house.pico", "rb");
+    FILE* mdlFile = fopen("media/house_tris.pico", "rb");
     if (mdlFile)
     {
         prVertexBufferDataFromFile(vertexBuffer, &numVertices, mdlFile);
@@ -280,7 +280,7 @@ int main()
     prLoadIdentity(viewMatrix);
     prViewMatrix(viewMatrix);
 
-    prCullMode(PR_CULL_BACK);
+    //prCullMode(PR_CULL_BACK);
 
     // Main loop
     while (!isQuit)
@@ -393,7 +393,7 @@ int main()
             //prDepthRange(0.0f, 0.5f);
             prDrawIndexed(PR_PRIMITIVE_TRIANGLES, NUM_INDICES, 0);
 
-            #   if 1
+            #   if 0
             // Setup transformation
             prLoadIdentity(worldMatrix);
             prTranslate(worldMatrix, 1.5f, 0.0f, posZ);
