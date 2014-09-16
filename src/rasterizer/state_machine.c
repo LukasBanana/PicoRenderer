@@ -8,20 +8,35 @@
 #include "state_machine.h"
 #include "static_config.h"
 #include "error.h"
+#include "ext_math.h"
 
 
 static pr_state_machine _nullStateMachine;
 pr_state_machine* _stateMachine = &_nullStateMachine;
+
+static void _state_machine_cliprect(PRint left, PRint top, PRint right, PRint bottom)
+{
+    _stateMachine->clipRect.left    = left;
+    _stateMachine->clipRect.top     = top;
+    _stateMachine->clipRect.right   = right;
+    _stateMachine->clipRect.bottom  = bottom;
+}
 
 void _pr_state_machine_init(pr_state_machine* stateMachine)
 {
     _pr_matrix_load_identity(&(stateMachine->projectionMatrix));
     _pr_matrix_load_identity(&(stateMachine->viewMatrix));
     _pr_matrix_load_identity(&(stateMachine->worldMatrix));
+    _pr_matrix_load_identity(&(stateMachine->worldViewMatrix));
     _pr_matrix_load_identity(&(stateMachine->worldViewProjectionMatrix));
 
     _pr_viewport_init(&(stateMachine->viewport));
     
+    stateMachine->clipRect.left     = 0;
+    stateMachine->clipRect.top      = 0;
+    stateMachine->clipRect.right    = 0;
+    stateMachine->clipRect.bottom   = 0;
+
     stateMachine->boundFrameBuffer  = NULL;
     stateMachine->boundVertexBuffer = NULL;
     stateMachine->boundIndexBuffer  = NULL;
@@ -47,6 +62,10 @@ void _pr_state_machine_makecurrent(pr_state_machine* stateMachine)
 void _pr_state_machine_bind_framebuffer(pr_framebuffer* frameBuffer)
 {
     PR_STATE_MACHINE.boundFrameBuffer = frameBuffer;
+    if (frameBuffer != NULL)
+        _state_machine_cliprect(0, 0, (PRint)frameBuffer->width/* - 1*/, (PRint)frameBuffer->height - 1);
+    else
+        _state_machine_cliprect(0, 0, 0, 0);
 }
 
 void _pr_state_machine_bind_vertexbuffer(pr_vertexbuffer* vertexBuffer)
@@ -71,6 +90,17 @@ void _pr_state_machine_viewport(PRuint x, PRuint y, PRuint width, PRuint height)
         PR_ERROR(PR_ERROR_INVALID_STATE);
         return;
     }
+
+    // Clamp clipping rectangle
+    const PRint maxWidth = (PRint)(PR_STATE_MACHINE.boundFrameBuffer->width/* - 1*/);
+    const PRint maxHeight = (PRint)(PR_STATE_MACHINE.boundFrameBuffer->height - 1);
+    
+    _state_machine_cliprect(
+        PR_CLAMP((PRint)x, 0, maxWidth),
+        PR_CLAMP((PRint)y, 0, maxHeight),
+        PR_CLAMP((PRint)(x + width), 0, maxWidth),
+        PR_CLAMP((PRint)(y + height), 0, maxHeight)
+    );
 
     /*
     Store width and height with half size, to avoid this multiplication
@@ -110,6 +140,15 @@ static void _update_viewprojection_matrix()
     );
 }
 
+static void _update_worldview_matrix()
+{
+    _pr_matrix_mul_matrix(
+        &(PR_STATE_MACHINE.worldViewMatrix),
+        &(PR_STATE_MACHINE.viewMatrix),
+        &(PR_STATE_MACHINE.worldMatrix)
+    );
+}
+
 static void _update_worldviewprojection_matrix()
 {
     _pr_matrix_mul_matrix(
@@ -130,12 +169,14 @@ void _pr_state_machine_view_matrix(const pr_matrix4* matrix)
 {
     _pr_matrix_copy(&(PR_STATE_MACHINE.viewMatrix), matrix);
     _update_viewprojection_matrix();
+    _update_worldview_matrix();
     _update_worldviewprojection_matrix();
 }
 
 void _pr_state_machine_world_matrix(const pr_matrix4* matrix)
 {
     _pr_matrix_copy(&(PR_STATE_MACHINE.worldMatrix), matrix);
+    _update_worldview_matrix();
     _update_worldviewprojection_matrix();
 }
 

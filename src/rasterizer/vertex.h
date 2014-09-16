@@ -22,9 +22,12 @@ typedef struct pr_vertex
     // Before vertex processing
     pr_vector3 coord;       //!< Original coordinate.
     pr_vector2 texCoord;    //!< Texture-coordinate.
+
+    #if 1//!remove!
     pr_vector4 ndc;         //!< Normalized device coordinate.
     #ifdef PR_PERSPECTIVE_CORRECTED
     pr_vector2 invTexCoord; //!< Inverse texture-coordinates.
+    #endif
     #endif
 }
 pr_vertex;

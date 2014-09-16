@@ -12,6 +12,7 @@
 #include "raster_vertex.h"
 
 
+//!REMOVE THIS!
 typedef struct pr_raster_triangle
 {
     pr_raster_vertex a;

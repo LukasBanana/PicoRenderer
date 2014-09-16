@@ -237,7 +237,7 @@ int main()
     };
     prIndexBufferData(indexBuffer, cubeIndices, NUM_INDICES);
 
-    float size[3] = { 1.0f, 1.0f, 1.0f };
+    float size[3] = { 2.0f, 2.0f, 0.5f };
 
     #else
 
@@ -378,7 +378,7 @@ int main()
             prBindTexture(textureA);
 
             // Setup view
-            prViewport(0, 0, viewWidth, viewHeight);
+            prViewport(0, 0, viewWidth - 100, viewHeight - 100);
 
             // Setup transformation
             prProjectionMatrix(projectionA);

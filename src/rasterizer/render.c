@@ -9,6 +9,7 @@
 #include "state_machine.h"
 #include "raster_triangle.h"
 #include "ext_math.h"
+#include "matrix4.h"
 #include "error.h"
 #include "static_config.h"
 
@@ -18,6 +19,8 @@
 
 
 // --- internals ---
+
+#define _CVERT_VEC2(v) (*(pr_vector2*)(&((_clipVertices[v]).x)))
 
 static void _vertexbuffer_transform(PRushort numVertices, PRushort firstVertex, pr_vertexbuffer* vertexBuffer)
 {
@@ -39,30 +42,55 @@ static void _vertexbuffer_transform_all(pr_vertexbuffer* vertexBuffer)
     );
 }
 
-static void _setup_triangle_vertex(pr_raster_vertex* rasterVert, const pr_vertex* vert)
+static void _setup_clip_vertex(pr_clip_vertex* clipVert, const pr_vertex* vert, const pr_matrix4* worldViewMatrix)
 {
-    rasterVert->x = (PRint)(vert->ndc.x);
-    rasterVert->y = (PRint)(vert->ndc.y);
-    
-    rasterVert->z = vert->ndc.z;
+    _pr_matrix_mul_float3(&(clipVert->x), worldViewMatrix, &(vert->coord.x));
+    clipVert->w = 1.0f;
+    clipVert->u = vert->texCoord.x;
+    clipVert->v = vert->texCoord.y;
+}
+
+static void _project_vertex(pr_clip_vertex* vertex, const pr_matrix4* projectionMatrix, const pr_viewport* viewport)
+{
+    // Transform view-space coordinate into projection space
+    pr_vector4 ndc;
+    _pr_matrix_mul_float4(&(ndc.x), projectionMatrix, &(vertex->x));
+
+    // Transform coordinate into normalized device coordinates
+    //vertex->z = 1.0f / ndc.w;
+    PRfloat rhw = 1.0f / ndc.w;
+
+    vertex->x = ndc.x * rhw;
+    vertex->y = ndc.y * rhw;
+    vertex->z = /*ndc.z * */rhw;
+
+    // Transform vertex to screen coordiante (+0.5 is for rounding adjustment)
+    vertex->x = viewport->x + (vertex->x + 1.0f) * viewport->halfWidth + 0.5f;
+    vertex->y = viewport->y + (vertex->y + 1.0f) * viewport->halfHeight + 0.5f;
+    //vertex->z = viewport->minDepth + vertex->z * viewport->depthSize;
 
     #ifdef PR_PERSPECTIVE_CORRECTED
-    rasterVert->u = vert->invTexCoord.x;
-    rasterVert->v = vert->invTexCoord.y;
-    #else
-    rasterVert->u = vert->texCoord.x;
-    rasterVert->v = vert->texCoord.y;
+    // Setup inverse texture coordinates
+    vertex->u *= rhw;
+    vertex->v *= rhw;
     #endif
 }
 
+static void _setup_raster_vertex(pr_raster_vertex* rasterVert, const pr_clip_vertex* clipVert)
+{
+    rasterVert->x = (PRint)(clipVert->x);
+    rasterVert->y = (PRint)(clipVert->y);
+    rasterVert->z = clipVert->z;
+    rasterVert->u = clipVert->u;
+    rasterVert->v = clipVert->v;
+}
+
 // Returns PR_TRUE if the specified triangle vertices are culled.
-static PRboolean _is_triangle_culled(const pr_vertex* a, const pr_vertex* b, const pr_vertex* c)
+static PRboolean _is_triangle_culled(const pr_vector2 a, const pr_vector2 b, const pr_vector2 c)
 {
     if (PR_STATE_MACHINE.cullMode != PR_CULL_NONE)
     {
-        const PRfloat vis =
-            (b->ndc.x - a->ndc.x)*(c->ndc.y - a->ndc.y) -
-            (b->ndc.y - a->ndc.y)*(c->ndc.x - a->ndc.x);
+        const PRfloat vis = (b.x - a.x)*(c.y - a.y) - (b.y - a.y)*(c.x - a.x);
 
         if (PR_STATE_MACHINE.cullMode == PR_CULL_FRONT)
         {
@@ -471,6 +499,198 @@ void _pr_render_screenspace_image(PRint left, PRint top, PRint right, PRint bott
 
 // --- triangles --- //
 
+#define MAX_NUM_POLYGON_VERTS 32
+
+static pr_clip_vertex _clipVertices[MAX_NUM_POLYGON_VERTS], _clipVerticesTmp[MAX_NUM_POLYGON_VERTS];
+static pr_raster_vertex _rasterVertices[MAX_NUM_POLYGON_VERTS], _rasterVerticesTmp[MAX_NUM_POLYGON_VERTS];
+static PRint _numPolyVerts = 0;
+
+// Computes the vertex 'c' which is cliped between the vertices 'a' and 'b' and the plane 'z'
+static pr_clip_vertex _get_zplane_vertex(pr_clip_vertex a, pr_clip_vertex b, PRfloat z)
+{
+    PRfloat m = (z - b.z) / (a.z - b.z);
+    pr_clip_vertex c;
+
+    c.x = m * (a.x - b.x) + b.x;
+    c.y = m * (a.y - b.y) + b.y;
+    c.z = z;
+
+    c.u = m * (a.u - b.u) + b.u;
+    c.v = m * (a.v - b.v) + b.v;
+
+    return c;
+}
+
+// Clips the polygon at the z planes
+static void _polygon_z_clipping(PRfloat zMin, PRfloat zMax)
+{
+    PRint x, y;
+
+    // Clip at near clipping plane (zMin)
+    PRint localNumVerts = 0;
+
+    for (x = _numPolyVerts - 1, y = 0; y < _numPolyVerts; x = y, ++y)
+    {
+        // Inside
+        if (_clipVertices[x].z >= zMin && _clipVertices[y].z >= zMin)
+            _clipVerticesTmp[localNumVerts++] = _clipVertices[y];
+
+        // Leaving
+        if (_clipVertices[x].z >= zMin && _clipVertices[y].z < zMin)
+            _clipVerticesTmp[localNumVerts++] = _get_zplane_vertex(_clipVertices[x], _clipVertices[y], zMin);
+
+        // Entering
+        if (_clipVertices[x].z < zMin && _clipVertices[y].z >= zMin)
+        {
+            _clipVerticesTmp[localNumVerts++] = _get_zplane_vertex(_clipVertices[x], _clipVertices[y], zMin);
+            _clipVerticesTmp[localNumVerts++] = _clipVertices[y];
+        }
+    }
+
+    // Clip at far clipping plane (zMax)
+    _numPolyVerts = 0;
+
+    for (x = localNumVerts - 1, y = 0; y < localNumVerts; x = y, ++y)
+    {
+        // Inside
+        if (_clipVerticesTmp[x].z <= zMax && _clipVerticesTmp[y].z <= zMax)
+            _clipVertices[_numPolyVerts++] = _clipVerticesTmp[y];
+
+        // Leaving
+        if (_clipVerticesTmp[x].z <= zMax && _clipVerticesTmp[y].z > zMax)
+            _clipVertices[_numPolyVerts++] = _get_zplane_vertex(_clipVerticesTmp[x], _clipVerticesTmp[y], zMax);
+
+        // Entering
+        if (_clipVerticesTmp[x].z > zMax && _clipVerticesTmp[y].z <= zMax)
+        {
+            _clipVertices[_numPolyVerts++] = _get_zplane_vertex(_clipVerticesTmp[x], _clipVerticesTmp[y], zMax);
+            _clipVertices[_numPolyVerts++] = _clipVerticesTmp[y];
+        }
+    }
+}
+
+// Computes the vertex 'c' which is cliped between the vertices 'a' and 'b' and the plane 'x'
+static pr_raster_vertex _get_xplane_vertex(pr_raster_vertex a, pr_raster_vertex b, PRint x)
+{
+    PRfloat m = ((PRfloat)(x - b.x)) / (a.x - b.x);
+    pr_raster_vertex c;
+
+    c.x = x;
+    c.y = (PRint)(m * (a.y - b.y) + b.y);
+    c.z = m * (a.z - b.z) + b.z;
+
+    c.u = m * (a.u - b.u) + b.u;
+    c.v = m * (a.v - b.v) + b.v;
+
+    return c;
+}
+
+// Computes the vertex 'c' which is cliped between the vertices 'a' and 'b' and the plane 'y'
+static pr_raster_vertex _get_yplane_vertex(pr_raster_vertex a, pr_raster_vertex b, PRint y)
+{
+    PRfloat m = ((PRfloat)(y - b.y)) / (a.y - b.y);
+    pr_raster_vertex c;
+
+    c.x = (PRint)(m * (a.x - b.x) + b.x);
+    c.y = y;
+    c.z = m * (a.z - b.z) + b.z;
+
+    c.u = m * (a.u - b.u) + b.u;
+    c.v = m * (a.v - b.v) + b.v;
+
+    return c;
+}
+
+// Clips the polygon at the x and y planes
+static void _polygon_xy_clipping(PRint xMin, PRint xMax, PRint yMin, PRint yMax)
+{
+    PRint x, y;
+
+    // Clip at left clipping plane (xMin)
+    PRint localNumVerts = 0;
+
+    for (x = _numPolyVerts - 1, y = 0; y < _numPolyVerts; x = y, ++y)
+    {
+        // Inside
+        if (_rasterVertices[x].x >= xMin && _rasterVertices[y].x >= xMin)
+            _rasterVerticesTmp[localNumVerts++] = _rasterVertices[y];
+
+        // Leaving
+        if (_rasterVertices[x].x >= xMin && _rasterVertices[y].x < xMin)
+            _rasterVerticesTmp[localNumVerts++] = _get_xplane_vertex(_rasterVertices[x], _rasterVertices[y], xMin);
+
+        // Entering
+        if (_rasterVertices[x].x < xMin && _rasterVertices[y].x >= xMin)
+        {
+            _rasterVerticesTmp[localNumVerts++] = _get_xplane_vertex(_rasterVertices[x], _rasterVertices[y], xMin);
+            _rasterVerticesTmp[localNumVerts++] = _rasterVertices[y];
+        }
+    }
+
+    // Clip at right clipping plane (xMax)
+    _numPolyVerts = 0;
+
+    for (x = localNumVerts - 1, y = 0; y < localNumVerts; x = y, ++y)
+    {
+        // Inside
+        if (_rasterVerticesTmp[x].x <= xMax && _rasterVerticesTmp[y].x <= xMax)
+            _rasterVertices[_numPolyVerts++] = _rasterVerticesTmp[y];
+
+        // Leaving
+        if (_rasterVerticesTmp[x].x <= xMax && _rasterVerticesTmp[y].x > xMax)
+            _rasterVertices[_numPolyVerts++] = _get_xplane_vertex(_rasterVerticesTmp[x], _rasterVerticesTmp[y], xMax);
+
+        // Entering
+        if (_rasterVerticesTmp[x].x > xMax && _rasterVerticesTmp[y].x <= xMax)
+        {
+            _rasterVertices[_numPolyVerts++] = _get_xplane_vertex(_rasterVerticesTmp[x], _rasterVerticesTmp[y], xMax);
+            _rasterVertices[_numPolyVerts++] = _rasterVerticesTmp[y];
+        }
+    }
+
+    // Clip at top clipping plane (yMin)
+    localNumVerts = 0;
+
+    for (x = _numPolyVerts - 1, y = 0; y < _numPolyVerts; x = y, ++y)
+    {
+        // Inside
+        if (_rasterVertices[x].y >= yMin && _rasterVertices[y].y >= yMin)
+            _rasterVerticesTmp[localNumVerts++] = _rasterVertices[y];
+
+        // Leaving
+        if (_rasterVertices[x].y >= yMin && _rasterVertices[y].y < yMin)
+            _rasterVerticesTmp[localNumVerts++] = _get_yplane_vertex(_rasterVertices[x], _rasterVertices[y], yMin);
+
+        // Entering
+        if (_rasterVertices[x].y < yMin && _rasterVertices[y].y >= yMin)
+        {
+            _rasterVerticesTmp[localNumVerts++] = _get_yplane_vertex(_rasterVertices[x], _rasterVertices[y], yMin);
+            _rasterVerticesTmp[localNumVerts++] = _rasterVertices[y];
+        }
+    }
+
+    // Clip at bottom clipping plane (yMax)
+    _numPolyVerts = 0;
+
+    for (x = localNumVerts - 1, y = 0; y < localNumVerts; x = y, ++y)
+    {
+        // Inside
+        if (_rasterVerticesTmp[x].y <= yMax && _rasterVerticesTmp[y].y <= yMax)
+            _rasterVertices[_numPolyVerts++] = _rasterVerticesTmp[y];
+
+        // Leaving
+        if (_rasterVerticesTmp[x].y <= yMax && _rasterVerticesTmp[y].y > yMax)
+            _rasterVertices[_numPolyVerts++] = _get_yplane_vertex(_rasterVerticesTmp[x], _rasterVerticesTmp[y], yMax);
+
+        // Entering
+        if (_rasterVerticesTmp[x].y > yMax && _rasterVerticesTmp[y].y <= yMax)
+        {
+            _rasterVertices[_numPolyVerts++] = _get_yplane_vertex(_rasterVerticesTmp[x], _rasterVerticesTmp[y], yMax);
+            _rasterVertices[_numPolyVerts++] = _rasterVerticesTmp[y];
+        }
+    }
+}
+
 static void _index_inc(PRint* x, PRint numVertices)
 {
     ++(*x);
@@ -485,8 +705,9 @@ static void _index_dec(PRint* x, PRint numVertices)
         *x = numVertices - 1;
 }
 
+// Rasterizes a convex polygon
 static void _rasterize_polygon_textured(
-    pr_framebuffer* frameBuffer, const pr_texture* texture, const pr_raster_vertex* vertices, PRint numVertices, PRubyte mipLevel)
+    pr_framebuffer* frameBuffer, const pr_texture* texture, PRubyte mipLevel)
 {
     // Select MIP level
     PRtexsize mipWidth, mipHeight;
@@ -495,11 +716,11 @@ static void _rasterize_polygon_textured(
     // Find left- and right sided polygon edges
     PRint x, y, top = 0, bottom = 0;
 
-    for (x = 1; x < numVertices; ++x)
+    for (x = 1; x < _numPolyVerts; ++x)
     {
-        if (vertices[top].y > vertices[x].y)
+        if (_rasterVertices[top].y > _rasterVertices[x].y)
             top = x;
-        if (vertices[bottom].y < vertices[x].y)
+        if (_rasterVertices[bottom].y < _rasterVertices[x].y)
             bottom = x;
     }
 
@@ -508,15 +729,15 @@ static void _rasterize_polygon_textured(
     pr_scaline_side* rightSide = frameBuffer->scanlinesEnd;
 
     x = y = top;
-    for (_index_dec(&y, numVertices); x != bottom; x = y, _index_dec(&y, numVertices))
-        _pr_framebuffer_setup_scanlines(frameBuffer, leftSide, vertices[x], vertices[y]);
+    for (_index_dec(&y, _numPolyVerts); x != bottom; x = y, _index_dec(&y, _numPolyVerts))
+        _pr_framebuffer_setup_scanlines(frameBuffer, leftSide, _rasterVertices[x], _rasterVertices[y]);
 
     x = y = top;
-    for (_index_inc(&y, numVertices); x != bottom; x = y, _index_inc(&y, numVertices))
-        _pr_framebuffer_setup_scanlines(frameBuffer, rightSide, vertices[x], vertices[y]);
+    for (_index_inc(&y, _numPolyVerts); x != bottom; x = y, _index_inc(&y, _numPolyVerts))
+        _pr_framebuffer_setup_scanlines(frameBuffer, rightSide, _rasterVertices[x], _rasterVertices[y]);
 
     // Check if sides must be swaped
-    long midIndex = (vertices[bottom].y + vertices[top].y) / 2;
+    long midIndex = (_rasterVertices[bottom].y + _rasterVertices[top].y) / 2;
     if (frameBuffer->scanlinesStart[midIndex].offset > frameBuffer->scanlinesEnd[midIndex].offset)
         PR_SWAP(pr_scaline_side*, leftSide, rightSide);
 
@@ -526,8 +747,8 @@ static void _rasterize_polygon_textured(
     PRfloat u, uAct, uStep;
     PRfloat v, vAct, vStep;
 
-    PRint yStart = vertices[top].y;
-    PRint yEnd = vertices[bottom].y;
+    PRint yStart = _rasterVertices[top].y;
+    PRint yEnd = _rasterVertices[bottom].y;
 
     pr_pixel* pixel;
 
@@ -585,23 +806,8 @@ static void _rasterize_polygon_textured(
     }
 }
 
-static void _pr_rasterize_triangle_textured(
-    pr_framebuffer* frameBuffer, const pr_texture* texture, const pr_vertex* a, const pr_vertex* b, const pr_vertex* c)
+static void _render_polygon_textured(pr_framebuffer* frameBuffer, const pr_texture* texture)
 {
-    pr_raster_triangle triangle;
-
-    // Make culling test
-    if (_is_triangle_culled(a, b, c))
-        return;
-
-    // To raster a triangle we copy the vertex data into a 'raster_triangle' structure,
-    // which is much smaller and compact to reduce memory overhead.
-    // This is necessary because during triangle rasterization we will
-    // access this memory a lot of times.
-    _setup_triangle_vertex(&(triangle.a), a);
-    _setup_triangle_vertex(&(triangle.b), b);
-    _setup_triangle_vertex(&(triangle.c), c);
-
     #if 0//!!!
 
     // Select MIP level
@@ -639,12 +845,20 @@ static void _pr_rasterize_triangle_textured(
     #endif
 
     // Rasterize polygon with 3 vertices
-    _rasterize_polygon_textured(frameBuffer, texture, &(triangle.a), 3, mipLevel);
+    _rasterize_polygon_textured(frameBuffer, texture, mipLevel);
 }
 
 static void _render_indexed_triangles_textured(
     const pr_texture* texture, PRushort numVertices, PRushort firstVertex, pr_vertexbuffer* vertexBuffer, const pr_indexbuffer* indexBuffer)
 {
+    // Get clipping dimensions
+    pr_framebuffer* frameBuffer = PR_STATE_MACHINE.boundFrameBuffer;
+
+    const PRint xMin = PR_STATE_MACHINE.clipRect.left;
+    const PRint xMax = PR_STATE_MACHINE.clipRect.right;
+    const PRint yMin = PR_STATE_MACHINE.clipRect.top;
+    const PRint yMax = PR_STATE_MACHINE.clipRect.bottom;
+
     // Iterate over the index buffer
     for (PRushort i = firstVertex, n = numVertices + firstVertex; i + 2 < n; i += 3)
     {
@@ -666,8 +880,35 @@ static void _render_indexed_triangles_textured(
         const pr_vertex* vertexB = (vertexBuffer->vertices + indexB);
         const pr_vertex* vertexC = (vertexBuffer->vertices + indexC);
 
-        // Rasterize triangle
-        _pr_rasterize_triangle_textured(PR_STATE_MACHINE.boundFrameBuffer, texture, vertexA, vertexB, vertexC);
+        // Setup polygon
+        _setup_clip_vertex(&(_clipVertices[0]), vertexA, &(PR_STATE_MACHINE.worldViewMatrix));
+        _setup_clip_vertex(&(_clipVertices[1]), vertexB, &(PR_STATE_MACHINE.worldViewMatrix));
+        _setup_clip_vertex(&(_clipVertices[2]), vertexC, &(PR_STATE_MACHINE.worldViewMatrix));
+
+        // Z clipping
+        _numPolyVerts = 3;
+        _polygon_z_clipping(1.0f, 100.0f);//!!!
+
+        // Projection
+        for (PRint j = 0; j < _numPolyVerts; ++j)
+            _project_vertex(&(_clipVertices[j]), &(PR_STATE_MACHINE.projectionMatrix), &(PR_STATE_MACHINE.viewport));
+
+        // Make culling test
+        if (_numPolyVerts < 3 || _is_triangle_culled(_CVERT_VEC2(0), _CVERT_VEC2(1), _CVERT_VEC2(2)))
+            continue;
+
+        // Setup raster vertices
+        for (PRint j = 0; j < _numPolyVerts; ++j)
+            _setup_raster_vertex(&(_rasterVertices[j]), &(_clipVertices[j]));
+
+        // Edge clipping
+        _polygon_xy_clipping(xMin, xMax, yMin, yMax);
+
+        if (_numPolyVerts < 3)
+            continue;
+
+        // Render polygon
+        _render_polygon_textured(frameBuffer, texture);
     }
 }
 
@@ -713,7 +954,7 @@ void _pr_render_indexed_triangles(PRushort numVertices, PRushort firstVertex, pr
         return;
     }
 
-    _vertexbuffer_transform_all(vertexBuffer);
+    //_vertexbuffer_transform_all(vertexBuffer);
 
     if (PR_STATE_MACHINE.boundTexture != NULL)
         _render_indexed_triangles_textured(PR_STATE_MACHINE.boundTexture, numVertices, firstVertex, vertexBuffer, indexBuffer);

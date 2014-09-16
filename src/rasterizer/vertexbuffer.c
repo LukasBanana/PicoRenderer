@@ -33,6 +33,7 @@ void _pr_vertexbuffer_delete(pr_vertexbuffer* vertexBuffer)
     }
 }
 
+//!REMOVE THIS!
 static void _vertex_transform(
     pr_vertex* vertex, const pr_matrix4* worldViewProjectionMatrix, const pr_viewport* viewport)
 {

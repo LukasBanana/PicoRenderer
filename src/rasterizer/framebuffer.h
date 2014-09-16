@@ -24,7 +24,7 @@ typedef struct pr_scaline_side
 }
 pr_scaline_side;
 
-//! Framebuffer structure.
+//! Framebuffer structure
 typedef struct pr_framebuffer
 {
     PRuint              width;

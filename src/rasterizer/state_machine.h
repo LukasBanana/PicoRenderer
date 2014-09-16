@@ -11,6 +11,7 @@
 
 #include "matrix4.h"
 #include "viewport.h"
+#include "rect.h"
 #include "framebuffer.h"
 #include "vertexbuffer.h"
 #include "indexbuffer.h"
@@ -26,8 +27,11 @@ typedef struct pr_state_machine
     pr_matrix4          viewMatrix;
     pr_matrix4          worldMatrix;
     pr_matrix4          viewProjectionMatrix;
+    pr_matrix4          worldViewMatrix;
     pr_matrix4          worldViewProjectionMatrix;
+
     pr_viewport         viewport;
+    pr_rect             clipRect;
     
     pr_framebuffer*     boundFrameBuffer;
     pr_vertexbuffer*    boundVertexBuffer;
