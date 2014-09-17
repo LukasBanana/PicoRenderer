@@ -59,7 +59,7 @@ void _pr_indexbuffer_data(pr_indexbuffer* indexBuffer, const PRushort* indices, 
         indexBuffer->indices[numIndices] = indices[numIndices];
 }
 
-void _pr_indexbuffer_data_from_file(pr_indexbuffer* indexBuffer, PRushort* numIndices, FILE* file)
+void _pr_indexbuffer_data_from_file(pr_indexbuffer* indexBuffer, PRsizei* numIndices, FILE* file)
 {
     if (indexBuffer == NULL || numIndices == NULL || file == NULL)
     {
@@ -68,7 +68,9 @@ void _pr_indexbuffer_data_from_file(pr_indexbuffer* indexBuffer, PRushort* numIn
     }
     
     // Read number of indices
-    fread(numIndices, sizeof(PRushort), 1, file);
+    PRushort numInd = 0;
+    fread(&numInd, sizeof(PRushort), 1, file);
+    *numIndices = (PRsizei)numInd;
 
     _indexbuffer_resize(indexBuffer, *numIndices);
 

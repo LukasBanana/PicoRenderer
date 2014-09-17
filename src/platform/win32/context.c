@@ -12,7 +12,7 @@
 
 pr_context* _currentContext = NULL;
 
-pr_context* _pr_context_create(const pr_context_desc* desc, PRuint width, PRuint height)
+pr_context* _pr_context_create(const PRcontextdesc* desc, PRuint width, PRuint height)
 {
     if (desc == NULL || desc->wnd == NULL || width <= 0 || height <= 0)
     {

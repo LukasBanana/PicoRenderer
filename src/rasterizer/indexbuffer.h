@@ -26,7 +26,7 @@ pr_indexbuffer* _pr_indexbuffer_create();
 void _pr_indexbuffer_delete(pr_indexbuffer* indexBuffer);
 
 void _pr_indexbuffer_data(pr_indexbuffer* indexBuffer, const PRushort* indices, PRushort numIndices);
-void _pr_indexbuffer_data_from_file(pr_indexbuffer* indexBuffer, PRushort* numIndices, FILE* file);
+void _pr_indexbuffer_data_from_file(pr_indexbuffer* indexBuffer, PRsizei* numIndices, FILE* file);
 
 
 #endif

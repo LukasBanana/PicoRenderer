@@ -42,7 +42,7 @@ pr_context;
 extern pr_context* _currentContext;
 
 //! Creates a new render context for the specified device context.
-pr_context* _pr_context_create(const pr_context_desc* desc, PRuint width, PRuint height);
+pr_context* _pr_context_create(const PRcontextdesc* desc, PRuint width, PRuint height);
 //! Deletes the specified render context.
 void _pr_context_delete(pr_context* context);
 

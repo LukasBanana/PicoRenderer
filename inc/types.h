@@ -46,7 +46,7 @@ typedef unsigned int PRenum;
 //! Flags type.
 typedef unsigned int PRflags;
 //! Size type.
-typedef size_t PRsizei;
+typedef int PRsizei;
 
 //! Texture size type: 8-bit unsigned byte.
 typedef PRshort PRtexsize;

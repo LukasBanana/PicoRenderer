@@ -65,7 +65,7 @@ const char* prGetString(PRenum str)
 
 // --- context --- //
 
-PRobject prGenContext(const pr_context_desc* desc, PRuint width, PRuint height)
+PRobject prGenContext(const PRcontextdesc* desc, PRuint width, PRuint height)
 {
     return (PRobject)_pr_context_create(desc, width, height);
 }
@@ -140,7 +140,7 @@ void prTextureImage2DFromFile(
         (pr_texture*)texture,
         (PRtexsize)(image->width),
         (PRtexsize)(image->height),
-        PR_IMAGE_FORMAT_UBYTE_RGB,
+        PR_UBYTE_RGB,
         image->colors,
         dither,
         generateMips
@@ -161,12 +161,12 @@ void prDeleteVertexBuffer(PRobject vertexBuffer)
     _pr_vertexbuffer_delete((pr_vertexbuffer*)vertexBuffer);
 }
 
-void prVertexBufferData(PRobject vertexBuffer, const PRvertex* vertices, PRsizei numVertices)
+void prVertexBufferData(PRobject vertexBuffer, PRsizei numVertices, const PRvoid* coords, const PRvoid* texCoords, PRsizei vertexStride)
 {
-    _pr_vertexbuffer_data((pr_vertexbuffer*)vertexBuffer, vertices, numVertices);
+    _pr_vertexbuffer_data((pr_vertexbuffer*)vertexBuffer, numVertices, coords, texCoords, vertexStride);
 }
 
-void prVertexBufferDataFromFile(PRobject vertexBuffer, PRushort* numVertices, FILE* file)
+void prVertexBufferDataFromFile(PRobject vertexBuffer, PRsizei* numVertices, FILE* file)
 {
     _pr_vertexbuffer_data_from_file((pr_vertexbuffer*)vertexBuffer, numVertices, file);
 }
@@ -193,7 +193,7 @@ void prIndexBufferData(PRobject indexBuffer, const PRushort* indices, PRsizei nu
     _pr_indexbuffer_data((pr_indexbuffer*)indexBuffer, indices, numIndices);
 }
 
-void prIndexBufferDataFromFile(PRobject indexBuffer, PRushort* numIndices, FILE* file)
+void prIndexBufferDataFromFile(PRobject indexBuffer, PRsizei* numIndices, FILE* file)
 {
     _pr_indexbuffer_data_from_file((pr_indexbuffer*)indexBuffer, numIndices, file);
 }
@@ -300,27 +300,27 @@ void prDrawIndexed(PRenum primitives, PRushort numVertices, PRushort firstVertex
 {
     switch (primitives)
     {
-        case PR_PRIMITIVE_POINTS:
+        case PR_POINTS:
             _pr_render_indexed_points(numVertices, firstVertex, PR_STATE_MACHINE.boundVertexBuffer, PR_STATE_MACHINE.boundIndexBuffer);
             break;
 
-        case PR_PRIMITIVE_LINES:
+        case PR_LINES:
             _pr_render_indexed_lines(numVertices, firstVertex, PR_STATE_MACHINE.boundVertexBuffer, PR_STATE_MACHINE.boundIndexBuffer);
             break;
-        case PR_PRIMITIVE_LINE_STRIP:
+        case PR_LINE_STRIP:
             _pr_render_indexed_line_strip(numVertices, firstVertex, PR_STATE_MACHINE.boundVertexBuffer, PR_STATE_MACHINE.boundIndexBuffer);
             break;
-        case PR_PRIMITIVE_LINE_LOOP:
+        case PR_LINE_LOOP:
             _pr_render_indexed_line_loop(numVertices, firstVertex, PR_STATE_MACHINE.boundVertexBuffer, PR_STATE_MACHINE.boundIndexBuffer);
             break;
 
-        case PR_PRIMITIVE_TRIANGLES:
+        case PR_TRIANGLES:
             _pr_render_indexed_triangles(numVertices, firstVertex, PR_STATE_MACHINE.boundVertexBuffer, PR_STATE_MACHINE.boundIndexBuffer);
             break;
-        case PR_PRIMITIVE_TRIANGLE_STRIP:
+        case PR_TRIANGLE_STRIP:
             _pr_render_indexed_triangle_strip(numVertices, firstVertex, PR_STATE_MACHINE.boundVertexBuffer, PR_STATE_MACHINE.boundIndexBuffer);
             break;
-        case PR_PRIMITIVE_TRIANGLE_FAN:
+        case PR_TRIANGLE_FAN:
             _pr_render_indexed_triangle_fan(numVertices, firstVertex, PR_STATE_MACHINE.boundVertexBuffer, PR_STATE_MACHINE.boundIndexBuffer);
             break;
 

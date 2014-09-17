@@ -159,7 +159,7 @@ int main()
     printf("%s %s\n", prGetString(PR_STRING_RENDERER), prGetString(PR_STRING_VERSION));
     
     // Create render context
-    pr_context_desc contextDesc;
+    PRcontextdesc contextDesc;
 
     contextDesc.wnd = wnd;
 
@@ -222,7 +222,7 @@ int main()
         {  1.0f, -1.0f,  1.0f, 1.0f, 1.0f },
         { -1.0f, -1.0f,  1.0f, 0.0f, 1.0f }
     };
-    prVertexBufferData(vertexBuffer, cubeVertices, NUM_VERTICES);
+    prVertexBufferData(vertexBuffer, NUM_VERTICES, &(cubeVertices[0].x), &(cubeVertices[0].u), sizeof(PRvertex));
 
     #define NUM_INDICES 36
 
@@ -244,7 +244,7 @@ int main()
     #define NUM_VERTICES numVertices
     #define NUM_INDICES numIndices
 
-    PRushort numVertices = 0, numIndices = 0;
+    PRsizei numVertices = 0, numIndices = 0;
 
     FILE* mdlFile = fopen("media/house_tris.pico", "rb");
     if (mdlFile)
@@ -280,7 +280,8 @@ int main()
     prLoadIdentity(viewMatrix);
     prViewMatrix(viewMatrix);
 
-    //prCullMode(PR_CULL_BACK);
+    prCullMode(PR_CULL_BACK);
+    //prCullMode(PR_CULL_FRONT);
 
     // Main loop
     while (!isQuit)
@@ -352,7 +353,7 @@ int main()
             prWorldMatrix(worldMatrix);
 
             // Draw lines
-            prDrawIndexed(PR_PRIMITIVE_LINES, NUM_INDICES, 0);
+            prDrawIndexed(PR_LINES, NUM_INDICES, 0);
 
             // Setup view
             prViewport(viewWidth, 0, 600, 600);
@@ -368,7 +369,7 @@ int main()
             prWorldMatrix(worldMatrix);
 
             // Draw lines
-            prDrawIndexed(PR_PRIMITIVE_LINES, NUM_INDICES, 0);
+            prDrawIndexed(PR_LINES, NUM_INDICES, 0);
 
             #elif 1
 
@@ -378,7 +379,7 @@ int main()
             prBindTexture(textureA);
 
             // Setup view
-            prViewport(0, 0, viewWidth - 100, viewHeight - 100);
+            prViewport(0, 0, viewWidth, viewHeight);
 
             // Setup transformation
             prProjectionMatrix(projectionA);
@@ -391,7 +392,7 @@ int main()
 
             // Draw triangles
             //prDepthRange(0.0f, 0.5f);
-            prDrawIndexed(PR_PRIMITIVE_TRIANGLES, NUM_INDICES, 0);
+            prDrawIndexed(PR_TRIANGLES, NUM_INDICES, 0);
 
             #   if 0
             // Setup transformation
@@ -404,7 +405,7 @@ int main()
 
             // Draw triangles
             //prDepthRange(0.5f, 1.0f);
-            prDrawIndexed(PR_PRIMITIVE_TRIANGLES, NUM_INDICES, 0);
+            prDrawIndexed(PR_TRIANGLES, NUM_INDICES, 0);
             #   endif
 
             #endif
@@ -423,7 +424,7 @@ int main()
     prRelease();
 
     DestroyWindow(wnd);
-
+    
     UnregisterClass(wcName, GetModuleHandle(NULL));
 
     return 0;

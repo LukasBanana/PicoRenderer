@@ -20,7 +20,7 @@
 static void _texture_subimage2d(
     PRubyte* texels, PRubyte mip, PRtexsize width, PRtexsize height, PRenum format, const PRvoid* data, PRboolean dither)
 {
-    if (format != PR_IMAGE_FORMAT_UBYTE_RGB)
+    if (format != PR_UBYTE_RGB)
     {
         _pr_error_set(PR_ERROR_INVALID_ARGUMENT, __FUNCTION__);
         return;
@@ -124,7 +124,7 @@ static PRubyte* _image_scale_down(PRtexsize width, PRtexsize height, PRenum form
 {
     switch (format)
     {
-        case PR_IMAGE_FORMAT_UBYTE_RGB:
+        case PR_UBYTE_RGB:
             return _image_scale_down_ubyte_rgb(width, height, (const PRubyte*)data);
         default:
             break;

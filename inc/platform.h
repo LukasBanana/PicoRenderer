@@ -22,20 +22,20 @@
 #if defined(PR_PLATFORM_WIN32)
 
 //! Win32 render context description structure.
-typedef struct pr_context_desc
+typedef struct PRcontextdesc
 {
     HWND wnd;
 }
-pr_context_desc;
+PRcontextdesc;
 
 #elif defined(PR_PLATFORM_POSIX)
 
 //! Posix render context description structure.
-typedef struct pr_context_desc
+typedef struct PRcontextdesc
 {
     int unused;
 }
-pr_context_desc;
+PRcontextdesc;
 
 #endif
 

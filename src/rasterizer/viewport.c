@@ -16,8 +16,8 @@ void _pr_viewport_init(pr_viewport* viewport)
     {
         viewport->x             = 0.0f;
         viewport->y             = 0.0f;
-        viewport->halfWidth     = 0.5f * (PRfloat)PR_DEFAULT_RESOLUTION_WIDTH;
-        viewport->halfHeight    = 0.5f * (PRfloat)PR_DEFAULT_RESOLUTION_HEIGHT;
+        viewport->halfWidth     = 0.0f;
+        viewport->halfHeight    = 0.0f;
         viewport->minDepth      = 0.0f;
         viewport->maxDepth      = 1.0f;
         viewport->depthSize     = 1.0f;

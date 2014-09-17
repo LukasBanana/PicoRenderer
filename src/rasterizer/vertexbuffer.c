@@ -65,10 +65,10 @@ static void _vertex_transform(
 }
 
 void _pr_vertexbuffer_transform(
-    PRushort numVertices, PRushort firstVertex, pr_vertexbuffer* vertexBuffer,
+    PRsizei numVertices, PRsizei firstVertex, pr_vertexbuffer* vertexBuffer,
     const pr_matrix4* worldViewProjectionMatrix, const pr_viewport* viewport)
 {
-    const PRushort lastVertex = numVertices + firstVertex;
+    const PRsizei lastVertex = numVertices + firstVertex;
 
     if (lastVertex >= vertexBuffer->numVertices)
     {
@@ -76,18 +76,18 @@ void _pr_vertexbuffer_transform(
         return;
     }
 
-    for (PRushort i = firstVertex; i < lastVertex; ++i)
+    for (PRsizei i = firstVertex; i < lastVertex; ++i)
         _vertex_transform((vertexBuffer->vertices + i), worldViewProjectionMatrix, viewport);
 }
 
 void _pr_vertexbuffer_transform_all(
     pr_vertexbuffer* vertexBuffer, const pr_matrix4* worldViewProjectionMatrix, const pr_viewport* viewport)
 {
-    for (PRushort i = 0; i < vertexBuffer->numVertices; ++i)
+    for (PRsizei i = 0; i < vertexBuffer->numVertices; ++i)
         _vertex_transform((vertexBuffer->vertices + i), worldViewProjectionMatrix, viewport);
 }
 
-static _vertexbuffer_resize(pr_vertexbuffer* vertexBuffer, PRushort numVertices)
+static void _vertexbuffer_resize(pr_vertexbuffer* vertexBuffer, PRsizei numVertices)
 {
     // Check if vertex buffer must be reallocated
     if (vertexBuffer->vertices == NULL || vertexBuffer->numVertices != numVertices)
@@ -100,9 +100,9 @@ static _vertexbuffer_resize(pr_vertexbuffer* vertexBuffer, PRushort numVertices)
     }
 }
 
-void _pr_vertexbuffer_data(pr_vertexbuffer* vertexBuffer, const PRvertex* vertices, PRushort numVertices)
+void _pr_vertexbuffer_data(pr_vertexbuffer* vertexBuffer, PRsizei numVertices, const PRvoid* coords, const PRvoid* texCoords, PRsizei vertexStride)
 {
-    if (vertexBuffer == NULL || vertices == NULL)
+    if (vertexBuffer == NULL)
     {
         PR_ERROR(PR_ERROR_NULL_POINTER);
         return;
@@ -110,24 +110,55 @@ void _pr_vertexbuffer_data(pr_vertexbuffer* vertexBuffer, const PRvertex* vertic
 
     _vertexbuffer_resize(vertexBuffer, numVertices);
 
+    // Get offset pointers
+    const PRbyte* coordsByteAlign = (const PRbyte*)coords;
+    const PRbyte* texCoordsByteAlign = (const PRbyte*)texCoords;
+
     // Fill vertex buffer
     pr_vertex* vert = vertexBuffer->vertices;
 
     while (numVertices-- > 0)
     {
-        vert->coord.x = vertices->x;
-        vert->coord.y = vertices->y;
-        vert->coord.z = vertices->z;
+        // Copy coordinates
+        if (coordsByteAlign != NULL)
+        {
+            const PRfloat* coord = (const PRfloat*)coordsByteAlign;
 
-        vert->texCoord.x = vertices->u;
-        vert->texCoord.y = vertices->v;
+            vert->coord.x = coord[0];
+            vert->coord.y = coord[1];
+            vert->coord.z = coord[2];
 
+            coordsByteAlign += vertexStride;
+        }
+        else
+        {
+            vert->coord.x = 0.0f;
+            vert->coord.y = 0.0f;
+            vert->coord.z = 0.0f;
+        }
+
+        // Copy texture coordinates
+        if (texCoordsByteAlign != NULL)
+        {   
+            const PRfloat* texCoord = (const PRfloat*)texCoordsByteAlign;
+            
+            vert->texCoord.x = texCoord[0];
+            vert->texCoord.y = texCoord[1];
+
+            texCoordsByteAlign += vertexStride;
+        }
+        else
+        {
+            vert->texCoord.x = 0.0f;
+            vert->texCoord.y = 0.0f;
+        }
+
+        // Next vertex
         ++vert;
-        ++vertices;
     }
 }
 
-void _pr_vertexbuffer_data_from_file(pr_vertexbuffer* vertexBuffer, PRushort* numVertices, FILE* file)
+void _pr_vertexbuffer_data_from_file(pr_vertexbuffer* vertexBuffer, PRsizei* numVertices, FILE* file)
 {
     if (vertexBuffer == NULL || numVertices == NULL || file == NULL)
     {
@@ -136,7 +167,9 @@ void _pr_vertexbuffer_data_from_file(pr_vertexbuffer* vertexBuffer, PRushort* nu
     }
     
     // Read number of vertices
-    fread(numVertices, sizeof(PRushort), 1, file);
+    PRushort vertCount = 0;
+    fread(&vertCount, sizeof(PRushort), 1, file);
+    *numVertices = (PRsizei)vertCount;
 
     _vertexbuffer_resize(vertexBuffer, *numVertices);
 

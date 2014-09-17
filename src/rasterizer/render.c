@@ -22,7 +22,7 @@
 
 #define _CVERT_VEC2(v) (*(pr_vector2*)(&((_clipVertices[v]).x)))
 
-static void _vertexbuffer_transform(PRushort numVertices, PRushort firstVertex, pr_vertexbuffer* vertexBuffer)
+static void _vertexbuffer_transform(PRsizei numVertices, PRsizei firstVertex, pr_vertexbuffer* vertexBuffer)
 {
     _pr_vertexbuffer_transform(
         numVertices,
@@ -134,7 +134,7 @@ void _pr_render_screenspace_point(PRint x, PRint y, PRubyte colorIndex)
     _pr_framebuffer_plot(frameBuffer, x, y, colorIndex);
 }
 
-void _pr_render_points(PRushort numVertices, PRushort firstVertex, pr_vertexbuffer* vertexBuffer)
+void _pr_render_points(PRsizei numVertices, PRsizei firstVertex, pr_vertexbuffer* vertexBuffer)
 {
     // Validate bound frame buffer
     pr_framebuffer* frameBuffer = PR_STATE_MACHINE.boundFrameBuffer;
@@ -183,7 +183,7 @@ void _pr_render_points(PRushort numVertices, PRushort firstVertex, pr_vertexbuff
     }
 }
 
-void _pr_render_indexed_points(PRushort numVertices, PRushort firstVertex, pr_vertexbuffer* vertexBuffer, const pr_indexbuffer* indexBuffer)
+void _pr_render_indexed_points(PRsizei numVertices, PRsizei firstVertex, pr_vertexbuffer* vertexBuffer, const pr_indexbuffer* indexBuffer)
 {
     _vertexbuffer_transform(numVertices, firstVertex, vertexBuffer);
     //...
@@ -269,18 +269,18 @@ static void _render_screenspace_line_colored(PRint x1, PRint y1, PRint x2, PRint
 }
 
 static void _render_indexed_lines_textured(
-    const pr_texture* texture, PRushort numVertices, PRushort firstVertex, const pr_vertexbuffer* vertexBuffer, const pr_indexbuffer* indexBuffer)
+    const pr_texture* texture, PRsizei numVertices, PRsizei firstVertex, const pr_vertexbuffer* vertexBuffer, const pr_indexbuffer* indexBuffer)
 {
     //...
 }
 
 static void _render_indexed_lines_colored(
-    PRubyte colorIndex, PRushort numVertices, PRushort firstVertex, const pr_vertexbuffer* vertexBuffer, const pr_indexbuffer* indexBuffer)
+    PRubyte colorIndex, PRsizei numVertices, PRsizei firstVertex, const pr_vertexbuffer* vertexBuffer, const pr_indexbuffer* indexBuffer)
 {
     pr_framebuffer* frameBuffer = PR_STATE_MACHINE.boundFrameBuffer;
 
     // Iterate over the index buffer
-    for (PRushort i = firstVertex, n = numVertices + firstVertex; i + 1 < n; i += 2)
+    for (PRsizei i = firstVertex, n = numVertices + firstVertex; i + 1 < n; i += 2)
     {
         // Fetch indices
         PRushort indexA = indexBuffer->indices[i];
@@ -328,24 +328,24 @@ void _pr_render_screenspace_line(PRint x1, PRint y1, PRint x2, PRint y2, PRubyte
     _render_screenspace_line_colored(x1, y1, x2, y2, colorIndex);
 }
 
-void _pr_render_lines(PRushort numVertices, PRushort firstVertex, pr_vertexbuffer* vertexBuffer)
+void _pr_render_lines(PRsizei numVertices, PRsizei firstVertex, pr_vertexbuffer* vertexBuffer)
 {
     _vertexbuffer_transform(numVertices, firstVertex, vertexBuffer);
 }
 
-void _pr_render_line_strip(PRushort numVertices, PRushort firstVertex, pr_vertexbuffer* vertexBuffer)
-{
-    _vertexbuffer_transform(numVertices, firstVertex, vertexBuffer);
-    //...
-}
-
-void _pr_render_line_loop(PRushort numVertices, PRushort firstVertex, pr_vertexbuffer* vertexBuffer)
+void _pr_render_line_strip(PRsizei numVertices, PRsizei firstVertex, pr_vertexbuffer* vertexBuffer)
 {
     _vertexbuffer_transform(numVertices, firstVertex, vertexBuffer);
     //...
 }
 
-void _pr_render_indexed_lines(PRushort numVertices, PRushort firstVertex, pr_vertexbuffer* vertexBuffer, const pr_indexbuffer* indexBuffer)
+void _pr_render_line_loop(PRsizei numVertices, PRsizei firstVertex, pr_vertexbuffer* vertexBuffer)
+{
+    _vertexbuffer_transform(numVertices, firstVertex, vertexBuffer);
+    //...
+}
+
+void _pr_render_indexed_lines(PRsizei numVertices, PRsizei firstVertex, pr_vertexbuffer* vertexBuffer, const pr_indexbuffer* indexBuffer)
 {
     if (PR_STATE_MACHINE.boundFrameBuffer == NULL)
     {
@@ -371,13 +371,13 @@ void _pr_render_indexed_lines(PRushort numVertices, PRushort firstVertex, pr_ver
         _render_indexed_lines_colored(PR_STATE_MACHINE.colorIndex, numVertices, firstVertex, vertexBuffer, indexBuffer);
 }
 
-void _pr_render_indexed_line_strip(PRushort numVertices, PRushort firstVertex, pr_vertexbuffer* vertexBuffer, const pr_indexbuffer* indexBuffer)
+void _pr_render_indexed_line_strip(PRsizei numVertices, PRsizei firstVertex, pr_vertexbuffer* vertexBuffer, const pr_indexbuffer* indexBuffer)
 {
     _vertexbuffer_transform_all(vertexBuffer);
     //...
 }
 
-void _pr_render_indexed_line_loop(PRushort numVertices, PRushort firstVertex, pr_vertexbuffer* vertexBuffer, const pr_indexbuffer* indexBuffer)
+void _pr_render_indexed_line_loop(PRsizei numVertices, PRsizei firstVertex, pr_vertexbuffer* vertexBuffer, const pr_indexbuffer* indexBuffer)
 {
     _vertexbuffer_transform_all(vertexBuffer);
     //...
@@ -849,7 +849,7 @@ static void _render_polygon_textured(pr_framebuffer* frameBuffer, const pr_textu
 }
 
 static void _render_indexed_triangles_textured(
-    const pr_texture* texture, PRushort numVertices, PRushort firstVertex, pr_vertexbuffer* vertexBuffer, const pr_indexbuffer* indexBuffer)
+    const pr_texture* texture, PRsizei numVertices, PRsizei firstVertex, pr_vertexbuffer* vertexBuffer, const pr_indexbuffer* indexBuffer)
 {
     // Get clipping dimensions
     pr_framebuffer* frameBuffer = PR_STATE_MACHINE.boundFrameBuffer;
@@ -860,7 +860,7 @@ static void _render_indexed_triangles_textured(
     const PRint yMax = PR_STATE_MACHINE.clipRect.bottom;
 
     // Iterate over the index buffer
-    for (PRushort i = firstVertex, n = numVertices + firstVertex; i + 2 < n; i += 3)
+    for (PRsizei i = firstVertex, n = numVertices + firstVertex; i + 2 < n; i += 3)
     {
         // Fetch indices
         PRushort indexA = indexBuffer->indices[i];
@@ -913,30 +913,30 @@ static void _render_indexed_triangles_textured(
 }
 
 static void _render_indexed_triangles_colored(
-    PRubyte colorIndex, PRushort numVertices, PRushort firstVertex, pr_vertexbuffer* vertexBuffer, const pr_indexbuffer* indexBuffer)
+    PRubyte colorIndex, PRsizei numVertices, PRsizei firstVertex, pr_vertexbuffer* vertexBuffer, const pr_indexbuffer* indexBuffer)
 {
     //...
 }
 
-void _pr_render_triangles(PRushort numVertices, PRushort firstVertex, pr_vertexbuffer* vertexBuffer)
-{
-    _vertexbuffer_transform(numVertices, firstVertex, vertexBuffer);
-    //...
-}
-
-void _pr_render_triangle_strip(PRushort numVertices, PRushort firstVertex, pr_vertexbuffer* vertexBuffer)
+void _pr_render_triangles(PRsizei numVertices, PRsizei firstVertex, pr_vertexbuffer* vertexBuffer)
 {
     _vertexbuffer_transform(numVertices, firstVertex, vertexBuffer);
     //...
 }
 
-void _pr_render_triangle_fan(PRushort numVertices, PRushort firstVertex, pr_vertexbuffer* vertexBuffer)
+void _pr_render_triangle_strip(PRsizei numVertices, PRsizei firstVertex, pr_vertexbuffer* vertexBuffer)
 {
     _vertexbuffer_transform(numVertices, firstVertex, vertexBuffer);
     //...
 }
 
-void _pr_render_indexed_triangles(PRushort numVertices, PRushort firstVertex, pr_vertexbuffer* vertexBuffer, const pr_indexbuffer* indexBuffer)
+void _pr_render_triangle_fan(PRsizei numVertices, PRsizei firstVertex, pr_vertexbuffer* vertexBuffer)
+{
+    _vertexbuffer_transform(numVertices, firstVertex, vertexBuffer);
+    //...
+}
+
+void _pr_render_indexed_triangles(PRsizei numVertices, PRsizei firstVertex, pr_vertexbuffer* vertexBuffer, const pr_indexbuffer* indexBuffer)
 {
     if (PR_STATE_MACHINE.boundFrameBuffer == NULL)
     {
@@ -962,13 +962,13 @@ void _pr_render_indexed_triangles(PRushort numVertices, PRushort firstVertex, pr
         _render_indexed_triangles_colored(PR_STATE_MACHINE.colorIndex, numVertices, firstVertex, vertexBuffer, indexBuffer);
 }
 
-void _pr_render_indexed_triangle_strip(PRushort numVertices, PRushort firstVertex, pr_vertexbuffer* vertexBuffer, const pr_indexbuffer* indexBuffer)
+void _pr_render_indexed_triangle_strip(PRsizei numVertices, PRsizei firstVertex, pr_vertexbuffer* vertexBuffer, const pr_indexbuffer* indexBuffer)
 {
     _vertexbuffer_transform_all(vertexBuffer);
     //...
 }
 
-void _pr_render_indexed_triangle_fan(PRushort numVertices, PRushort firstVertex, pr_vertexbuffer* vertexBuffer, const pr_indexbuffer* indexBuffer)
+void _pr_render_indexed_triangle_fan(PRsizei numVertices, PRsizei firstVertex, pr_vertexbuffer* vertexBuffer, const pr_indexbuffer* indexBuffer)
 {
     _vertexbuffer_transform_all(vertexBuffer);
     //...

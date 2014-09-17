@@ -9,27 +9,28 @@
 #define __PR_ENUMS_H__
 
 
-#define PR_IMAGE_FORMAT_UBYTE_RGB       1
-//#define PR_IMAGE_FORMAT_UBYTE_RGBA      2
+// Color formats
+#define PR_UBYTE_RGB        1
+//#define PR_UBYTE_RGBA       2
 
-#define PR_DEFAULT_RESOLUTION_WIDTH     640
-#define PR_DEFAULT_RESOLUTION_HEIGHT    480
+// prGetString arguments
+#define PR_STRING_VERSION   1
+#define PR_STRING_RENDERER  2
+#define PR_STRING_PLUGINS   3
 
-#define PR_STRING_VERSION               1
-#define PR_STRING_RENDERER              2
-#define PR_STRING_PLUGINS               3
+// Geometry primitives
+#define PR_POINTS           1
+#define PR_LINES            2
+#define PR_LINE_STRIP       3
+#define PR_LINE_LOOP        4
+#define PR_TRIANGLES        5
+#define PR_TRIANGLE_STRIP   6
+#define PR_TRIANGLE_FAN     7
 
-#define PR_PRIMITIVE_POINTS             0x00000001
-#define PR_PRIMITIVE_LINES              0x00010001
-#define PR_PRIMITIVE_LINE_STRIP         0x00010002
-#define PR_PRIMITIVE_LINE_LOOP          0x00010003
-#define PR_PRIMITIVE_TRIANGLES          0x00020001
-#define PR_PRIMITIVE_TRIANGLE_STRIP     0x00020002
-#define PR_PRIMITIVE_TRIANGLE_FAN       0x00020003
-
-#define PR_CULL_NONE                    0
-#define PR_CULL_FRONT                   1
-#define PR_CULL_BACK                    2
+// Cull modes
+#define PR_CULL_NONE        0
+#define PR_CULL_FRONT       1
+#define PR_CULL_BACK        2
 
 
 #endif

@@ -17,9 +17,23 @@ pr_state_machine* _stateMachine = &_nullStateMachine;
 static void _state_machine_cliprect(PRint left, PRint top, PRint right, PRint bottom)
 {
     _stateMachine->clipRect.left    = left;
-    _stateMachine->clipRect.top     = top;
     _stateMachine->clipRect.right   = right;
+    #ifdef PR_ORIGIN_LEFT_TOP
+    if (PR_STATE_MACHINE.boundFrameBuffer != NULL)
+    {
+        PRint height = (PRint)(PR_STATE_MACHINE.boundFrameBuffer->height);
+        _stateMachine->clipRect.top     = height - bottom - 1;
+        _stateMachine->clipRect.bottom  = height - top - 1;
+    }
+    else
+    {
+        _stateMachine->clipRect.top     = top;
+        _stateMachine->clipRect.bottom  = bottom;
+    }
+    #else
+    _stateMachine->clipRect.top     = top;
     _stateMachine->clipRect.bottom  = bottom;
+    #endif
 }
 
 void _pr_state_machine_init(pr_state_machine* stateMachine)

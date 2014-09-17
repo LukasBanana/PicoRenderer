@@ -49,7 +49,7 @@ Generates a new render context. At least one render context is required to rende
 \remarks The render context must be deleted with 'prDeleteContext'.
 \see prDeleteContext
 */
-PRobject prGenContext(const pr_context_desc* desc, PRuint width, PRuint height);
+PRobject prGenContext(const PRcontextdesc* desc, PRuint width, PRuint height);
 
 /**
 Deletes the specified render context.
@@ -130,7 +130,7 @@ Sets the 2D image data to the specified texture.
 \param[in] texture Specifies the texture whose image data is to be set.
 \param[in] width Specifies the image width. This will be the final texture width.
 \param[in] height Specifies the image height. This will be the final texture height.
-\param[in] format Specifies the image data format. This must be PR_IMAGE_FORMAT_UBYTE_RGB.
+\param[in] format Specifies the image data format. This must be PR_UBYTE_RGB.
 \param[in] data Raw pointer to the image data. This must be in the format: PRubyte[width*height*3].
 \param[in] dither Specifies whether dithering is to be applied to the image (to compensate 8-bit colors).
 \param[in] generateMips Specifies whether MIP maps are to be generated for this texture.
@@ -171,11 +171,23 @@ void prDeleteVertexBuffer(PRobject vertexBuffer);
 /**
 Sets the vertex buffer data.
 \param[in] vertexBuffer Specifies the vertex buffer whose vertex data is to be set.
-\param[in] vertices Pointer to the vertex data.
-\param[in] numVertices Specifies the number of vertices. The array 'vertices' must be large enough!
-\see PRvertex
+\param[in] numVertices Specifies the number of vertices.
+\param[in] coords Raw pointer to the vertex coordinates data.
+If this is null, the coordinate of all vertices will be initialized with { 0, 0, 0 }.
+\param[in] texCoords Raw pointer to the vertex texture coordinates data.
+If this is null, the texture coordinate of all vertices will be initialized with { 0, 0 }.
+\param[in] vertexStride Specifies the vertex stride size (in bytes).
+\code
+struct MyVertex
+{
+    PRfloat x, y, z;    // Vertex coordinates X, Y, Z
+    PRfloat u, v;       // Texture coordinates U, V
+};
+struct MyVertex[32] = ...
+prVertexBufferData(vertexBuffer, 32, &(MyVertex[0].x), &(MyVertex[0].u), sizeof(MyVertex));
+\endcode
 */
-void prVertexBufferData(PRobject vertexBuffer, const PRvertex* vertices, PRsizei numVertices);
+void prVertexBufferData(PRobject vertexBuffer, PRsizei numVertices, const PRvoid* coords, const PRvoid* texCoords, PRsizei vertexStride);
 
 /**
 Reads and sets the vertex buffer data from the specified file.
@@ -189,7 +201,7 @@ vertices[numVertices]: 'numVertices' * (five 32-bit floating point values for: x
 \endcode
 \see PRvertex
 */
-void prVertexBufferDataFromFile(PRobject vertexBuffer, PRushort* numVertices, FILE* file);
+void prVertexBufferDataFromFile(PRobject vertexBuffer, PRsizei* numVertices, FILE* file);
 
 /**
 Binds the specified vertex buffer.
@@ -235,7 +247,7 @@ numIndices: 16-bit unsigned integer
 indices[numVertices]: 'numIndices' * (16-bit unsigned integer).
 \endcode
 */
-void prIndexBufferDataFromFile(PRobject indexBuffer, PRushort* numIndices, FILE* file);
+void prIndexBufferDataFromFile(PRobject indexBuffer, PRsizei* numIndices, FILE* file);
 
 /**
 Binds the specified index buffer.
@@ -360,7 +372,7 @@ void prDrawScreenImage(PRint left, PRint top, PRint right, PRint bottom);
 
 /**
 Draws the specified amount of primitives.
-\param[in] primitives Specifies the primitive types. This must be PR_PRIMITIVE_...
+\param[in] primitives Specifies the primitive types. This must be PR_...
 \param[in] numVertices Specifies the number of vertices to draw.
 \param[in] firstVertex Specifies the first vertex to draw.
 \remarks A vertex buffer must be bound.
@@ -370,7 +382,7 @@ void prDraw(PRenum primitives, PRushort numVertices, PRushort firstVertex);
 
 /**
 Draws the specified amount of primitives.
-\param[in] primitives Specifies the primitive types. This must be PR_PRIMITIVE_...
+\param[in] primitives Specifies the primitive types. This must be PR_...
 \param[in] numVertices Specifies the number of vertices to draw.
 \param[in] firstVertex Specifies the first vertex to draw.
 \remarks A vertex buffer and an index buffer must be bound.
