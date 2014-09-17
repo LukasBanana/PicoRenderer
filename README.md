@@ -17,6 +17,11 @@ Build
 - C99 compliant compiler
 
 
+Why C and not C++?
+==================
+C code is slim, highly portable, compiles fast and for a low-level software renderer one doesn't need lots of object-oriented or templated code.
+
+
 Getting Started
 ===============
 ```c
