@@ -445,5 +445,16 @@ Draws the specified amount of primitives.
 */
 void prDrawIndexed(PRenum primitives, PRushort numVertices, PRushort firstVertex);
 
+// --- immediate mode --- //
+
+void prBegin(PRenum primitives);
+void prEnd();
+
+void prTexCoord2f(PRfloat u, PRfloat v);
+
+void prVertex2f(PRfloat x, PRfloat y);
+void prVertex3f(PRfloat x, PRfloat y, PRfloat z);
+void prVertex4f(PRfloat x, PRfloat y, PRfloat z, PRfloat w);
+
 
 #endif

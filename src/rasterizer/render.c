@@ -927,6 +927,70 @@ static PRboolean _clip_and_transform_polygon()
     return PR_TRUE;
 }
 
+static void _render_triangles(
+    const pr_texture* texture, PRsizei numVertices, PRsizei firstVertex, const pr_vertexbuffer* vertexBuffer)
+{
+    // Get clipping dimensions
+    pr_framebuffer* frameBuffer = PR_STATE_MACHINE.boundFrameBuffer;
+
+    // Iterate over the index buffer
+    for (PRsizei i = firstVertex, n = numVertices + firstVertex; i + 2 < n; i += 3)
+    {
+        // Fetch vertices
+        const pr_vertex* vertexA = (vertexBuffer->vertices + i);
+        const pr_vertex* vertexB = (vertexBuffer->vertices + (i + 1));
+        const pr_vertex* vertexC = (vertexBuffer->vertices + (i + 2));
+
+        // Setup polygon
+        _setup_clip_vertex(&(_clipVertices[0]), vertexA, &(PR_STATE_MACHINE.worldViewMatrix));
+        _setup_clip_vertex(&(_clipVertices[1]), vertexB, &(PR_STATE_MACHINE.worldViewMatrix));
+        _setup_clip_vertex(&(_clipVertices[2]), vertexC, &(PR_STATE_MACHINE.worldViewMatrix));
+
+        if (_clip_and_transform_polygon() != PR_FALSE)
+        {
+            // Rasterize active polygon
+            _rasterize_polygon(frameBuffer, texture);
+        }
+    }
+}
+
+void _pr_render_triangles(PRsizei numVertices, PRsizei firstVertex, const pr_vertexbuffer* vertexBuffer)
+{
+    if (PR_STATE_MACHINE.boundFrameBuffer == NULL)
+    {
+        PR_ERROR(PR_ERROR_INVALID_STATE);
+        return;
+    }
+    if (vertexBuffer == NULL)
+    {
+        PR_ERROR(PR_ERROR_NULL_POINTER);
+        return;
+    }
+    if (firstVertex + numVertices > vertexBuffer->numVertices)
+    {
+        PR_ERROR(PR_ERROR_INVALID_ARGUMENT);
+        return;
+    }
+
+    if (PR_STATE_MACHINE.boundTexture == NULL)
+    {
+        _pr_texture_singular_color(&PR_SINGULAR_TEXTURE, PR_STATE_MACHINE.colorIndex);
+        _render_triangles(&PR_SINGULAR_TEXTURE, numVertices, firstVertex, vertexBuffer);
+    }
+    else
+        _render_triangles(PR_STATE_MACHINE.boundTexture, numVertices, firstVertex, vertexBuffer);
+}
+
+void _pr_render_triangle_strip(PRsizei numVertices, PRsizei firstVertex, const pr_vertexbuffer* vertexBuffer)
+{
+    //...
+}
+
+void _pr_render_triangle_fan(PRsizei numVertices, PRsizei firstVertex, const pr_vertexbuffer* vertexBuffer)
+{
+    //...
+}
+
 static void _render_indexed_triangles(
     const pr_texture* texture, PRsizei numVertices, PRsizei firstVertex, const pr_vertexbuffer* vertexBuffer, const pr_indexbuffer* indexBuffer)
 {
@@ -965,21 +1029,6 @@ static void _render_indexed_triangles(
             _rasterize_polygon(frameBuffer, texture);
         }
     }
-}
-
-void _pr_render_triangles(PRsizei numVertices, PRsizei firstVertex, const pr_vertexbuffer* vertexBuffer)
-{
-    //...
-}
-
-void _pr_render_triangle_strip(PRsizei numVertices, PRsizei firstVertex, const pr_vertexbuffer* vertexBuffer)
-{
-    //...
-}
-
-void _pr_render_triangle_fan(PRsizei numVertices, PRsizei firstVertex, const pr_vertexbuffer* vertexBuffer)
-{
-    //...
 }
 
 void _pr_render_indexed_triangles(PRsizei numVertices, PRsizei firstVertex, const pr_vertexbuffer* vertexBuffer, const pr_indexbuffer* indexBuffer)

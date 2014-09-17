@@ -180,7 +180,7 @@ int main()
     PRobject vertexBuffer = prGenVertexBuffer();
     PRobject indexBuffer = prGenIndexBuffer();
 
-    #if 0
+    #if 1
 
     #define NUM_VERTICES 24
 
@@ -399,6 +399,41 @@ int main()
             // Draw triangles
             //prDepthRange(0.0f, 0.5f);
             prDrawIndexed(PR_TRIANGLES, NUM_INDICES, 0);
+
+            #   if 1
+
+            // Draw with immediate mode
+            prBindTexture(0);
+            prColor(prGetColorIndex(255, 0, 0));
+
+            static float angle;
+
+            //angle += 0.02f;
+            if (buttonDown[1])
+                angle += 0.02f * mouseSpeedX;
+
+            prLoadIdentity(worldMatrix);
+            prProjectionMatrix(worldMatrix);
+            prTranslate(worldMatrix, 0, 0, 1.5f);
+            prRotate(worldMatrix, 0, 0, 1, angle);
+            prScale(worldMatrix, 0.7f, 0.7f, 0.7f);
+            prWorldMatrix(worldMatrix);
+
+            prCullMode(PR_CULL_NONE);
+            prPolygonMode(PR_POLYGON_FILL);
+            prDisable(PR_SCISSOR);
+
+            prViewport(0, 0, 100, 100);
+
+            prBegin(PR_TRIANGLES);
+            {
+                prVertex2f(0, 1.155f);
+                prVertex2f(1, -0.577f);
+                prVertex2f(-1, -0.577f);
+            }
+            prEnd();
+
+            #   endif
 
             #   if 0
             // Setup transformation

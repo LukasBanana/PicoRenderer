@@ -37,6 +37,21 @@ void _pr_vertexbuffer_delete(pr_vertexbuffer* vertexBuffer)
     }
 }
 
+void _pr_vertexbuffer_singular_init(pr_vertexbuffer* vertexBuffer, PRsizei numVertices)
+{
+    if (vertexBuffer != NULL)
+    {
+        vertexBuffer->numVertices   = numVertices;
+        vertexBuffer->vertices      = PR_CALLOC(pr_vertex, numVertices);
+    }
+}
+
+void _pr_vertexbuffer_singular_clear(pr_vertexbuffer* vertexBuffer)
+{
+    if (vertexBuffer != NULL)
+        PR_FREE(vertexBuffer->vertices);
+}
+
 //!REMOVE THIS!
 static void _vertex_transform(
     pr_vertex* vertex, const pr_matrix4* worldViewProjectionMatrix, const pr_viewport* viewport)

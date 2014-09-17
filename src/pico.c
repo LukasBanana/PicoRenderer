@@ -324,7 +324,36 @@ void prDrawScreenImage(PRint left, PRint top, PRint right, PRint bottom)
 
 void prDraw(PRenum primitives, PRushort numVertices, PRushort firstVertex)
 {
-    //...
+    switch (primitives)
+    {
+        case PR_POINTS:
+            _pr_render_points(numVertices, firstVertex, PR_STATE_MACHINE.boundVertexBuffer);
+            break;
+
+        case PR_LINES:
+            _pr_render_lines(numVertices, firstVertex, PR_STATE_MACHINE.boundVertexBuffer);
+            break;
+        case PR_LINE_STRIP:
+            _pr_render_line_strip(numVertices, firstVertex, PR_STATE_MACHINE.boundVertexBuffer);
+            break;
+        case PR_LINE_LOOP:
+            _pr_render_line_loop(numVertices, firstVertex, PR_STATE_MACHINE.boundVertexBuffer);
+            break;
+
+        case PR_TRIANGLES:
+            _pr_render_triangles(numVertices, firstVertex, PR_STATE_MACHINE.boundVertexBuffer);
+            break;
+        case PR_TRIANGLE_STRIP:
+            _pr_render_triangle_strip(numVertices, firstVertex, PR_STATE_MACHINE.boundVertexBuffer);
+            break;
+        case PR_TRIANGLE_FAN:
+            _pr_render_triangle_fan(numVertices, firstVertex, PR_STATE_MACHINE.boundVertexBuffer);
+            break;
+
+        default:
+            PR_ERROR(PR_ERROR_INVALID_ARGUMENT);
+            break;
+    }
 }
 
 void prDrawIndexed(PRenum primitives, PRushort numVertices, PRushort firstVertex)
@@ -359,5 +388,37 @@ void prDrawIndexed(PRenum primitives, PRushort numVertices, PRushort firstVertex
             PR_ERROR(PR_ERROR_INVALID_ARGUMENT);
             break;
     }
+}
+
+// --- immediate mode --- //
+
+void prBegin(PRenum primitives)
+{
+    _pr_immediate_mode_begin(primitives);
+}
+
+void prEnd()
+{
+    _pr_immediate_mode_end();
+}
+
+void prTexCoord2f(PRfloat u, PRfloat v)
+{
+    _pr_immediate_mode_texcoord(u, v);
+}
+
+void prVertex2f(PRfloat x, PRfloat y)
+{
+    _pr_immediate_mode_vertex(x, y, 0.0f, 1.0f);
+}
+
+void prVertex3f(PRfloat x, PRfloat y, PRfloat z)
+{
+    _pr_immediate_mode_vertex(x, y, z, 1.0f);
+}
+
+void prVertex4f(PRfloat x, PRfloat y, PRfloat z, PRfloat w)
+{
+    _pr_immediate_mode_vertex(x, y, z, w);
 }
 
