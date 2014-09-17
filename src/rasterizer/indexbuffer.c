@@ -8,6 +8,7 @@
 #include "indexbuffer.h"
 #include "helper.h"
 #include "error.h"
+#include "state_machine.h"
 
 #include <stdlib.h>
 
@@ -19,6 +20,8 @@ pr_indexbuffer* _pr_indexbuffer_create()
     indexBuffer->numIndices = 0;
     indexBuffer->indices    = NULL;
 
+    _pr_ref_add(indexBuffer);
+
     return indexBuffer;
 }
 
@@ -26,6 +29,8 @@ void _pr_indexbuffer_delete(pr_indexbuffer* indexBuffer)
 {
     if (indexBuffer != NULL)
     {
+        _pr_ref_release(indexBuffer);
+        
         PR_FREE(indexBuffer->indices);
         PR_FREE(indexBuffer);
     }

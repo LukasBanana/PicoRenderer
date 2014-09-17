@@ -10,6 +10,7 @@
 #include "error.h"
 #include "helper.h"
 #include "image.h"
+#include "state_machine.h"
 
 #include <math.h>
 #include <stdlib.h>
@@ -144,6 +145,8 @@ pr_texture* _pr_texture_create()
     texture->mips   = 0;
     texture->texels = NULL;
 
+    _pr_ref_add(texture);
+
     return texture;
 }
 
@@ -151,6 +154,8 @@ void _pr_texture_delete(pr_texture* texture)
 {
     if (texture != NULL)
     {
+        _pr_ref_release(texture);
+
         PR_FREE(texture->texels);
         PR_FREE(texture);
     }

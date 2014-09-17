@@ -17,9 +17,8 @@
 #include "render.h"
 #include "helper.h"
 
+#include <string.h>
 
-#include "ext_math.h"
-#include <math.h>
 
 // --- common --- //
 

@@ -36,6 +36,33 @@ static void _state_machine_cliprect(PRint left, PRint top, PRint right, PRint bo
     #endif
 }
 
+void _pr_ref_add(PRobject obj)
+{
+    if (obj != NULL)
+        ++_stateMachine->refCounter;
+}
+
+void _pr_ref_release(PRobject obj)
+{
+    if (obj != NULL)
+    {
+        if (_stateMachine->refCounter == 0)
+            PR_ERROR(PR_ERROR_INVALID_STATE, "object ref-counter underflow");
+        else
+            --_stateMachine->refCounter;
+    }
+}
+
+void _pr_ref_assert(pr_state_machine* stateMachine)
+{
+    if (stateMachine != NULL && stateMachine->refCounter != 0)
+    {
+        char msg[64];
+        sprintf(msg, "object ref-counter is none zero ( %i )", stateMachine->refCounter);
+        _pr_error_set(PR_ERROR_INVALID_STATE, msg);
+    }
+}
+
 void _pr_state_machine_init(pr_state_machine* stateMachine)
 {
     _pr_matrix_load_identity(&(stateMachine->projectionMatrix));
@@ -58,6 +85,8 @@ void _pr_state_machine_init(pr_state_machine* stateMachine)
 
     stateMachine->colorIndex        = 0;
     stateMachine->cullMode          = PR_CULL_NONE;
+
+    stateMachine->refCounter        = 0;
 }
 
 void _pr_state_machine_init_null()

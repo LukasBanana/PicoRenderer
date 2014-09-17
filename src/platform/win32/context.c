@@ -60,10 +60,13 @@ void _pr_context_delete(pr_context* context)
 {
     if (context != NULL)
     {
+        _pr_ref_assert(&(context->stateMachine));
+
         if (context->bmp != NULL)
             DeleteObject(context->bmp);
         if (context->dcBmp != NULL)
             DeleteDC(context->dcBmp);
+
         free(context->colorPalette);
         free(context->colors);
         free(context);

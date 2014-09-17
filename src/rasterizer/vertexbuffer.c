@@ -21,6 +21,8 @@ pr_vertexbuffer* _pr_vertexbuffer_create()
     vertexBuffer->numVertices   = 0;
     vertexBuffer->vertices      = NULL;
 
+    _pr_ref_add(vertexBuffer);
+
     return vertexBuffer;
 }
 
@@ -28,6 +30,8 @@ void _pr_vertexbuffer_delete(pr_vertexbuffer* vertexBuffer)
 {
     if (vertexBuffer != NULL)
     {
+        _pr_ref_release(vertexBuffer);
+
         PR_FREE(vertexBuffer->vertices);
         PR_FREE(vertexBuffer);
     }

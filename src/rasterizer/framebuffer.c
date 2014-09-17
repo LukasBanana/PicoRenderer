@@ -8,6 +8,7 @@
 #include "framebuffer.h"
 #include "error.h"
 #include "helper.h"
+#include "state_machine.h"
 
 #include <stdlib.h>
 #include <string.h>
@@ -33,6 +34,8 @@ pr_framebuffer* _pr_framebuffer_create(PRuint width, PRuint height)
     // Initialize framebuffer
     memset(frameBuffer->pixels, 0, width*height*sizeof(pr_pixel));
 
+    _pr_ref_add(frameBuffer);
+
     return frameBuffer;
 }
 
@@ -40,6 +43,8 @@ void _pr_framebuffer_delete(pr_framebuffer* frameBuffer)
 {
     if (frameBuffer != NULL)
     {
+        _pr_ref_release(frameBuffer);
+
         PR_FREE(frameBuffer->pixels);
         PR_FREE(frameBuffer->scanlinesStart);
         PR_FREE(frameBuffer->scanlinesEnd);

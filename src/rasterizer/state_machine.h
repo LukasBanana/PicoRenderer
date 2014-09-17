@@ -18,7 +18,7 @@
 #include "texture.h"
 
 
-#define PR_STATE_MACHINE (*_stateMachine)
+#define PR_STATE_MACHINE    (*_stateMachine)
 
 
 typedef struct pr_state_machine
@@ -38,8 +38,10 @@ typedef struct pr_state_machine
     pr_indexbuffer*     boundIndexBuffer;
     pr_texture*         boundTexture;
 
-    PRubyte             colorIndex;                 //!< Acitve color index.
+    PRubyte             colorIndex;                 // Active color index
     PRenum              cullMode;
+
+    PRsizei             refCounter;                 // Object reference counter
 }
 pr_state_machine;
 
@@ -47,6 +49,10 @@ pr_state_machine;
 //! Reference to the state machine of the current context.
 extern pr_state_machine* _stateMachine;
 
+
+void _pr_ref_add(PRobject obj);
+void _pr_ref_release(PRobject obj);
+void _pr_ref_assert(pr_state_machine* stateMachine);
 
 void _pr_state_machine_init(pr_state_machine* stateMachine);
 void _pr_state_machine_init_null();
