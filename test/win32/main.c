@@ -180,7 +180,7 @@ int main()
     PRobject vertexBuffer = prGenVertexBuffer();
     PRobject indexBuffer = prGenIndexBuffer();
 
-    #if 1
+    #if 0
 
     #define NUM_VERTICES 24
 
@@ -280,8 +280,9 @@ int main()
     prLoadIdentity(viewMatrix);
     prViewMatrix(viewMatrix);
 
-    prCullMode(PR_CULL_BACK);
-    //prCullMode(PR_CULL_FRONT);
+    //prCullMode(PR_CULL_BACK);
+    prCullMode(PR_CULL_FRONT);
+    prPolygonMode(PR_POLYGON_LINE);
 
     // Main loop
     while (!isQuit)
@@ -373,6 +374,8 @@ int main()
 
             #elif 1
 
+            prColor(prGetColorIndex(0, 0, 255));
+
             // Bind buffers
             prBindVertexBuffer(vertexBuffer);
             prBindIndexBuffer(indexBuffer);
@@ -380,6 +383,9 @@ int main()
 
             // Setup view
             prViewport(0, 0, viewWidth, viewHeight);
+
+            prEnable(PR_SCISSOR);
+            prScissor(20, 20, viewWidth - 100, viewHeight - 100);
 
             // Setup transformation
             prProjectionMatrix(projectionA);

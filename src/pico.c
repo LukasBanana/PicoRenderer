@@ -14,6 +14,7 @@
 #include "texture.h"
 #include "image.h"
 #include "state_machine.h"
+#include "global_state.h"
 #include "render.h"
 #include "helper.h"
 
@@ -25,12 +26,13 @@
 PRboolean prInit()
 {
     _pr_state_machine_init_null();
+    _pr_global_state_init();
     return PR_TRUE;
 }
 
 PRboolean prRelease()
 {
-    //...
+    _pr_global_state_release();
     return PR_TRUE;
 }
 
@@ -253,9 +255,34 @@ void prLoadIdentity(PRfloat* matrix4x4)
 
 // --- states --- //
 
-void prViewport(PRuint x, PRuint y, PRuint width, PRuint height)
+void prSetState(PRenum cap, PRboolean state)
+{
+    _pr_state_machine_set_state(cap, state);
+}
+
+PRboolean prGetState(PRenum cap)
+{
+    return _pr_state_machine_get_state(cap);
+}
+
+void prEnable(PRenum cap)
+{
+    _pr_state_machine_set_state(cap, PR_TRUE);
+}
+
+void prDisable(PRenum cap)
+{
+    _pr_state_machine_set_state(cap, PR_FALSE);
+}
+
+void prViewport(PRint x, PRint y, PRint width, PRint height)
 {
     _pr_state_machine_viewport(x, y, width, height);
+}
+
+void prScissor(PRint x, PRint y, PRint width, PRint height)
+{
+    _pr_state_machine_scissor(x, y, width, height);
 }
 
 void prDepthRange(PRfloat minDepth, PRfloat maxDepth)
@@ -266,6 +293,11 @@ void prDepthRange(PRfloat minDepth, PRfloat maxDepth)
 void prCullMode(PRenum mode)
 {
     _pr_state_machine_cull_mode(mode);
+}
+
+void prPolygonMode(PRenum mode)
+{
+    _pr_state_machine_polygon_mode(mode);
 }
 
 // --- drawing --- //

@@ -22,4 +22,7 @@ typedef struct pr_rect
 pr_rect;
 
 
+void _pr_rect_init(pr_rect* rect);
+
+
 #endif

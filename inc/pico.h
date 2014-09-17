@@ -86,6 +86,9 @@ void prDeleteFrameBuffer(PRobject frameBuffer);
 Binds the specified frame buffer.
 \param[in] frameBuffer Specifies the frame buffer which is to be bound.
 If this is zero, no frame buffer is bound.
+\note After a new frame buffer has bound, the viewport and scissor must be set again.
+\see prViewport
+\see prScissor
 */
 void prBindFrameBuffer(PRobject frameBuffer);
 
@@ -335,11 +338,54 @@ void prLoadIdentity(PRfloat* matrix4x4);
 // --- states --- //
 
 /**
+Sets the specified state.
+\param[in] cap Specifies the capability whose state is to be changed.
+Value values are:
+- PR_SCISSOR - Enables/disables the scissor rectangle (see prScissor). By default PR_FALSE.
+\param[in] state Specifies the new state.
+\see prEnable
+\see prDisable
+*/
+void prSetState(PRenum cap, PRboolean state);
+
+/**
+Returns the current value of the specified state.
+\param[in] cap Specifies the capability whose state is to be returned.
+\see prSetState
+*/
+PRboolean prGetState(PRenum cap);
+
+/**
+Enables the specified capability. This is equivalent to:
+\code
+prSetState(cap, PR_TRUE);
+\endcode
+\see prSetState
+*/
+void prEnable(PRenum cap);
+
+/**
+Disables the specified capability. This is equivalent to:
+\code
+prSetState(cap, PR_FALSE);
+\endcode
+\see prSetState
+*/
+void prDisable(PRenum cap);
+
+/**
 Sets the viewport for the currently bound framebuffer.
 \note A frame buffer must be bound before this function can be used!
 \see prBindFrameBuffer
 */
-void prViewport(PRuint x, PRuint y, PRuint width, PRuint height);
+void prViewport(PRint x, PRint y, PRint width, PRint height);
+
+/**
+Sets the scissor rectangle for the currently bound framebuffer.
+\note A frame buffer must be bound before this function can be used!
+\see prBindFrameBuffer
+*/
+void prScissor(PRint x, PRint y, PRint width, PRint height);
 
 /**
 Sets the depth range for the currently bound framebuffer.
@@ -355,6 +401,14 @@ This must be PR_CULL_NONE, PR_CULL_FRONT or PR_CULL_BACK.
 By default PR_CULL_NONE.
 */
 void prCullMode(PRenum mode);
+
+/**
+Sets the polygon drawing mode.
+\param[in] mode Specifies the new polygon mode.
+This must be PR_POLYGON_FILL, PR_POLYGON_LINE or PR_POLYGON_POINT.
+By default PR_POLYGON_FILL.
+*/
+void prPolygonMode(PRenum mode);
 
 // --- drawing --- //
 

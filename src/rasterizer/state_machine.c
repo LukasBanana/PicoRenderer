@@ -14,11 +14,14 @@
 static pr_state_machine _nullStateMachine;
 pr_state_machine* _stateMachine = &_nullStateMachine;
 
+
 static void _state_machine_cliprect(PRint left, PRint top, PRint right, PRint bottom)
 {
     _stateMachine->clipRect.left    = left;
     _stateMachine->clipRect.right   = right;
+
     #ifdef PR_ORIGIN_LEFT_TOP
+
     if (PR_STATE_MACHINE.boundFrameBuffer != NULL)
     {
         PRint height = (PRint)(PR_STATE_MACHINE.boundFrameBuffer->height);
@@ -30,10 +33,42 @@ static void _state_machine_cliprect(PRint left, PRint top, PRint right, PRint bo
         _stateMachine->clipRect.top     = top;
         _stateMachine->clipRect.bottom  = bottom;
     }
+    
     #else
+
     _stateMachine->clipRect.top     = top;
     _stateMachine->clipRect.bottom  = bottom;
+
     #endif
+}
+
+static void _update_cliprect()
+{
+    // Get dimensions from viewport
+    PRint left      = PR_STATE_MACHINE.viewportRect.left;
+    PRint top       = PR_STATE_MACHINE.viewportRect.top;
+    PRint right     = PR_STATE_MACHINE.viewportRect.right;
+    PRint bottom    = PR_STATE_MACHINE.viewportRect.bottom;
+
+    if (PR_STATE_MACHINE.states[PR_SCISSOR] != PR_FALSE)
+    {
+        // Get dimensions from scissor
+        PR_CLAMP_LARGEST(left, PR_STATE_MACHINE.scissorRect.left);
+        PR_CLAMP_LARGEST(top, PR_STATE_MACHINE.scissorRect.top);
+        PR_CLAMP_SMALLEST(right, PR_STATE_MACHINE.scissorRect.right);
+        PR_CLAMP_SMALLEST(bottom, PR_STATE_MACHINE.scissorRect.bottom);
+    }
+
+    // Clamp clipping rectangle
+    const PRint maxWidth = PR_STATE_MACHINE.boundFrameBuffer->width - 1;
+    const PRint maxHeight = PR_STATE_MACHINE.boundFrameBuffer->height - 1;
+    
+    _state_machine_cliprect(
+        PR_CLAMP(left, 0, maxWidth),
+        PR_CLAMP(top, 0, maxHeight),
+        PR_CLAMP(right, 0, maxWidth),
+        PR_CLAMP(bottom, 0, maxHeight)
+    );
 }
 
 void _pr_ref_add(PRobject obj)
@@ -47,7 +82,7 @@ void _pr_ref_release(PRobject obj)
     if (obj != NULL)
     {
         if (_stateMachine->refCounter == 0)
-            PR_ERROR(PR_ERROR_INVALID_STATE, "object ref-counter underflow");
+            _pr_error_set(PR_ERROR_INVALID_STATE, "object ref-counter underflow");
         else
             --_stateMachine->refCounter;
     }
@@ -72,21 +107,23 @@ void _pr_state_machine_init(pr_state_machine* stateMachine)
     _pr_matrix_load_identity(&(stateMachine->worldViewProjectionMatrix));
 
     _pr_viewport_init(&(stateMachine->viewport));
-    
-    stateMachine->clipRect.left     = 0;
-    stateMachine->clipRect.top      = 0;
-    stateMachine->clipRect.right    = 0;
-    stateMachine->clipRect.bottom   = 0;
 
-    stateMachine->boundFrameBuffer  = NULL;
-    stateMachine->boundVertexBuffer = NULL;
-    stateMachine->boundIndexBuffer  = NULL;
-    stateMachine->boundTexture      = NULL;
+    _pr_rect_init(&(stateMachine-> viewportRect));
+    _pr_rect_init(&(stateMachine->scissorRect));
+    _pr_rect_init(&(stateMachine->clipRect));
 
-    stateMachine->colorIndex        = 0;
-    stateMachine->cullMode          = PR_CULL_NONE;
+    stateMachine->boundFrameBuffer      = NULL;
+    stateMachine->boundVertexBuffer     = NULL;
+    stateMachine->boundIndexBuffer      = NULL;
+    stateMachine->boundTexture          = NULL;
 
-    stateMachine->refCounter        = 0;
+    stateMachine->colorIndex            = 0;
+    stateMachine->cullMode              = PR_CULL_NONE;
+    stateMachine->polygonMode           = PR_POLYGON_FILL;
+
+    stateMachine->states[PR_SCISSOR]    = PR_FALSE;
+
+    stateMachine->refCounter            = 0;
 }
 
 void _pr_state_machine_init_null()
@@ -102,11 +139,41 @@ void _pr_state_machine_makecurrent(pr_state_machine* stateMachine)
         _stateMachine = &_nullStateMachine;
 }
 
+void _pr_state_machine_set_state(PRenum cap, PRboolean state)
+{
+    if (cap >= PR_NUM_STATES)
+    {
+        PR_ERROR(PR_ERROR_INDEX_OUT_OF_BOUNDS);
+        return;
+    }
+
+    // Store new state
+    PR_STATE_MACHINE.states[cap] = state;
+
+    // Check for special cases (update functions)
+    switch (cap)
+    {
+        case PR_SCISSOR:
+            _update_cliprect();
+            break;
+    }
+}
+
+PRboolean _pr_state_machine_get_state(PRenum cap)
+{
+    if (cap >= PR_NUM_STATES)
+    {
+        PR_ERROR(PR_ERROR_INDEX_OUT_OF_BOUNDS);
+        return PR_FALSE;
+    }
+    return PR_STATE_MACHINE.states[cap];
+}
+
 void _pr_state_machine_bind_framebuffer(pr_framebuffer* frameBuffer)
 {
     PR_STATE_MACHINE.boundFrameBuffer = frameBuffer;
     if (frameBuffer != NULL)
-        _state_machine_cliprect(0, 0, (PRint)frameBuffer->width/* - 1*/, (PRint)frameBuffer->height - 1);
+        _state_machine_cliprect(0, 0, (PRint)frameBuffer->width - 1, (PRint)frameBuffer->height - 1);
     else
         _state_machine_cliprect(0, 0, 0, 0);
 }
@@ -126,7 +193,7 @@ void _pr_state_machine_bind_texture(pr_texture* texture)
     PR_STATE_MACHINE.boundTexture = texture;
 }
 
-void _pr_state_machine_viewport(PRuint x, PRuint y, PRuint width, PRuint height)
+void _pr_state_machine_viewport(PRint x, PRint y, PRint width, PRint height)
 {
     if (PR_STATE_MACHINE.boundFrameBuffer == NULL)
     {
@@ -134,32 +201,29 @@ void _pr_state_machine_viewport(PRuint x, PRuint y, PRuint width, PRuint height)
         return;
     }
 
-    // Clamp clipping rectangle
-    const PRint maxWidth = (PRint)(PR_STATE_MACHINE.boundFrameBuffer->width/* - 1*/);
-    const PRint maxHeight = (PRint)(PR_STATE_MACHINE.boundFrameBuffer->height - 1);
-    
-    _state_machine_cliprect(
-        PR_CLAMP((PRint)x, 0, maxWidth),
-        PR_CLAMP((PRint)y, 0, maxHeight),
-        PR_CLAMP((PRint)(x + width), 0, maxWidth),
-        PR_CLAMP((PRint)(y + height), 0, maxHeight)
-    );
-
     /*
     Store width and height with half size, to avoid this multiplication
     while transforming the normalized device coordinates (NDC) into viewspace.
     */
+    PR_STATE_MACHINE.viewport.x = (PRfloat)x;
+
     #ifdef PR_ORIGIN_LEFT_TOP
-    PR_STATE_MACHINE.viewport.x             = (PRfloat)x;
-    PR_STATE_MACHINE.viewport.y             = (PRfloat)(PR_STATE_MACHINE.boundFrameBuffer->height - y - 1);
-    PR_STATE_MACHINE.viewport.halfWidth     = 0.5f * (PRfloat)width;
-    PR_STATE_MACHINE.viewport.halfHeight    = -0.5f * (PRfloat)height;
+    PR_STATE_MACHINE.viewport.y = (PRfloat)(PR_STATE_MACHINE.boundFrameBuffer->height - 1 - y);
     #else
-    PR_STATE_MACHINE.viewport.x             = (PRfloat)x;
-    PR_STATE_MACHINE.viewport.y             = (PRfloat)y;
-    PR_STATE_MACHINE.viewport.halfWidth     = 0.5f * (PRfloat)width;
-    PR_STATE_MACHINE.viewport.halfHeight    = 0.5f * (PRfloat)height;
+    PR_STATE_MACHINE.viewport.y = (PRfloat)y;
     #endif
+
+    PR_STATE_MACHINE.viewport.halfWidth = 0.5f * (PRfloat)width;
+    PR_STATE_MACHINE.viewport.halfHeight = -0.5f * (PRfloat)height;
+
+    // Store viewport rectangle
+    PR_STATE_MACHINE.viewportRect.left      = x;
+    PR_STATE_MACHINE.viewportRect.top       = y;
+    PR_STATE_MACHINE.viewportRect.right     = x + width;
+    PR_STATE_MACHINE.viewportRect.bottom    = y + height;
+
+    // Update clipping rectangle
+    _update_cliprect();
 }
 
 void _pr_state_machine_depth_range(PRfloat minDepth, PRfloat maxDepth)
@@ -169,9 +233,35 @@ void _pr_state_machine_depth_range(PRfloat minDepth, PRfloat maxDepth)
     PR_STATE_MACHINE.viewport.depthSize = maxDepth - minDepth;
 }
 
+void _pr_state_machine_scissor(PRint x, PRint y, PRint width, PRint height)
+{
+    // Store scissor rectangle
+    PR_STATE_MACHINE.scissorRect.left   = x;
+    PR_STATE_MACHINE.scissorRect.top    = y;
+    PR_STATE_MACHINE.scissorRect.right  = x + width;
+    PR_STATE_MACHINE.scissorRect.bottom = y + height;
+
+    if (PR_STATE_MACHINE.states[PR_SCISSOR] != PR_FALSE)
+    {
+        // Update clipping rectangle
+        _update_cliprect();
+    }
+}
+
 void _pr_state_machine_cull_mode(PRenum mode)
 {
-    PR_STATE_MACHINE.cullMode = mode;
+    if (mode < PR_CULL_NONE || mode > PR_CULL_BACK)
+        PR_ERROR(PR_ERROR_INVALID_ARGUMENT);
+    else
+        PR_STATE_MACHINE.cullMode = mode;
+}
+
+void _pr_state_machine_polygon_mode(PRenum mode)
+{
+    if (mode < PR_POLYGON_FILL || mode > PR_POLYGON_POINT)
+        PR_ERROR(PR_ERROR_INVALID_ARGUMENT);
+    else
+        PR_STATE_MACHINE.polygonMode = mode;
 }
 
 static void _update_viewprojection_matrix()

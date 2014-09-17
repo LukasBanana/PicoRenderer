@@ -14,14 +14,17 @@
 #include "consts.h"
 
 
-#define PR_MIN(a, b)        ((a) < (b) ? (a) : (b))
-#define PR_MAX(a, b)        ((a) > (b) ? (a) : (b))
+#define PR_MIN(a, b)            ((a) < (b) ? (a) : (b))
+#define PR_MAX(a, b)            ((a) > (b) ? (a) : (b))
 
-#define PR_CLAMP(x, a, b)   ((x) < (a) ? (a) : ((x) > (b) ? (b) : (x)))
+#define PR_CLAMP(x, a, b)       ((x) < (a) ? (a) : ((x) > (b) ? (b) : (x)))
 
-#define PR_SIGN(x)          (((x) > 0) ? 1 : ((x) < 0) ? -1 : 0)
+#define PR_CLAMP_LARGEST(x, c)  if ((x) < (c)) x = c
+#define PR_CLAMP_SMALLEST(x, c) if ((x) > (c)) x = c
 
-#define PR_SQ(x)            ((x)*(x))
+#define PR_SIGN(x)              (((x) > 0) ? 1 : ((x) < 0) ? -1 : 0)
+
+#define PR_SQ(x)                ((x)*(x))
 
 #define PR_SWAP(t, a, b)    \
     {                       \

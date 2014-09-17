@@ -16,9 +16,11 @@
 #include "vertexbuffer.h"
 #include "indexbuffer.h"
 #include "texture.h"
+#include "enums.h"
 
 
 #define PR_STATE_MACHINE    (*_stateMachine)
+#define PR_NUM_STATES       1
 
 
 typedef struct pr_state_machine
@@ -31,6 +33,9 @@ typedef struct pr_state_machine
     pr_matrix4          worldViewProjectionMatrix;
 
     pr_viewport         viewport;
+
+    pr_rect             viewportRect;
+    pr_rect             scissorRect;
     pr_rect             clipRect;
     
     pr_framebuffer*     boundFrameBuffer;
@@ -39,7 +44,11 @@ typedef struct pr_state_machine
     pr_texture*         boundTexture;
 
     PRubyte             colorIndex;                 // Active color index
+    
     PRenum              cullMode;
+    PRenum              polygonMode;
+
+    PRboolean           states[PR_NUM_STATES];
 
     PRsizei             refCounter;                 // Object reference counter
 }
@@ -59,14 +68,19 @@ void _pr_state_machine_init_null();
 
 void _pr_state_machine_makecurrent(pr_state_machine* stateMachine);
 
+void _pr_state_machine_set_state(PRenum cap, PRboolean state);
+PRboolean _pr_state_machine_get_state(PRenum cap);
+
 void _pr_state_machine_bind_framebuffer(pr_framebuffer* frameBuffer);
 void _pr_state_machine_bind_vertexbuffer(pr_vertexbuffer* vertexBuffer);
 void _pr_state_machine_bind_indexbuffer(pr_indexbuffer* indexBuffer);
 void _pr_state_machine_bind_texture(pr_texture* texture);
 
-void _pr_state_machine_viewport(PRuint x, PRuint y, PRuint width, PRuint height);
+void _pr_state_machine_viewport(PRint x, PRint y, PRint width, PRint height);
 void _pr_state_machine_depth_range(PRfloat minDepth, PRfloat maxDepth);
+void _pr_state_machine_scissor(PRint x, PRint y, PRint width, PRint height);
 void _pr_state_machine_cull_mode(PRenum mode);
+void _pr_state_machine_polygon_mode(PRenum mode);
 
 void _pr_state_machine_projection_matrix(const pr_matrix4* matrix);
 void _pr_state_machine_view_matrix(const pr_matrix4* matrix);

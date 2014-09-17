@@ -32,6 +32,15 @@ pr_texture;
 pr_texture* _pr_texture_create();
 void _pr_texture_delete(pr_texture* texture);
 
+void _pr_texture_singular_init(pr_texture* texture);
+void _pr_texture_singular_clear(pr_texture* texture);
+
+//! Sets the single color to the specified texture. No null pointer assertion!
+PR_INLINE void _pr_texture_singular_color(pr_texture* texture, PRubyte colorIndex)
+{
+    texture->texels[0] = colorIndex;
+}
+
 //! Sets the 2D image data to the specified texture.
 PRboolean _pr_texture_image2d(
     pr_texture* texture,

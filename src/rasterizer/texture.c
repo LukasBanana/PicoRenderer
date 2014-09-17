@@ -161,6 +161,23 @@ void _pr_texture_delete(pr_texture* texture)
     }
 }
 
+void _pr_texture_singular_init(pr_texture* texture)
+{
+    if (texture != NULL)
+    {
+        texture->width  = 1;
+        texture->height = 1;
+        texture->mips   = 1;
+        texture->texels = PR_CALLOC(PRbyte, 1);
+    }
+}
+
+void _pr_texture_singular_clear(pr_texture* texture)
+{
+    if (texture != NULL)
+        PR_FREE(texture->texels);
+}
+
 PRboolean _pr_texture_image2d(
     pr_texture* texture, PRtexsize width, PRtexsize height, PRenum format, const PRvoid* data, PRboolean dither, PRboolean generateMips)
 {
