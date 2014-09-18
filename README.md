@@ -34,11 +34,6 @@ int main()
   if (!prInit())
     return 1;
   
-  // Create window
-  #ifdef WIN32
-  //HWND hWnd = ...
-  #endif
-  
   // Create render context
   PRuint scrWidth = 800, scrHeight = 600;
   PRcontextdesc contextDesc;
@@ -55,17 +50,6 @@ int main()
   prBindFrameBuffer(frameBuffer);
   
   prViewport(0, 0, scrWidth, scrHeight);
-  
-  // Create vertex buffer
-  PRobject vertexBuffer = prGenVertexBuffer();
-  PRfloat coords[3*3] = { 0,1,0,  1,-1,0,  -1,-1,0 };
-  prVertexBufferData(
-    vertexBuffer,       // output vertex buffer
-    3,                  // number of vertices
-    coords,             // vertex coordinates pointer
-    NULL,               // texture coordinates pointer (none)
-    sizeof(PRfloat)*3,  // vertex stride size (in bytes)
-  );
   
   // Setup projection matrix
   PRfloat projection[16];
@@ -87,22 +71,26 @@ int main()
   
   while (!isQuit)
   { 
-    // Update user input
-    //...
-    
+    // Update user input ...
+
     // Setup world matrix
     prLoadIdentity(worldMatrix);
     prTranslate(worldMatrix, 0, 0, 2);
-    prRotate(worldMatrix, 0, 1, 0, rotation);
+    prRotate(worldMatrix, 0, 0, 1, rotation);
     prWorldMatrix(worldMatrix);
     rotation += 0.01f;
     
     // Draw scene
-    prBindVertexBuffer(vertexBuffer);
-    prDraw(PR_TRIANGLES, 3, 0);
-    
+    prBegin(PR_TRIANGLES);
+    {
+      prVertex2f(0, 1.155f);
+      prVertex2f(1, -0.577f);
+      prVertex2f(-1, -0.577f);
+    }
+    prEnd();
+
     // Show frame buffer on render context
-    prPresent();
+    prPresent(context);
   }
   
   // Release all objects
