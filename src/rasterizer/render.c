@@ -21,6 +21,12 @@
 
 // --- internals ---
 
+#define MAX_NUM_POLYGON_VERTS 32
+
+static pr_clip_vertex _clipVertices[MAX_NUM_POLYGON_VERTS], _clipVerticesTmp[MAX_NUM_POLYGON_VERTS];
+static pr_raster_vertex _rasterVertices[MAX_NUM_POLYGON_VERTS], _rasterVerticesTmp[MAX_NUM_POLYGON_VERTS];
+static PRint _numPolyVerts = 0;
+
 #define _CVERT_VEC2(v) (*(pr_vector2*)(&((_clipVertices[v]).x)))
 
 static void _vertexbuffer_transform(PRsizei numVertices, PRsizei firstVertex, pr_vertexbuffer* vertexBuffer)
@@ -268,6 +274,97 @@ static void _render_screenspace_line_colored(PRint x1, PRint y1, PRint x2, PRint
     }
 }
 
+// Rasterizes a textured line using the "Bresenham" algorithm
+static void _rasterize_line(pr_framebuffer* frameBuffer, const pr_texture* texture, PRubyte mipLevel, PRuint indexA, PRuint indexB)
+{
+    const pr_raster_vertex* vertexA = &(_rasterVertices[indexA]);
+    const pr_raster_vertex* vertexB = &(_rasterVertices[indexB]);
+
+    // Select MIP level
+    PRtexsize mipWidth, mipHeight;
+    const PRubyte* texels = _pr_texture_select_miplevel(texture, mipLevel, &mipWidth, &mipHeight);
+
+    // Pre-compuations
+    int dx = vertexB->x - vertexA->x;
+    int dy = vertexB->y - vertexA->y;
+    
+    int incx = PR_SIGN(dx);
+    int incy = PR_SIGN(dy);
+    
+    if (dx < 0)
+        dx = -dx;
+    if (dy < 0)
+        dy = -dy;
+    
+    int pdx, pdy, ddx, ddy, es, el;
+    
+    if (dx > dy)
+    {
+        pdx = incx;
+        pdy = 0;
+        ddx = incx;
+        ddy = incy;
+        es  = dy;
+        el  = dx;
+    }
+    else
+    {
+        pdx = 0;
+        pdy = incy;
+        ddx = incx;
+        ddy = incy;
+        es  = dx;
+        el  = dy;
+    }
+    
+    if (el == 0)
+        return;
+    
+    int x = vertexA->x;
+    int y = vertexA->y;
+    float u = vertexA->u;
+    float v = vertexA->v;
+
+    float uStep = 0.0f, vStep = 0.0f;
+
+    if (el > 1)
+    {
+        uStep = (vertexB->u - vertexA->u) / (el - 1);
+        vStep = (vertexB->v - vertexA->v) / (el - 1);
+    }
+
+    int err = el/2;
+
+    PRubyte colorIndex;
+    
+    // Render each pixel of the line
+    for (PRint t = 0; t < el; ++t)
+    {
+        // Render pixel
+        colorIndex = _pr_texture_sample_nearest(texels, mipWidth, mipHeight, u, v);
+
+        _pr_framebuffer_plot(frameBuffer, (PRuint)x, (PRuint)y, colorIndex);
+        
+        // Increase tex-coords
+        u += uStep;
+        v += vStep;
+
+        // Move to next pixel
+        err -= es;
+        if (err < 0)
+        {
+            err += el;
+            x += ddx;
+            y += ddy;
+        }
+        else
+        {
+            x += pdx;
+            y += pdy;
+        }
+    }
+}
+
 static void _render_indexed_lines_textured(
     const pr_texture* texture, PRsizei numVertices, PRsizei firstVertex, const pr_vertexbuffer* vertexBuffer, const pr_indexbuffer* indexBuffer)
 {
@@ -495,12 +592,6 @@ void _pr_render_screenspace_image(PRint left, PRint top, PRint right, PRint bott
 
 // --- triangles --- //
 
-#define MAX_NUM_POLYGON_VERTS 32
-
-static pr_clip_vertex _clipVertices[MAX_NUM_POLYGON_VERTS], _clipVerticesTmp[MAX_NUM_POLYGON_VERTS];
-static pr_raster_vertex _rasterVertices[MAX_NUM_POLYGON_VERTS], _rasterVerticesTmp[MAX_NUM_POLYGON_VERTS];
-static PRint _numPolyVerts = 0;
-
 // Computes the vertex 'c' which is cliped between the vertices 'a' and 'b' and the plane 'z'
 static pr_clip_vertex _get_zplane_vertex(pr_clip_vertex a, pr_clip_vertex b, PRfloat z)
 {
@@ -702,8 +793,7 @@ static void _index_dec(PRint* x, PRint numVertices)
 }
 
 // Rasterizes convex polygon filled
-static void _rasterize_polygon_fill(
-    pr_framebuffer* frameBuffer, const pr_texture* texture, PRubyte mipLevel)
+static void _rasterize_polygon_fill(pr_framebuffer* frameBuffer, const pr_texture* texture, PRubyte mipLevel)
 {
     // Select MIP level
     PRtexsize mipWidth, mipHeight;
@@ -803,27 +893,28 @@ static void _rasterize_polygon_fill(
 }
 
 // Rasterizes convex polygon outlines
-static void _rasterize_polygon_line(
-    pr_framebuffer* frameBuffer, const pr_texture* texture, PRubyte mipLevel)
+static void _rasterize_polygon_line(pr_framebuffer* frameBuffer, const pr_texture* texture, PRubyte mipLevel)
 {
     for (PRint i = 0; i + 1 < _numPolyVerts; ++i)
     {
-        _render_screenspace_line_colored(
+        /*_render_screenspace_line_colored(
             _rasterVertices[i].x,
             _rasterVertices[i].y,
             _rasterVertices[i + 1].x,
             _rasterVertices[i + 1].y,
             PR_STATE_MACHINE.colorIndex
-        );
+        );*/
+        _rasterize_line(frameBuffer, texture, mipLevel, i, i + 1);
     }
 
-    _render_screenspace_line_colored(
+    _rasterize_line(frameBuffer, texture, mipLevel, _numPolyVerts - 1, 0);
+    /*_render_screenspace_line_colored(
         _rasterVertices[_numPolyVerts - 1].x,
         _rasterVertices[_numPolyVerts - 1].y,
         _rasterVertices[0].x,
         _rasterVertices[0].y,
         PR_STATE_MACHINE.colorIndex
-    );
+    );*/
 }
 
 // Rasterizes convex polygon points

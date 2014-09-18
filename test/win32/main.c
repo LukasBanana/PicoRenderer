@@ -25,6 +25,8 @@ int mouseSpeedX = 0, mouseSpeedY = 0;
 int mouseWheel = 0;
 bool buttonDown[2] = { 0 };
 
+PRenum polyMode = PR_POLYGON_LINE;
+
 #define PI 3.141592654f
 
 
@@ -38,6 +40,18 @@ LRESULT CALLBACK window_callback(HWND wnd, UINT message, WPARAM wParam, LPARAM l
         {
             if (wParam == VK_ESCAPE)
                 isQuit = PR_TRUE;
+        }
+        break;
+
+        case WM_KEYUP:
+        {
+            if (wParam == VK_TAB)
+            {
+                if (polyMode == PR_POLYGON_FILL)
+                    polyMode = PR_POLYGON_LINE;
+                else
+                    polyMode = PR_POLYGON_FILL;
+            }
         }
         break;
 
@@ -175,7 +189,7 @@ int main()
 
     // Create textures
     PRobject textureA = prGenTexture();
-    prTextureImage2DFromFile(textureA, "media/crate.png", PR_TRUE, PR_TRUE);
+    prTextureImage2DFromFile(textureA, "media/house.jpg", PR_TRUE, PR_TRUE);
 
     PRobject textureB = prGenTexture();
     prTextureImage2DFromFile(textureB, "media/front.png", PR_TRUE, PR_TRUE);
@@ -184,7 +198,7 @@ int main()
     PRobject vertexBuffer = prGenVertexBuffer();
     PRobject indexBuffer = prGenIndexBuffer();
 
-    #if 1
+    #if 0
 
     #define NUM_VERTICES 24
 
@@ -287,7 +301,6 @@ int main()
 
     //prCullMode(PR_CULL_BACK);
     //prCullMode(PR_CULL_FRONT);
-    prPolygonMode(PR_POLYGON_LINE);
 
     // Main loop
     while (!isQuit)
@@ -391,6 +404,8 @@ int main()
 
             //prEnable(PR_SCISSOR);
             //prScissor(20, 20, viewWidth - 100, viewHeight - 100);
+
+            prPolygonMode(polyMode);
 
             // Setup transformation
             prProjectionMatrix(projectionA);
