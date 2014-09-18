@@ -77,7 +77,6 @@ void _pr_framebuffer_clear(pr_framebuffer* frameBuffer, PRubyte clearColor, PRfl
 void _pr_framebuffer_setup_scanlines(
     pr_framebuffer* frameBuffer, pr_scaline_side* sides, pr_raster_vertex start, pr_raster_vertex end)
 {
-    pr_pixel* pixels = frameBuffer->pixels;
     PRint pitch = (PRint)frameBuffer->width;
     PRint len = end.y - start.y;
 

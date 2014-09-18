@@ -22,7 +22,7 @@
 
 
 //! Color palette for 8-bit color indices.
-typedef struct pr_color_palette
+typedef struct pr_color_palette//_r3g3b2
 {
     pr_color colors[256];
 }

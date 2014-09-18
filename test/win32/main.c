@@ -56,16 +56,20 @@ LRESULT CALLBACK window_callback(HWND wnd, UINT message, WPARAM wParam, LPARAM l
 
         case WM_LBUTTONDOWN:
             buttonDown[0] = true;
+            SetCapture(wnd);
             break;
         case WM_LBUTTONUP:
             buttonDown[0] = false;
+            ReleaseCapture();
             break;
 
         case WM_RBUTTONDOWN:
             buttonDown[1] = true;
+            SetCapture(wnd);
             break;
         case WM_RBUTTONUP:
             buttonDown[1] = false;
+            ReleaseCapture();
             break;
 
         case WM_MOUSEWHEEL:
@@ -237,7 +241,8 @@ int main()
     };
     prIndexBufferData(indexBuffer, cubeIndices, NUM_INDICES);
 
-    float size[3] = { 2.0f, 2.0f, 0.5f };
+    //float size[3] = { 2.0f, 2.0f, 0.5f };
+    float size[3] = { 1.0f, 1.0f, 1.0f };
 
     #else
 
@@ -274,7 +279,7 @@ int main()
     #endif
 
     float orthoSize = 0.007f;//0.02f;
-    prBuildPerspectiveProjection(projectionA, (float)viewWidth/viewHeight, 0.1f, 100.0f, 90.0f * PR_DEG2RAD);
+    prBuildPerspectiveProjection(projectionA, (float)viewWidth/viewHeight, 0.1f, 100.0f, 74.0f * PR_DEG2RAD);
     prBuildOrthogonalProjection(projectionB, orthoSize*viewWidth, orthoSize*viewHeight, 0.1f, 100.0f);
 
     prLoadIdentity(viewMatrix);
@@ -384,8 +389,8 @@ int main()
             // Setup view
             prViewport(0, 0, viewWidth, viewHeight);
 
-            prEnable(PR_SCISSOR);
-            prScissor(20, 20, viewWidth - 100, viewHeight - 100);
+            //prEnable(PR_SCISSOR);
+            //prScissor(20, 20, viewWidth - 100, viewHeight - 100);
 
             // Setup transformation
             prProjectionMatrix(projectionA);
