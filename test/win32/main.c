@@ -286,7 +286,7 @@ int main()
     prViewMatrix(viewMatrix);
 
     //prCullMode(PR_CULL_BACK);
-    prCullMode(PR_CULL_FRONT);
+    //prCullMode(PR_CULL_FRONT);
     prPolygonMode(PR_POLYGON_LINE);
 
     // Main loop
@@ -405,7 +405,7 @@ int main()
             //prDepthRange(0.0f, 0.5f);
             prDrawIndexed(PR_TRIANGLES, NUM_INDICES, 0);
 
-            #   if 1
+            #   if 0
 
             // Draw with immediate mode
             prBindTexture(0);

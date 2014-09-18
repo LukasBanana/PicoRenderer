@@ -426,7 +426,8 @@ void prDrawScreenImage(PRint left, PRint top, PRint right, PRint bottom);
 
 /**
 Draws the specified amount of primitives.
-\param[in] primitives Specifies the primitive types. This must be PR_...
+\param[in] primitives Specifies the primitive types. Valid values are:
+PR_POINTS, PR_LINES, PR_LINE_STRIP, PR_LINE_LOOP, PR_TRIANGLES, PR_TRIANGLE_STRIP, PR_TRIANGLE_FAN.
 \param[in] numVertices Specifies the number of vertices to draw.
 \param[in] firstVertex Specifies the first vertex to draw.
 \remarks A vertex buffer must be bound.
@@ -436,7 +437,8 @@ void prDraw(PRenum primitives, PRushort numVertices, PRushort firstVertex);
 
 /**
 Draws the specified amount of primitives.
-\param[in] primitives Specifies the primitive types. This must be PR_...
+\param[in] primitives Specifies the primitive types. Valid values are:
+PR_POINTS, PR_LINES, PR_LINE_STRIP, PR_LINE_LOOP, PR_TRIANGLES, PR_TRIANGLE_STRIP, PR_TRIANGLE_FAN.
 \param[in] numVertices Specifies the number of vertices to draw.
 \param[in] firstVertex Specifies the first vertex to draw.
 \remarks A vertex buffer and an index buffer must be bound.
@@ -447,14 +449,88 @@ void prDrawIndexed(PRenum primitives, PRushort numVertices, PRushort firstVertex
 
 // --- immediate mode --- //
 
+/**
+Begins the immediate drawing mode.
+\param[in] primitives Specifies the primitive types. Valid values are:
+PR_POINTS, PR_LINES, PR_LINE_STRIP, PR_LINE_LOOP, PR_TRIANGLES, PR_TRIANGLE_STRIP, PR_TRIANGLE_FAN.
+\remarks This must be finished by calling "prEnd". Here is a usage example:
+\code
+// Draw a quad
+prBegin(PR_TRIANGLE_STRIP);
+{
+    prTexCoord2i(0, 0);
+    prVertex2i(-1, 1);
+
+    prTexCoord2i(1, 0);
+    prVertex2i(1, 1);
+
+    prTexCoord2i(0, 1);
+    prVertex2i(-1, -1);
+
+    prTexCoord2i(1, 1);
+    prVertex2i(1, -1);
+}
+prEnd();
+\encode
+\remarks This is equivalent to drawing the primitives with a vertex buffer (but no index buffer).
+\note This is slower than using a vertex buffer. A global immediate vertex buffer is used,
+to draw the primitives. This internal global buffer is severely limited (by default 32 vertices).
+However, you can drawn unlimited primitives, since the buffer works like a stream,
+which will be flushed when it's full (i.e. the current content will be drawn to the frame buffer).
+\see prEnd
+\see prDraw
+*/
 void prBegin(PRenum primitives);
+/**
+Ends the immediate drawing mode.
+\remarks This must be started by calling "prBegin".
+\see prBegin
+*/
 void prEnd();
 
+/**
+Sets the texture coordinates of the current vertex in the immediate drawing mode.
+\remarks This must be called between "prBegin" and "prEnd".
+\see prBegin
+\see prEnd
+*/
 void prTexCoord2f(PRfloat u, PRfloat v);
 
-void prVertex2f(PRfloat x, PRfloat y);
-void prVertex3f(PRfloat x, PRfloat y, PRfloat z);
+// \see prTexCoord2f
+void prTexCoord2i(PRint u, PRint v);
+
+/**
+Sets the coordinates of the current vertex in the immediate drawing mode.
+This function will also increment the vertex counter,
+i.e. the next calls to "prTexCoord..." will configure the next vertex.
+Thus call "prVertex..." only when all configurations for the current vertex are done.
+\remarks This must be called between "prBegin" and "prEnd".
+\see prBegin
+\see prEnd
+*/
 void prVertex4f(PRfloat x, PRfloat y, PRfloat z, PRfloat w);
+
+//! \see prVertex4f
+void prVertex4i(PRint x, PRint y, PRint z, PRint w);
+
+/**
+Sets the coordinates of the current vertex. The 'w' component will be set to 1.0.
+\see prVertex4f
+*/
+void prVertex3f(PRfloat x, PRfloat y, PRfloat z);
+
+//! \see prVertex3f
+void prVertex3i(PRint x, PRint y, PRint z);
+
+/**
+Sets the coordinates of the current vertex.
+The 'z' component will be set to 0.0 and the 'w' component will be set to 1.0.
+\see prVertex4f
+*/
+void prVertex2f(PRfloat x, PRfloat y);
+
+//! \see prVertex2f
+void prVertex2i(PRint x, PRint y);
 
 
 #endif

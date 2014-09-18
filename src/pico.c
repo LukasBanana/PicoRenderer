@@ -407,9 +407,19 @@ void prTexCoord2f(PRfloat u, PRfloat v)
     _pr_immediate_mode_texcoord(u, v);
 }
 
-void prVertex2f(PRfloat x, PRfloat y)
+void prTexCoord2i(PRint u, PRint v)
 {
-    _pr_immediate_mode_vertex(x, y, 0.0f, 1.0f);
+    _pr_immediate_mode_texcoord((PRfloat)u, (PRfloat)v);
+}
+
+void prVertex4f(PRfloat x, PRfloat y, PRfloat z, PRfloat w)
+{
+    _pr_immediate_mode_vertex(x, y, z, w);
+}
+
+void prVertex4i(PRint x, PRint y, PRint z, PRint w)
+{
+    _pr_immediate_mode_vertex((PRfloat)x, (PRfloat)y, (PRfloat)z, (PRfloat)w);
 }
 
 void prVertex3f(PRfloat x, PRfloat y, PRfloat z)
@@ -417,8 +427,18 @@ void prVertex3f(PRfloat x, PRfloat y, PRfloat z)
     _pr_immediate_mode_vertex(x, y, z, 1.0f);
 }
 
-void prVertex4f(PRfloat x, PRfloat y, PRfloat z, PRfloat w)
+void prVertex3i(PRint x, PRint y, PRint z)
 {
-    _pr_immediate_mode_vertex(x, y, z, w);
+    _pr_immediate_mode_vertex((PRfloat)x, (PRfloat)y, (PRfloat)z, 1.0f);
+}
+
+void prVertex2f(PRfloat x, PRfloat y)
+{
+    _pr_immediate_mode_vertex(x, y, 0.0f, 1.0f);
+}
+
+void prVertex2i(PRint x, PRint y)
+{
+    _pr_immediate_mode_vertex((PRfloat)x, (PRfloat)y, 0.0f, 1.0f);
 }
 
