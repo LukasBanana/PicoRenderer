@@ -81,6 +81,8 @@ int main()
     rotation += 0.01f;
     
     // Draw scene
+    prClearFrameBuffer(prGetColorIndex(255, 255, 255), 0.0f);
+    
     prBegin(PR_TRIANGLES);
     {
       prVertex2f(0, 1.155f);
