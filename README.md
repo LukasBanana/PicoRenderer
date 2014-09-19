@@ -5,6 +5,11 @@ This project provides a simple, 8-bit colored, 3D software renderer written in C
 It has an interface similiar to OpenGL 1.1.
 
 
+License
+=======
+BSD 3-Clause License
+
+
 Status
 ======
 This is an ALPHA status!
