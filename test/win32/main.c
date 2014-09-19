@@ -25,7 +25,7 @@ int mouseSpeedX = 0, mouseSpeedY = 0;
 int mouseWheel = 0;
 bool buttonDown[2] = { 0 };
 
-PRenum polyMode = PR_POLYGON_LINE;
+PRenum polyMode = PR_POLYGON_FILL;
 
 #define PI 3.141592654f
 
