@@ -54,11 +54,11 @@ int main()
   //contextDesc.hWnd = ...
   #endif
   
-  PRobject context = prGenContext(&contextDesc, scrWidth, scrHeight);
+  PRobject context = prCreateContext(&contextDesc, scrWidth, scrHeight);
   prMakeCurrent(context);
   
   // Create frame buffer
-  PRobject frameBuffer = prGenFrameBuffer(scrWidth, scrHeight);
+  PRobject frameBuffer = prCreateFrameBuffer(scrWidth, scrHeight);
   prBindFrameBuffer(frameBuffer);
   
   prViewport(0, 0, scrWidth, scrHeight);
@@ -93,7 +93,7 @@ int main()
     rotation += 0.01f;
     
     // Draw scene
-    prClearFrameBuffer(prGetColorIndex(255, 255, 255), 0.0f);
+    prClearFrameBuffer(frameBuffer, prGetColorIndex(255, 255, 255), 0.0f, PR_COLOR_BUFFER_BIT | PR_DEPTH_BUFFER_BIT);
     
     prBegin(PR_TRIANGLES);
     {
