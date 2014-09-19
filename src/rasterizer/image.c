@@ -35,18 +35,30 @@ pr_image* _pr_image_load_from_file(const char* filename)
 
     #ifdef PR_INCLUDE_PLUGINS
 
+    image->width    = 0;
+    image->height   = 0;
+    image->format   = 0;
     image->colors   = stbi_load(filename, &(image->width), &(image->height), &(image->format), 3);
     image->defFree  = PR_FALSE;
 
-    #else
+    if (image->colors == NULL)
+    {
+
+    #endif
 
     image->width    = 1;
     image->height   = 1;
-    image->format   = 1;
+    image->format   = 3;
     image->colors   = PR_CALLOC(PRubyte, 3);
     image->defFree  = PR_TRUE;
 
     image->colors[0] = 0;
+    image->colors[1] = 0;
+    image->colors[2] = 0;
+
+    #ifdef PR_INCLUDE_PLUGINS
+
+    }
 
     #endif
 
@@ -87,7 +99,8 @@ void _pr_image_delete(pr_image* image)
             else
             #endif
             {
-                PR_FREE(image->colors);
+                //error???
+                //PR_FREE(image->colors);
             }
         }
         PR_FREE(image);
