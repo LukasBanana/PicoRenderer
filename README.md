@@ -12,7 +12,7 @@ BSD 3-Clause License
 
 Status
 ======
-This is an ALPHA status!
+This project is in ALPHA status!
 
 
 Why C and not C++?
