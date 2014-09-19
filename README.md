@@ -98,7 +98,12 @@ int main()
     rotation += 0.01f;
     
     // Draw scene
-    prClearFrameBuffer(frameBuffer, prGetColorIndex(255, 255, 255), 0.0f, PR_COLOR_BUFFER_BIT | PR_DEPTH_BUFFER_BIT);
+    prClearFrameBuffer(
+      frameBuffer,
+      prGetColorIndex(255, 255, 255),
+      0.0f,
+      PR_COLOR_BUFFER_BIT | PR_DEPTH_BUFFER_BIT
+    );
     
     prBegin(PR_TRIANGLES);
     {
