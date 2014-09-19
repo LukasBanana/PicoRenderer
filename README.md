@@ -5,10 +5,14 @@ This project provides a simple, 8-bit colored, 3D software renderer written in C
 It has an interface similiar to OpenGL 1.1.
 
 
-Plugins
-=======
+Status
+======
+This is an ALPHA status!
 
-This project makes use of the "stb_image" library (see https://github.com/nothings/stb)
+
+Why C and not C++?
+==================
+C code is slim, highly portable, compiles fast and for a low-level software renderer one doesn't need lots of object-oriented or templated code.
 
 
 Build
@@ -17,9 +21,17 @@ Build
 - C99 compliant compiler
 
 
-Why C and not C++?
-==================
-C code is slim, highly portable, compiles fast and for a low-level software renderer one doesn't need lots of object-oriented or templated code.
+Fine Tuning
+===========
+There are several macros which allows you to enabled or disable specific features for fine tuning.
+For example if "PR_FAST_MATH" is defined, all uses of the sine function ('sinf' from the C standard library) will be replaced by "_aprx_sin" which implements an approximated and fast sine function (in src/rasterizer/ext_math.c).
+See src/rasterizer/static_config.h for all these macros.
+
+
+Plugins
+=======
+
+This project makes use of the "stb_image" library (see https://github.com/nothings/stb)
 
 
 Getting Started
