@@ -52,22 +52,41 @@ void _pr_framebuffer_delete(pr_framebuffer* frameBuffer)
     }
 }
 
-void _pr_framebuffer_clear(pr_framebuffer* frameBuffer, PRubyte clearColor, PRfloat depth)
+void _pr_framebuffer_clear(pr_framebuffer* frameBuffer, PRubyte clearColor, PRfloat clearDepth, PRbitfield clearFlags)
 {
     if (frameBuffer != NULL && frameBuffer->pixels != NULL)
     {
         // Convert depth (32-bit) into pixel depth (16-bit or 8-bit)
-        PRdepthtype clearDepth = _pr_pixel_write_depth(depth);
+        PRdepthtype depth = _pr_pixel_write_depth(clearDepth);
 
         // Iterate over the entire framebuffer
         pr_pixel* dst = frameBuffer->pixels;
         pr_pixel* dstEnd = dst + (frameBuffer->width * frameBuffer->height);
 
-        while (dst != dstEnd)
+        if ((clearFlags & PR_COLOR_BUFFER_BIT) != 0 && (clearFlags & PR_DEPTH_BUFFER_BIT) != 0)
         {
-            dst->colorIndex = clearColor;
-            dst->depth      = clearDepth;
-            ++dst;
+            while (dst != dstEnd)
+            {
+                dst->colorIndex = clearColor;
+                dst->depth      = depth;
+                ++dst;
+            }
+        }
+        else if ((clearFlags & PR_COLOR_BUFFER_BIT) != 0)
+        {
+            while (dst != dstEnd)
+            {
+                dst->colorIndex = clearColor;
+                ++dst;
+            }
+        }
+        else if ((clearFlags & PR_DEPTH_BUFFER_BIT) != 0)
+        {
+            while (dst != dstEnd)
+            {
+                dst->depth = depth;
+                ++dst;
+            }
         }
     }
     else

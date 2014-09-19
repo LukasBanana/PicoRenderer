@@ -181,22 +181,22 @@ int main()
 
     contextDesc.wnd = wnd;
 
-    context = prGenContext(&contextDesc, screenWidth, screenHeight);
+    context = prCreateContext(&contextDesc, screenWidth, screenHeight);
 
     // Create frame buffer
-    frameBuffer = prGenFrameBuffer(screenWidth, screenHeight);
+    frameBuffer = prCreateFrameBuffer(screenWidth, screenHeight);
     prBindFrameBuffer(frameBuffer);
 
     // Create textures
-    PRobject textureA = prGenTexture();
+    PRobject textureA = prCreateTexture();
     prTextureImage2DFromFile(textureA, "media/house.jpg", PR_TRUE, PR_TRUE);
 
-    PRobject textureB = prGenTexture();
+    PRobject textureB = prCreateTexture();
     prTextureImage2DFromFile(textureB, "media/front.png", PR_TRUE, PR_TRUE);
 
     // Create vertex buffer
-    PRobject vertexBuffer = prGenVertexBuffer();
-    PRobject indexBuffer = prGenIndexBuffer();
+    PRobject vertexBuffer = prCreateVertexBuffer();
+    PRobject indexBuffer = prCreateIndexBuffer();
 
     #if 0
 
@@ -329,7 +329,7 @@ int main()
         posZ += 0.1f * mouseWheel;
 
         // Drawing
-        prClearFrameBuffer(prGetColorIndex(255, 255, 255), 0.0f);
+        prClearFrameBuffer(frameBuffer, prGetColorIndex(255, 255, 255), 0.0f, PR_COLOR_BUFFER_BIT | PR_DEPTH_BUFFER_BIT);
         {
             #if 0
             

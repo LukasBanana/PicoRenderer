@@ -564,15 +564,15 @@ static void _render_screenspace_image_colored(PRubyte colorIndex, PRint left, PR
     // Rasterize rectangle
     pr_pixel* pixels = frameBuffer->pixels;
     const PRuint pitch = frameBuffer->width;
-    pr_pixel* scaline;
+    pr_pixel* scanline;
 
     for (PRint y = top; y <= bottom; ++y)
     {
-        scaline = pixels + (y * pitch + left);
+        scanline = pixels + (y * pitch + left);
         for (PRint x = left; x <= right; ++x)
         {
-            scaline->colorIndex = colorIndex;
-            ++scaline;
+            scanline->colorIndex = colorIndex;
+            ++scanline;
         }
     }
 }
@@ -868,7 +868,7 @@ static void _rasterize_polygon_fill(pr_framebuffer* frameBuffer, const pr_textur
                 pixel->depth = depth;
 
                 #ifdef PR_PERSPECTIVE_CORRECTED
-                // Compute perspective coorected coordinates
+                // Compute perspective corrected texture coordinates
                 z = 1.0f / zAct;
                 u = uAct * z;
                 v = vAct * z;
@@ -896,25 +896,8 @@ static void _rasterize_polygon_fill(pr_framebuffer* frameBuffer, const pr_textur
 static void _rasterize_polygon_line(pr_framebuffer* frameBuffer, const pr_texture* texture, PRubyte mipLevel)
 {
     for (PRint i = 0; i + 1 < _numPolyVerts; ++i)
-    {
-        /*_render_screenspace_line_colored(
-            _rasterVertices[i].x,
-            _rasterVertices[i].y,
-            _rasterVertices[i + 1].x,
-            _rasterVertices[i + 1].y,
-            PR_STATE_MACHINE.colorIndex
-        );*/
         _rasterize_line(frameBuffer, texture, mipLevel, i, i + 1);
-    }
-
     _rasterize_line(frameBuffer, texture, mipLevel, _numPolyVerts - 1, 0);
-    /*_render_screenspace_line_colored(
-        _rasterVertices[_numPolyVerts - 1].x,
-        _rasterVertices[_numPolyVerts - 1].y,
-        _rasterVertices[0].x,
-        _rasterVertices[0].y,
-        PR_STATE_MACHINE.colorIndex
-    );*/
 }
 
 // Rasterizes convex polygon points

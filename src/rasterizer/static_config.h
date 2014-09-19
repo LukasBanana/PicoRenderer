@@ -37,5 +37,8 @@
 //! Use an 8-bit depth buffer (instead of 16 bit)
 //#define PR_DEPTH_BUFFER_8BIT
 
+//! Merge color- and depth buffers to a single one inside a frame buffer.
+#define PR_MERGE_COLOR_AND_DEPTH_BUFFERS
+
 
 #endif

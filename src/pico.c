@@ -66,7 +66,7 @@ const char* prGetString(PRenum str)
 
 // --- context --- //
 
-PRobject prGenContext(const PRcontextdesc* desc, PRuint width, PRuint height)
+PRobject prCreateContext(const PRcontextdesc* desc, PRuint width, PRuint height)
 {
     return (PRobject)_pr_context_create(desc, width, height);
 }
@@ -83,7 +83,7 @@ void prPresent(PRobject context)
 
 // --- framebuffer --- //
 
-PRobject prGenFrameBuffer(PRuint width, PRuint height)
+PRobject prCreateFrameBuffer(PRuint width, PRuint height)
 {
     return (PRobject)_pr_framebuffer_create(width, height);
 }
@@ -98,9 +98,9 @@ void prBindFrameBuffer(PRobject frameBuffer)
     _pr_state_machine_bind_framebuffer((pr_framebuffer*)frameBuffer);
 }
 
-void prClearFrameBuffer(PRubyte clearColor, PRfloat depth)
+void prClearFrameBuffer(PRobject frameBuffer, PRubyte clearColor, PRfloat clearDepth, PRbitfield clearFlags)
 {
-    _pr_framebuffer_clear(PR_STATE_MACHINE.boundFrameBuffer, clearColor, depth);
+    _pr_framebuffer_clear((pr_framebuffer*)frameBuffer, clearColor, clearDepth, clearFlags);
 }
 
 PRubyte prGetColorIndex(PRubyte red, PRubyte green, PRubyte blue)
@@ -110,7 +110,7 @@ PRubyte prGetColorIndex(PRubyte red, PRubyte green, PRubyte blue)
 
 // --- texture --- //
 
-PRobject prGenTexture()
+PRobject prCreateTexture()
 {
     return (PRobject)_pr_texture_create();
 }
@@ -152,7 +152,7 @@ void prTextureImage2DFromFile(
 
 // --- vertexbuffer --- //
 
-PRobject prGenVertexBuffer()
+PRobject prCreateVertexBuffer()
 {
     return (PRobject)_pr_vertexbuffer_create();
 }
@@ -179,7 +179,7 @@ void prBindVertexBuffer(PRobject vertexBuffer)
 
 // --- indexbuffer --- //
 
-PRobject prGenIndexBuffer()
+PRobject prCreateIndexBuffer()
 {
     return (PRobject)_pr_indexbuffer_create();
 }

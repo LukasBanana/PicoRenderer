@@ -29,7 +29,12 @@ typedef struct pr_framebuffer
 {
     PRuint              width;
     PRuint              height;
+    #ifdef PR_MERGE_COLOR_AND_DEPTH_BUFFERS
     pr_pixel*           pixels;
+    #else
+    PRubyte*            colors;
+    PRdepthtype         depths;
+    #endif
     pr_scaline_side*    scanlinesStart; //!< Start offsets to scanlines
     pr_scaline_side*    scanlinesEnd;   //!< End offsets to scanlines
 }
@@ -39,7 +44,7 @@ pr_framebuffer;
 pr_framebuffer* _pr_framebuffer_create(PRuint width, PRuint height);
 void _pr_framebuffer_delete(pr_framebuffer* frameBuffer);
 
-void _pr_framebuffer_clear(pr_framebuffer* frameBuffer, PRubyte clearColor, PRfloat depth);
+void _pr_framebuffer_clear(pr_framebuffer* frameBuffer, PRubyte clearColor, PRfloat clearDepth, PRbitfield clearFlags);
 
 //! Sets the start and end offsets of the specified scanlines.
 void _pr_framebuffer_setup_scanlines(
@@ -48,7 +53,11 @@ void _pr_framebuffer_setup_scanlines(
 
 PR_INLINE void _pr_framebuffer_plot(pr_framebuffer* frameBuffer, PRuint x, PRuint y, PRubyte colorIndex)
 {
+    #ifdef PR_MERGE_COLOR_AND_DEPTH_BUFFERS
     frameBuffer->pixels[y * frameBuffer->width + x].colorIndex = colorIndex;
+    #else
+    frameBuffer->colors[y * frameBuffer->width + x] = colorIndex;
+    #endif
 }
 
 

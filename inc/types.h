@@ -43,8 +43,8 @@ typedef double PRdouble;
 
 //! Enumeration type.
 typedef unsigned int PRenum;
-//! Flags type.
-typedef unsigned int PRflags;
+//! Bit field type used for flags.
+typedef unsigned int PRbitfield;
 //! Size type.
 typedef int PRsizei;
 

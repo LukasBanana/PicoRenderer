@@ -40,5 +40,9 @@
 // States
 #define PR_SCISSOR          0
 
+// Frame buffer clear flags
+#define PR_COLOR_BUFFER_BIT 0x00000001
+#define PR_DEPTH_BUFFER_BIT 0x00000002
+
 
 #endif
