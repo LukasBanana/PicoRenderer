@@ -501,7 +501,7 @@ static void _render_screenspace_image_textured(const pr_texture* texture, PRint 
 
     // Select MIP level
     PRtexsize width, height;
-    PRubyte mipLevel = _pr_texutre_compute_miplevel(texture, 1.0f / (PRfloat)(right - left), 0.0f, 0.0f, 1.0f / (PRfloat)(bottom - top));
+    PRubyte mipLevel = _pr_texture_compute_miplevel(texture, 1.0f / (PRfloat)(right - left), 0.0f, 0.0f, 1.0f / (PRfloat)(bottom - top));
     const PRubyte* texels = _pr_texture_select_miplevel(texture, mipLevel, &width, &height);
 
     // Rasterize rectangle
@@ -935,7 +935,7 @@ static void _rasterize_polygon(pr_framebuffer* frameBuffer, const pr_texture* te
     float len0 = sqrtf(c0x*c0x + c0y*c0y);
     float len1 = sqrtf(c1x*c1x + c1y*c1y);
 
-    PRubyte mipLevel = _pr_texutre_compute_miplevel(
+    PRubyte mipLevel = _pr_texture_compute_miplevel(
         texture,
         /*(b->texCoord.x - a->texCoord.x) * (b->ndc.x - a->ndc.x),
         (b->texCoord.y - a->texCoord.y) * (b->ndc.y - a->ndc.y),

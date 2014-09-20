@@ -340,7 +340,7 @@ const PRubyte* _pr_texture_select_miplevel(const pr_texture* texture, PRubyte mi
     return texels;
 }
 
-PRubyte _pr_texutre_compute_miplevel(const pr_texture* texture, PRfloat dux, PRfloat duy, PRfloat dvx, PRfloat dvy)
+PRubyte _pr_texture_compute_miplevel(const pr_texture* texture, PRfloat dux, PRfloat duy, PRfloat dvx, PRfloat dvy)
 {
     // Compute derivation of u and v vectors
     PRfloat ux = fabsf(dux) * texture->width;

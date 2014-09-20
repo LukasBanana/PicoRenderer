@@ -491,7 +491,7 @@ int main()
             #endif
 
             // Draw floor
-            int floorSize = 100;
+            float floorSize = 100.0f;
             int floorTC = 50;
 
             prLoadIdentity(worldMatrix);
