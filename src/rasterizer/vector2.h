@@ -20,4 +20,10 @@ typedef struct pr_vector2
 pr_vector2;
 
 
+PR_INLINE PRfloat _pr_vector2_dot(pr_vector2 a, pr_vector2 b)
+{
+    return a.x*b.x + a.y*b.y;
+}
+
+
 #endif

@@ -39,6 +39,13 @@ Returns the specified string or null if 'str' is invalid.
 */
 const char* prGetString(PRenum str);
 
+/**
+Returns the specified parameter value.
+\param[in] param Specifies the parameter which is to be queried.
+- PR_MAX_TEXTURE_SIZE: Returns the maximum texture size.
+*/
+PRint prGetIntegerv(PRenum param);
+
 // --- context --- //
 
 /**

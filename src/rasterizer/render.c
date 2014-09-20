@@ -341,7 +341,7 @@ static void _rasterize_line(pr_framebuffer* frameBuffer, const pr_texture* textu
     for (PRint t = 0; t < el; ++t)
     {
         // Render pixel
-        colorIndex = _pr_texture_sample_nearest(texels, mipWidth, mipHeight, u, v);
+        colorIndex = _pr_texture_sample_nearest_from_mipmap(texels, mipWidth, mipHeight, u, v);
 
         _pr_framebuffer_plot(frameBuffer, (PRuint)x, (PRuint)y, colorIndex);
         
@@ -527,7 +527,7 @@ static void _render_screenspace_image_textured(const pr_texture* texture, PRint 
 
         for (PRint x = left; x <= right; ++x)
         {
-            scanline->colorIndex = _pr_texture_sample_nearest(texels, width, height, u, v);
+            scanline->colorIndex = _pr_texture_sample_nearest_from_mipmap(texels, width, height, u, v);
             ++scanline;
             u += uStep;
         }
@@ -879,7 +879,8 @@ static void _rasterize_polygon_fill(pr_framebuffer* frameBuffer, const pr_textur
                 #endif
 
                 // Sample texture
-                pixel->colorIndex = _pr_texture_sample_nearest(texels, mipWidth, mipHeight, u, v);
+                pixel->colorIndex = _pr_texture_sample_nearest_from_mipmap(texels, mipWidth, mipHeight, u, v);
+                //pixel->colorIndex = _pr_texture_sample_nearest(texture, u, v, uStep*z, vStep*z);
                 //pixel->colorIndex = (PRubyte)(zAct * (PRfloat)UCHAR_MAX);
             }
 

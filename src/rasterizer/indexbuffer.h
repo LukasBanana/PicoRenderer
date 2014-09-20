@@ -16,8 +16,8 @@
 
 typedef struct pr_indexbuffer
 {
-    PRushort numIndices;
-    PRushort* indices;
+    PRushort    numIndices;
+    PRushort*   indices;
 }
 pr_indexbuffer;
 

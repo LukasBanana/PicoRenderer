@@ -64,6 +64,16 @@ const char* prGetString(PRenum str)
     return NULL;
 }
 
+PRint prGetIntegerv(PRenum param)
+{
+    switch (param)
+    {
+        case PR_MAX_TEXTURE_SIZE:
+            return PR_MAX_TEX_SIZE;
+    }
+    return 0;
+}
+
 // --- context --- //
 
 PRobject prCreateContext(const PRcontextdesc* desc, PRuint width, PRuint height)

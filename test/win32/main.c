@@ -367,6 +367,11 @@ int main()
 
         #ifdef MOVE_CAMERA
         
+        if (pitch < -PI*0.5f)
+            pitch = -PI*0.5f;
+        if (pitch > PI*0.5f)
+            pitch = PI*0.5f;
+
         prLoadIdentity(viewMatrix);
         prRotate(viewMatrix, 1.0f, 0.0f, 0.0f, pitch);
         prRotate(viewMatrix, 0.0f, 1.0f, 0.0f, yaw);

@@ -11,7 +11,13 @@
 
 #include "types.h"
 #include "enums.h"
+#include "vector2.h"
 
+
+// Maximal 11 MIP-maps restricts the textures to have a
+// maximum size of (2^(11-1) = 1024) in width and height.
+#define PR_MAX_NUM_MIPS             11
+#define PR_MAX_TEX_SIZE             1024
 
 #define PR_MIP_SIZE(size, mip)      ((size) >> (mip))
 #define PR_TEXTURE_HAS_MIPS(tex)    ((tex)->mips > 1)
@@ -21,10 +27,11 @@
 //! Textures store all their mip maps in a single texel array for compact memory access.
 typedef struct pr_texture
 {
-    PRtexsize width;    //!< Width of the first MIP level.
-    PRtexsize height;   //!< Height of the first MIP level.
-    PRubyte mips;       //!< Number of MIP levels.
-    PRubyte* texels;    //!< Texel MIP chain.
+    PRtexsize       width;                      //!< Width of the first MIP level.
+    PRtexsize       height;                     //!< Height of the first MIP level.
+    PRubyte         mips;                       //!< Number of MIP levels.
+    PRubyte*        texels;                     //!< Texel MIP chain.
+    const PRubyte*  mipTexels[PR_MAX_NUM_MIPS]; //! Texel offsets for the MIP chain (Use a static array for better cache locality).
 }
 pr_texture;
 
@@ -64,8 +71,11 @@ const PRubyte* _pr_texture_select_miplevel(const pr_texture* texture, PRubyte mi
 //! Returns the MIP level index for the specified texture.
 PRubyte _pr_texture_compute_miplevel(const pr_texture* texture, PRfloat dux, PRfloat duy, PRfloat dvx, PRfloat dvy);
 
-//! Samples the nearest texels.
-PRubyte _pr_texture_sample_nearest(const PRubyte* mipTexels, PRtexsize width, PRtexsize height, PRfloat u, PRfloat v);
+//! Samples the nearest texel from the specified MIP-map level.
+PRubyte _pr_texture_sample_nearest_from_mipmap(const PRubyte* mipTexels, PRtexsize mipWidth, PRtexsize mipHeight, PRfloat u, PRfloat v);
+
+//! Samples the nearest texel from the specified texture. MIP-map selection is compuited by tex-coord derivations ddx and ddy.
+PRubyte _pr_texture_sample_nearest(const pr_texture* texture, PRfloat u, PRfloat v, PRfloat ddx, PRfloat ddy);
 
 
 #endif

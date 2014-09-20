@@ -18,8 +18,8 @@
 
 typedef struct pr_vertexbuffer
 {
-    PRsizei numVertices;
-    pr_vertex* vertices;
+    PRsizei     numVertices;
+    pr_vertex*  vertices;
 }
 pr_vertexbuffer;
 

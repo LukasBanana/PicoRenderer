@@ -12,8 +12,11 @@
 #include "image.h"
 #include "state_machine.h"
 
+#include "color_palette.h"//!!!
+
 #include <math.h>
 #include <stdlib.h>
+#include <string.h>
 
 
 // --- internals --- //
@@ -145,6 +148,9 @@ pr_texture* _pr_texture_create()
     texture->mips   = 0;
     texture->texels = NULL;
 
+    for (size_t i = 0; i < PR_MAX_NUM_MIPS; ++i)
+        texture->mipTexels[i] = NULL;
+
     _pr_ref_add(texture);
 
     return texture;
@@ -189,7 +195,12 @@ PRboolean _pr_texture_image2d(
     }
     if (width == 0 || height == 0)
     {
-        _pr_error_set(PR_ERROR_INVALID_ARGUMENT, __FUNCTION__);
+        _pr_error_set(PR_ERROR_INVALID_ARGUMENT, "textures must not have a size equal to zero");
+        return PR_FALSE;
+    }
+    if (width > PR_MAX_TEX_SIZE || height > PR_MAX_TEX_SIZE)
+    {
+        _pr_error_set(PR_ERROR_INVALID_ARGUMENT, "maximum texture size exceeded");
         return PR_FALSE;
     }
 
@@ -237,6 +248,25 @@ PRboolean _pr_texture_image2d(
 
         // Create texels
         texture->texels = PR_CALLOC(PRubyte, numTexels);
+
+        // Setup MIP texel offsets
+        const PRubyte* texels = texture->texels;
+        PRtexsize w = width, h = height;
+
+        for (PRubyte mip = 0; mip < texture->mips; ++mip)
+        {
+            // Store current texel offset
+            texture->mipTexels[mip] = texels;
+
+            // Goto next texel MIP level
+            texels += w*h;
+
+            // Halve MIP size
+            if (w > 1)
+                w /= 2;
+            if (h > 1)
+                h /= 2;
+        }
     }
 
     // Fill image data of first MIP level
@@ -309,35 +339,13 @@ PRubyte _pr_texture_num_mips(PRubyte maxSize)
     return maxSize > 0 ? (PRubyte)(floorf(log2f(maxSize))) + 1 : 0;
 }
 
-/*
-TODO: This should be optimized:
-add "PRubyte** mipTexels" member to "pr_texture" structure with pointer offsets.
-*/
 const PRubyte* _pr_texture_select_miplevel(const pr_texture* texture, PRubyte mip, PRtexsize* width, PRtexsize* height)
 {
-    PRtexsize w = texture->width;
-    PRtexsize h = texture->height;
-
     // Store mip size in output parameters
-    *width = PR_MIP_SIZE(w, mip);
-    *height = PR_MIP_SIZE(h, mip);
-
-    // Select MIP level texels
-    const PRubyte* texels = texture->texels;
-
-    while (mip > 0)
-    {
-        texels += w*h;
-
-        if (w > 1)
-            w /= 2;
-        if (h > 1)
-            h /= 2;
-
-        --mip;
-    }
-
-    return texels;
+    *width = PR_MIP_SIZE(texture->width, mip);
+    *height = PR_MIP_SIZE(texture->height, mip);
+    // Return MIP-map texel offset
+    return texture->mipTexels[mip];
 }
 
 PRubyte _pr_texture_compute_miplevel(const pr_texture* texture, PRfloat dux, PRfloat duy, PRfloat dvx, PRfloat dvy)
@@ -357,17 +365,38 @@ PRubyte _pr_texture_compute_miplevel(const pr_texture* texture, PRfloat dux, PRf
     return (PRubyte)PR_CLAMP(lod, 0, texture->mips - 1);
 }
 
-PRubyte _pr_texture_sample_nearest(const PRubyte* mipTexels, PRtexsize width, PRtexsize height, PRfloat u, PRfloat v)
+PRubyte _pr_texture_sample_nearest_from_mipmap(const PRubyte* mipTexels, PRtexsize mipWidth, PRtexsize mipHeight, PRfloat u, PRfloat v)
 {
     // Clamp texture coordinates
-    PRint x = (PRint)((u - (PRint)u)*width);
-    PRint y = (PRint)((v - (PRint)v)*height);
+    PRint x = (PRint)((u - (PRint)u)*mipWidth);
+    PRint y = (PRint)((v - (PRint)v)*mipHeight);
 
     if (x < 0)
-        x += width;
+        x += mipWidth;
     if (y < 0)
-        y += height;
+        y += mipHeight;
 
     // Sample from texels
-    return mipTexels[y*width + x];
+    return mipTexels[y*mipWidth + x];
 }
+
+PRubyte _pr_texture_sample_nearest(const pr_texture* texture, PRfloat u, PRfloat v, PRfloat ddx, PRfloat ddy)
+{
+    // Select MIP-level texels by tex-coord derivation
+    const PRfloat dx = ddx * texture->width;
+    const PRfloat dy = ddy * texture->height;
+
+    const PRfloat deltaMaxSq = PR_MAX(dx*dx, dy*dy);
+
+    const PRint lod = _int_log2(deltaMaxSq);// / 2;
+    const PRubyte mip = (PRubyte)PR_CLAMP(lod, 0, texture->mips - 1);
+
+    // Get texels from MIP-level
+    PRtexsize w, h;
+    const PRubyte* texels = _pr_texture_select_miplevel(texture, mip, &w, &h);
+
+    // Sample nearest texel
+    return _pr_texture_sample_nearest_from_mipmap(texels, w, h, u, v);
+    //return _pr_color_to_colorindex_r3g3b2(mip*20, mip*20, mip*20);
+}
+

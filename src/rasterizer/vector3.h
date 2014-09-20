@@ -23,5 +23,10 @@ pr_vector3;
 
 void _pr_vector_normalize3(pr_vector3* vec);
 
+PR_INLINE PRfloat _pr_vector3_dot(pr_vector3 a, pr_vector3 b)
+{
+    return a.x*b.x + a.y*b.y + a.z*b.z;
+}
+
 
 #endif
