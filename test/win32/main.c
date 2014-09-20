@@ -10,8 +10,10 @@
 #include <stdio.h>
 #include <pico.h>
 #include <stdbool.h>
+#include <math.h>
 
 #include <rasterizer/image.h>
+#include <rasterizer/matrix4.h>
 
 
 // --- global members --- //
@@ -25,7 +27,41 @@ int mouseSpeedX = 0, mouseSpeedY = 0;
 int mouseWheel = 0;
 bool buttonDown[2] = { 0 };
 
+bool keyDown[256] = { 0 };
+
 PRenum polyMode = PR_POLYGON_FILL;
+
+float pitch = 0.0f, yaw = 0.0f;
+float posZ = 3.0f;
+
+#define MOVE_CAMERA
+#ifdef MOVE_CAMERA
+
+#define MOVE_SPEED 0.02f
+
+float camX = 0.0f, camY = 0.0f, camZ = -2.0f;
+
+static void MoveCam(float x, float z)
+{
+    float matrix[16];
+    prLoadIdentity(matrix);
+    prRotate(matrix, 0.0f, 1.0f, 0.0f, -yaw);
+    prRotate(matrix, 1.0f, 0.0f, 0.0f, -pitch);
+
+    float out[3];
+    float in[3] = { x, 0.0f, z };
+    _pr_matrix_mul_float3(out, (pr_matrix4*)matrix, in);
+
+    float speed = MOVE_SPEED;
+    if (keyDown[VK_SHIFT])
+        speed *= 5.0f;
+
+    camX += out[0] * speed;
+    camY += out[1] * speed;
+    camZ += out[2] * speed;
+}
+
+#endif
 
 #define PI 3.141592654f
 
@@ -40,6 +76,7 @@ LRESULT CALLBACK window_callback(HWND wnd, UINT message, WPARAM wParam, LPARAM l
         {
             if (wParam == VK_ESCAPE)
                 isQuit = PR_TRUE;
+            keyDown[wParam] = true;
         }
         break;
 
@@ -52,6 +89,7 @@ LRESULT CALLBACK window_callback(HWND wnd, UINT message, WPARAM wParam, LPARAM l
                 else
                     polyMode = PR_POLYGON_FILL;
             }
+            keyDown[wParam] = false;
         }
         break;
 
@@ -192,7 +230,7 @@ int main()
     prTextureImage2DFromFile(textureA, "media/house.jpg", PR_TRUE, PR_TRUE);
 
     PRobject textureB = prCreateTexture();
-    prTextureImage2DFromFile(textureB, "media/front.png", PR_TRUE, PR_TRUE);
+    prTextureImage2DFromFile(textureB, "media/tiles.png", PR_TRUE, PR_TRUE);
 
     // Create vertex buffer
     PRobject vertexBuffer = prCreateVertexBuffer();
@@ -204,6 +242,7 @@ int main()
 
     PRvertex cubeVertices[NUM_VERTICES] =
     {
+        //  x      y      z     u     v
         // front
         { -1.0f,  1.0f, -1.0f, 0.0f, 0.0f },
         {  1.0f,  1.0f, -1.0f, 1.0f, 0.0f },
@@ -275,14 +314,12 @@ int main()
     else
         puts("could not open model file!");
 
-    float size[3] = { 0.7f, -0.7f, 0.7f };
+    float size[3] = { 5, -5, 5 };//0.7f, -0.7f, 0.7f };
 
     #endif
 
     // Setup matrices
     float projectionA[16], projectionB[16], worldMatrix[16], viewMatrix[16];
-    float pitch = 0.0f, yaw = 0.0f;
-    float posZ = 3.0f;
 
     #if 0
     PRuint viewWidth = 200;
@@ -300,7 +337,7 @@ int main()
     prViewMatrix(viewMatrix);
 
     //prCullMode(PR_CULL_BACK);
-    //prCullMode(PR_CULL_FRONT);
+    prCullMode(PR_CULL_FRONT);
 
     // Main loop
     while (!isQuit)
@@ -327,6 +364,25 @@ int main()
         }
 
         posZ += 0.1f * mouseWheel;
+
+        #ifdef MOVE_CAMERA
+        
+        prLoadIdentity(viewMatrix);
+        prRotate(viewMatrix, 1.0f, 0.0f, 0.0f, pitch);
+        prRotate(viewMatrix, 0.0f, 1.0f, 0.0f, yaw);
+        prTranslate(viewMatrix, -camX, -camY, -camZ);
+        prViewMatrix(viewMatrix);
+
+        if (keyDown['W'])
+            MoveCam(0, 1);
+        if (keyDown['S'])
+            MoveCam(0, -1);
+        if (keyDown['A'])
+            MoveCam(-1, 0);
+        if (keyDown['D'])
+            MoveCam(1, 0);
+
+        #endif
 
         // Drawing
         prClearFrameBuffer(frameBuffer, prGetColorIndex(255, 255, 255), 0.0f, PR_COLOR_BUFFER_BIT | PR_DEPTH_BUFFER_BIT);
@@ -365,9 +421,11 @@ int main()
             // Setup transformation
             prProjectionMatrix(projectionB);
             prLoadIdentity(worldMatrix);
+            #ifndef viewMatrix
             prTranslate(worldMatrix, 0.0f, 0.0f, posZ);
             prRotate(worldMatrix, 1.0f, 0.0f, 0.0f, pitch);
             prRotate(worldMatrix, 0.0f, 1.0f, 0.0f, -yaw);
+            #endif
             prScale(worldMatrix, size[0], size[1], size[2]);
             prWorldMatrix(worldMatrix);
 
@@ -410,15 +468,50 @@ int main()
             // Setup transformation
             prProjectionMatrix(projectionA);
             prLoadIdentity(worldMatrix);
+            #ifndef MOVE_CAMERA
             prTranslate(worldMatrix, 0.0f, 0.0f, posZ);
             prRotate(worldMatrix, 1.0f, 0.0f, 0.0f, pitch);
             prRotate(worldMatrix, 0.0f, 1.0f, 0.0f, yaw);
+            #endif
             prScale(worldMatrix, size[0], size[1], size[2]);
             prWorldMatrix(worldMatrix);
 
             // Draw triangles
             //prDepthRange(0.0f, 0.5f);
             prDrawIndexed(PR_TRIANGLES, NUM_INDICES, 0);
+
+            #if 1
+            for (int i = 1; i < 9; ++i)
+            {
+                worldMatrix[12] = ((float)(i % 3))*5*size[0];
+                worldMatrix[14] = ((float)(i / 3))*5*size[2];
+                prWorldMatrix(worldMatrix);
+                prDrawIndexed(PR_TRIANGLES, NUM_INDICES, 0);
+            }
+            #endif
+
+            // Draw floor
+            int floorSize = 100;
+            int floorTC = 50;
+
+            prLoadIdentity(worldMatrix);
+            prTranslate(worldMatrix, 0, 4, 0);
+            prScale(worldMatrix, floorSize, floorSize, floorSize);
+            prWorldMatrix(worldMatrix);
+
+            prBindTexture(textureB);
+
+            prBegin(PR_TRIANGLES);
+            {
+                prTexCoord2i(0, 0); prVertex3i(-1, 0, 1);
+                prTexCoord2i(floorTC, 0); prVertex3i(1, 0, 1);
+                prTexCoord2i(floorTC, floorTC); prVertex3i(1, 0, -1);
+
+                prTexCoord2i(0, 0); prVertex3i(-1, 0, 1);
+                prTexCoord2i(floorTC, floorTC); prVertex3i(1, 0, -1);
+                prTexCoord2i(0, floorTC); prVertex3i(-1, 0, -1);
+            }
+            prEnd();
 
             #   if 0
 
@@ -434,8 +527,10 @@ int main()
 
             prLoadIdentity(worldMatrix);
             prProjectionMatrix(worldMatrix);
+            #ifndef MOVE_CAMERA
             prTranslate(worldMatrix, 0, 0, 1.5f);
             prRotate(worldMatrix, 0, 0, 1, angle);
+            #endif
             prScale(worldMatrix, 0.7f, 0.7f, 0.7f);
             prWorldMatrix(worldMatrix);
 
@@ -458,8 +553,10 @@ int main()
             #   if 0
             // Setup transformation
             prLoadIdentity(worldMatrix);
+            #ifndef MOVE_CAMERA
             prTranslate(worldMatrix, 1.5f, 0.0f, posZ);
             prRotate(worldMatrix, 1.0f, 1.0f, 1.0f, pitch);
+            #endif
             prWorldMatrix(worldMatrix);
 
             prBindTexture(textureB);
