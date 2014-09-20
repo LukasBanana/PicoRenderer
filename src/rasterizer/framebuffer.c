@@ -110,9 +110,9 @@ void _pr_framebuffer_setup_scanlines(
     PRdouble offsetEnd   = (PRdouble)(end.y * pitch + end.x);
     PRdouble offsetStep  = (offsetEnd - offsetStart) / len;
 
-    PRfloat zStep       = (end.z - start.z) / len;
-    PRfloat uStep       = (end.u - start.u) / len;
-    PRfloat vStep       = (end.v - start.v) / len;
+    PRinterp zStep       = (end.z - start.z) / len;
+    PRinterp uStep       = (end.u - start.u) / len;
+    PRinterp vStep       = (end.v - start.v) / len;
 
     // Fill scanline sides
     pr_scaline_side* sidesEnd = &(sides[end.y]);

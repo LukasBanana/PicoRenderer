@@ -37,8 +37,22 @@
 //! Use an 8-bit depth buffer (instead of 16 bit)
 //#define PR_DEPTH_BUFFER_8BIT
 
+//! Use an 64-bit interpolation type instead of 32-bit.
+#define PR_INTERP_64BIT
+
 //! Merge color- and depth buffers to a single one inside a frame buffer.
 #define PR_MERGE_COLOR_AND_DEPTH_BUFFERS
+
+
+#ifdef PR_INTERP_64BIT
+//! 64-bit interpolation type.
+typedef double PRinterp;
+#define PR_FLOAT(x) x
+#else
+//! 32-bit interpolation type.
+typedef float PRinterp;
+#define PR_FLOAT(x) x##f
+#endif
 
 
 #endif

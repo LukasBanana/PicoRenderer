@@ -322,10 +322,10 @@ static void _rasterize_line(pr_framebuffer* frameBuffer, const pr_texture* textu
     
     int x = vertexA->x;
     int y = vertexA->y;
-    float u = vertexA->u;
-    float v = vertexA->v;
+    PRinterp u = vertexA->u;
+    PRinterp v = vertexA->v;
 
-    float uStep = 0.0f, vStep = 0.0f;
+    PRinterp uStep = PR_FLOAT(0.0), vStep = PR_FLOAT(0.0);
 
     if (el > 1)
     {
@@ -341,7 +341,7 @@ static void _rasterize_line(pr_framebuffer* frameBuffer, const pr_texture* textu
     for (PRint t = 0; t < el; ++t)
     {
         // Render pixel
-        colorIndex = _pr_texture_sample_nearest_from_mipmap(texels, mipWidth, mipHeight, u, v);
+        colorIndex = _pr_texture_sample_nearest_from_mipmap(texels, mipWidth, mipHeight, (PRfloat)u, (PRfloat)v);
 
         _pr_framebuffer_plot(frameBuffer, (PRuint)x, (PRuint)y, colorIndex);
         
@@ -595,15 +595,15 @@ void _pr_render_screenspace_image(PRint left, PRint top, PRint right, PRint bott
 // Computes the vertex 'c' which is cliped between the vertices 'a' and 'b' and the plane 'z'
 static pr_clip_vertex _get_zplane_vertex(pr_clip_vertex a, pr_clip_vertex b, PRfloat z)
 {
-    PRfloat m = (z - b.z) / (a.z - b.z);
+    PRinterp m = ((PRinterp)(z - b.z)) / (a.z - b.z);
     pr_clip_vertex c;
 
-    c.x = m * (a.x - b.x) + b.x;
-    c.y = m * (a.y - b.y) + b.y;
+    c.x = (PRfloat)(m * (a.x - b.x) + b.x);
+    c.y = (PRfloat)(m * (a.y - b.y) + b.y);
     c.z = z;
 
-    c.u = m * (a.u - b.u) + b.u;
-    c.v = m * (a.v - b.v) + b.v;
+    c.u = (PRfloat)(m * (a.u - b.u) + b.u);
+    c.v = (PRfloat)(m * (a.v - b.v) + b.v);
 
     return c;
 }
@@ -659,15 +659,15 @@ static void _polygon_z_clipping(PRfloat zMin, PRfloat zMax)
 // Computes the vertex 'c' which is cliped between the vertices 'a' and 'b' and the plane 'x'
 static pr_raster_vertex _get_xplane_vertex(pr_raster_vertex a, pr_raster_vertex b, PRint x)
 {
-    PRfloat m = ((PRfloat)(x - b.x)) / (a.x - b.x);
+    PRinterp m = ((PRinterp)(x - b.x)) / (a.x - b.x);
     pr_raster_vertex c;
 
     c.x = x;
     c.y = (PRint)(m * (a.y - b.y) + b.y);
-    c.z = m * (a.z - b.z) + b.z;
+    c.z = (PRfloat)(m * (a.z - b.z) + b.z);
 
-    c.u = m * (a.u - b.u) + b.u;
-    c.v = m * (a.v - b.v) + b.v;
+    c.u = (PRfloat)(m * (a.u - b.u) + b.u);
+    c.v = (PRfloat)(m * (a.v - b.v) + b.v);
 
     return c;
 }
@@ -675,15 +675,15 @@ static pr_raster_vertex _get_xplane_vertex(pr_raster_vertex a, pr_raster_vertex 
 // Computes the vertex 'c' which is cliped between the vertices 'a' and 'b' and the plane 'y'
 static pr_raster_vertex _get_yplane_vertex(pr_raster_vertex a, pr_raster_vertex b, PRint y)
 {
-    PRfloat m = ((PRfloat)(y - b.y)) / (a.y - b.y);
+    PRinterp m = ((PRinterp)(y - b.y)) / (a.y - b.y);
     pr_raster_vertex c;
 
     c.x = (PRint)(m * (a.x - b.x) + b.x);
     c.y = y;
-    c.z = m * (a.z - b.z) + b.z;
+    c.z = (PRfloat)(m * (a.z - b.z) + b.z);
 
-    c.u = m * (a.u - b.u) + b.u;
-    c.v = m * (a.v - b.v) + b.v;
+    c.u = (PRfloat)(m * (a.u - b.u) + b.u);
+    c.v = (PRfloat)(m * (a.v - b.v) + b.v);
 
     return c;
 }
@@ -829,9 +829,9 @@ static void _rasterize_polygon_fill(pr_framebuffer* frameBuffer, const pr_textur
 
     // Start rasterizing the polygon
     PRint len, offset;
-    PRfloat z, zAct, zStep;
-    PRfloat u, uAct, uStep;
-    PRfloat v, vAct, vStep;
+    PRinterp z, zAct, zStep;
+    PRinterp u, uAct, uStep;
+    PRinterp v, vAct, vStep;
 
     PRint yStart = _rasterVertices[top].y;
     PRint yEnd = _rasterVertices[bottom].y;
@@ -869,7 +869,7 @@ static void _rasterize_polygon_fill(pr_framebuffer* frameBuffer, const pr_textur
 
                 #ifdef PR_PERSPECTIVE_CORRECTED
                 // Compute perspective corrected texture coordinates
-                z = 1.0f / zAct;
+                z = PR_FLOAT(1.0) / zAct;
                 u = uAct * z;
                 v = vAct * z;
                 #else
@@ -879,7 +879,7 @@ static void _rasterize_polygon_fill(pr_framebuffer* frameBuffer, const pr_textur
                 #endif
 
                 // Sample texture
-                pixel->colorIndex = _pr_texture_sample_nearest_from_mipmap(texels, mipWidth, mipHeight, u, v);
+                pixel->colorIndex = _pr_texture_sample_nearest_from_mipmap(texels, mipWidth, mipHeight, (PRfloat)u, (PRfloat)v);
                 //pixel->colorIndex = _pr_texture_sample_nearest(texture, u, v, uStep*z, vStep*z);
                 //pixel->colorIndex = (PRubyte)(zAct * (PRfloat)UCHAR_MAX);
             }
@@ -979,7 +979,7 @@ static PRboolean _clip_and_transform_polygon()
 
     // Z clipping
     _numPolyVerts = 3;
-    _polygon_z_clipping(1.0f, 100.0f);//!!!
+    _polygon_z_clipping(0.01f/*1.0f*/, 100.0f);//!!!
 
     // Projection
     for (PRint j = 0; j < _numPolyVerts; ++j)

@@ -36,15 +36,15 @@ pr_pixel;
 Writes the specified real depth value to a pixel depth.
 \param[in] z Specifies the real z value. This must be in the range [0.0 .. 1.0].
 */
-PR_INLINE PRdepthtype _pr_pixel_write_depth(PRfloat z)
+PR_INLINE PRdepthtype _pr_pixel_write_depth(PRinterp z)
 {
-    return (PRdepthtype)(z * (PRfloat)PR_DEPTH_MAX);
+    return (PRdepthtype)(z * (PRinterp)PR_DEPTH_MAX);
 }
 
 //! Reads the specified pixel depth to a real depth value.
-PR_INLINE PRfloat _pr_pixel_read_depth(PRdepthtype z)
+PR_INLINE PRinterp _pr_pixel_read_depth(PRdepthtype z)
 {
-    return ((PRfloat)z) / ((PRdepthtype)PR_DEPTH_MAX);
+    return ((PRinterp)z) / ((PRdepthtype)PR_DEPTH_MAX);
 }
 
 

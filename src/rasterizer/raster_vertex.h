@@ -27,11 +27,11 @@ pr_clip_vertex;
 //! Raster vertex structure after projection
 typedef struct pr_raster_vertex
 {
-    PRint   x; //!< Screen coordinate X.
-    PRint   y; //!< Screen coordinate Y.
-    PRfloat z; //!< Normalized device coordinate Z.
-    PRfloat u; //!< Inverse texture coordinate U.
-    PRfloat v; //!< Inverse texture coordinate V.
+    PRint       x; //!< Screen coordinate X.
+    PRint       y; //!< Screen coordinate Y.
+    PRinterp    z; //!< Normalized device coordinate Z.
+    PRinterp    u; //!< Inverse texture coordinate U.
+    PRinterp    v; //!< Inverse texture coordinate V.
 }
 pr_raster_vertex;
 

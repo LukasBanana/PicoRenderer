@@ -17,10 +17,10 @@
 //! Raster scanline side structure
 typedef struct pr_scaline_side
 {
-    PRint   offset; //!< Pixel offset in framebuffer
-    PRfloat z;
-    PRfloat u;
-    PRfloat v;
+    PRint       offset; //!< Pixel offset in framebuffer
+    PRinterp    z;
+    PRinterp    u;
+    PRinterp    v;
 }
 pr_scaline_side;
 
