@@ -39,7 +39,7 @@ float posZ = 3.0f;
 
 #define MOVE_SPEED 0.02f
 
-float camX = 0.0f, camY = 0.0f, camZ = -2.0f;
+float camX = 0.0f, camY = 0.0f, camZ = -20.0f;
 
 static void MoveCam(float x, float z)
 {
@@ -330,7 +330,7 @@ int main()
     #endif
 
     float orthoSize = 0.007f;//0.02f;
-    prBuildPerspectiveProjection(projectionA, (float)viewWidth/viewHeight, 0.1f, 100.0f, 74.0f * PR_DEG2RAD);
+    prBuildPerspectiveProjection(projectionA, (float)viewWidth/viewHeight, 0.01f, 100.0f, 74.0f * PR_DEG2RAD);
     prBuildOrthogonalProjection(projectionB, orthoSize*viewWidth, orthoSize*viewHeight, 0.1f, 100.0f);
 
     prLoadIdentity(viewMatrix);

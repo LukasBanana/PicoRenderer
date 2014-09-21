@@ -16,8 +16,6 @@
 
 #include <stdio.h>
 
-#include <math.h>//!!!
-
 
 // --- internals ---
 
@@ -49,27 +47,23 @@ static void _vertexbuffer_transform_all(pr_vertexbuffer* vertexBuffer)
     );
 }
 
-static void _setup_clip_vertex(pr_clip_vertex* clipVert, const pr_vertex* vert, const pr_matrix4* worldViewMatrix)
+static void _transform_vertex(pr_clip_vertex* clipVert, const pr_vertex* vert)
 {
-    _pr_matrix_mul_float3(&(clipVert->x), worldViewMatrix, &(vert->coord.x));
-    clipVert->w = 1.0f;
+    _pr_matrix_mul_float4(&(clipVert->x), &(PR_STATE_MACHINE.worldViewProjectionMatrix), &(vert->coord.x));
     clipVert->u = vert->texCoord.x;
     clipVert->v = vert->texCoord.y;
 }
 
-static void _project_vertex(pr_clip_vertex* vertex, const pr_matrix4* projectionMatrix, const pr_viewport* viewport)
+static void _project_vertex(pr_clip_vertex* vertex, const pr_viewport* viewport)
 {
-    // Transform view-space coordinate into projection space
-    pr_vector4 ndc;
-    _pr_matrix_mul_float4(&(ndc.x), projectionMatrix, &(vertex->x));
-
     // Transform coordinate into normalized device coordinates
-    //vertex->z = 1.0f / ndc.w;
-    PRfloat rhw = 1.0f / ndc.w;
+    //vertex->z = 1.0f / vertex->w;
+    PRfloat rhw = 1.0f / vertex->w;
 
-    vertex->x = ndc.x * rhw;
-    vertex->y = ndc.y * rhw;
-    vertex->z = /*ndc.z * */rhw;
+    vertex->x *= rhw;
+    vertex->y *= rhw;
+    //vertex->z *= rhw;
+    vertex->z = rhw;
 
     // Transform vertex to screen coordiante (+0.5 is for rounding adjustment)
     vertex->x = viewport->x + (vertex->x + 1.0f) * viewport->halfWidth + 0.5f;
@@ -601,6 +595,7 @@ static pr_clip_vertex _get_zplane_vertex(pr_clip_vertex a, pr_clip_vertex b, PRf
     c.x = (PRfloat)(m * (a.x - b.x) + b.x);
     c.y = (PRfloat)(m * (a.y - b.y) + b.y);
     c.z = z;
+    c.w = (PRfloat)(m * (a.w - b.w) + b.w);
 
     c.u = (PRfloat)(m * (a.u - b.u) + b.u);
     c.v = (PRfloat)(m * (a.v - b.v) + b.v);
@@ -664,10 +659,10 @@ static pr_raster_vertex _get_xplane_vertex(pr_raster_vertex a, pr_raster_vertex 
 
     c.x = x;
     c.y = (PRint)(m * (a.y - b.y) + b.y);
-    c.z = (PRfloat)(m * (a.z - b.z) + b.z);
+    c.z = m * (a.z - b.z) + b.z;
 
-    c.u = (PRfloat)(m * (a.u - b.u) + b.u);
-    c.v = (PRfloat)(m * (a.v - b.v) + b.v);
+    c.u = m * (a.u - b.u) + b.u;
+    c.v = m * (a.v - b.v) + b.v;
 
     return c;
 }
@@ -680,10 +675,10 @@ static pr_raster_vertex _get_yplane_vertex(pr_raster_vertex a, pr_raster_vertex 
 
     c.x = (PRint)(m * (a.x - b.x) + b.x);
     c.y = y;
-    c.z = (PRfloat)(m * (a.z - b.z) + b.z);
+    c.z = m * (a.z - b.z) + b.z;
 
-    c.u = (PRfloat)(m * (a.u - b.u) + b.u);
-    c.v = (PRfloat)(m * (a.v - b.v) + b.v);
+    c.u = m * (a.u - b.u) + b.u;
+    c.v = m * (a.v - b.v) + b.v;
 
     return c;
 }
@@ -855,7 +850,7 @@ static void _rasterize_polygon_fill(pr_framebuffer* frameBuffer, const pr_textur
         vAct = leftSide[y].v;
 
         // Rasterize current scanline
-        while (len-- > 0)
+        while (len-- >= 0)
         {
             // Fetch pixel from framebuffer
             pixel = &(frameBuffer->pixels[offset]);
@@ -969,7 +964,7 @@ static void _rasterize_polygon(pr_framebuffer* frameBuffer, const pr_texture* te
     }
 }
 
-static PRboolean _clip_and_transform_polygon()
+static PRboolean _clip_and_project_polygon(PRint numVertices)
 {
     // Get clipping rectangle
     const PRint xMin = PR_STATE_MACHINE.clipRect.left;
@@ -978,12 +973,13 @@ static PRboolean _clip_and_transform_polygon()
     const PRint yMax = PR_STATE_MACHINE.clipRect.bottom;
 
     // Z clipping
-    _numPolyVerts = 3;
-    _polygon_z_clipping(0.01f/*1.0f*/, 100.0f);//!!!
+    _numPolyVerts = numVertices;
+    //_polygon_z_clipping(1.0f, 100.0f);//!!!
+    _polygon_z_clipping(0.01f, 100.0f);//!!!
 
     // Projection
     for (PRint j = 0; j < _numPolyVerts; ++j)
-        _project_vertex(&(_clipVertices[j]), &(PR_STATE_MACHINE.projectionMatrix), &(PR_STATE_MACHINE.viewport));
+        _project_vertex(&(_clipVertices[j]), &(PR_STATE_MACHINE.viewport));
 
     // Make culling test
     if (_numPolyVerts < 3 || _is_triangle_culled(_CVERT_VEC2(0), _CVERT_VEC2(1), _CVERT_VEC2(2)))
@@ -1017,11 +1013,11 @@ static void _render_triangles(
         const pr_vertex* vertexC = (vertexBuffer->vertices + (i + 2));
 
         // Setup polygon
-        _setup_clip_vertex(&(_clipVertices[0]), vertexA, &(PR_STATE_MACHINE.worldViewMatrix));
-        _setup_clip_vertex(&(_clipVertices[1]), vertexB, &(PR_STATE_MACHINE.worldViewMatrix));
-        _setup_clip_vertex(&(_clipVertices[2]), vertexC, &(PR_STATE_MACHINE.worldViewMatrix));
+        _transform_vertex(&(_clipVertices[0]), vertexA);
+        _transform_vertex(&(_clipVertices[1]), vertexB);
+        _transform_vertex(&(_clipVertices[2]), vertexC);
 
-        if (_clip_and_transform_polygon() != PR_FALSE)
+        if (_clip_and_project_polygon(3) != PR_FALSE)
         {
             // Rasterize active polygon
             _rasterize_polygon(frameBuffer, texture);
@@ -1094,11 +1090,11 @@ static void _render_indexed_triangles(
         const pr_vertex* vertexC = (vertexBuffer->vertices + indexC);
 
         // Setup polygon
-        _setup_clip_vertex(&(_clipVertices[0]), vertexA, &(PR_STATE_MACHINE.worldViewMatrix));
-        _setup_clip_vertex(&(_clipVertices[1]), vertexB, &(PR_STATE_MACHINE.worldViewMatrix));
-        _setup_clip_vertex(&(_clipVertices[2]), vertexC, &(PR_STATE_MACHINE.worldViewMatrix));
+        _transform_vertex(&(_clipVertices[0]), vertexA);
+        _transform_vertex(&(_clipVertices[1]), vertexB);
+        _transform_vertex(&(_clipVertices[2]), vertexC);
 
-        if (_clip_and_transform_polygon() != PR_FALSE)
+        if (_clip_and_project_polygon(3) != PR_FALSE)
         {
             // Rasterize active polygon
             _rasterize_polygon(frameBuffer, texture);

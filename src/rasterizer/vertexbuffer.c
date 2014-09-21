@@ -57,14 +57,7 @@ static void _vertex_transform(
     pr_vertex* vertex, const pr_matrix4* worldViewProjectionMatrix, const pr_viewport* viewport)
 {
     // Transform view-space coordinate into projection space
-    pr_vector4 coordVS;
-    
-    coordVS.x = vertex->coord.x;
-    coordVS.y = vertex->coord.y;
-    coordVS.z = vertex->coord.z;
-    coordVS.w = 1.0f;
-
-    _pr_matrix_mul_float4(&(vertex->ndc.x), worldViewProjectionMatrix, &(coordVS.x));
+    _pr_matrix_mul_float4(&(vertex->ndc.x), worldViewProjectionMatrix, &(vertex->coord.x));
 
     // Transform coordinate into normalized device coordinates
     vertex->ndc.z = 1.0f / vertex->ndc.w;
@@ -146,6 +139,7 @@ void _pr_vertexbuffer_data(pr_vertexbuffer* vertexBuffer, PRsizei numVertices, c
             vert->coord.x = coord[0];
             vert->coord.y = coord[1];
             vert->coord.z = coord[2];
+            vert->coord.w = 1.0f;//coord[3];
 
             coordsByteAlign += vertexStride;
         }
@@ -154,6 +148,7 @@ void _pr_vertexbuffer_data(pr_vertexbuffer* vertexBuffer, PRsizei numVertices, c
             vert->coord.x = 0.0f;
             vert->coord.y = 0.0f;
             vert->coord.z = 0.0f;
+            vert->coord.w = 1.0f;
         }
 
         // Copy texture coordinates
@@ -210,6 +205,7 @@ void _pr_vertexbuffer_data_from_file(pr_vertexbuffer* vertexBuffer, PRsizei* num
         vert->coord.x = data.x;
         vert->coord.y = data.y;
         vert->coord.z = data.z;
+        vert->coord.w = 1.0f;
 
         vert->texCoord.x = data.u;
         vert->texCoord.y = data.v;

@@ -121,7 +121,7 @@ void _pr_immediate_mode_vertex(PRfloat x, PRfloat y, PRfloat z, PRfloat w)
     _IMM_CUR_VERTEX.coord.x = x;
     _IMM_CUR_VERTEX.coord.y = y;
     _IMM_CUR_VERTEX.coord.z = z;
-    //_IMM_CUR_VERTEX.coord.w = w;
+    _IMM_CUR_VERTEX.coord.w = w;
 
     // Count to next vertex
     ++_globalState.immModeVertCounter;
