@@ -974,8 +974,8 @@ static PRboolean _clip_and_project_polygon(PRint numVertices)
 
     // Z clipping
     _numPolyVerts = numVertices;
-    //_polygon_z_clipping(1.0f, 100.0f);//!!!
-    _polygon_z_clipping(0.01f, 100.0f);//!!!
+    _polygon_z_clipping(1.0f, 100.0f);//!!!
+    //_polygon_z_clipping(0.01f, 100.0f);//!!!
 
     // Projection
     for (PRint j = 0; j < _numPolyVerts; ++j)

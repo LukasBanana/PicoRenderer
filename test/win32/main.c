@@ -176,9 +176,15 @@ int main()
     #if 1
     const PRuint screenWidth  = 800;
     const PRuint screenHeight = 600;
+    const PRboolean isFullscreen = PR_FALSE;
+    #elif 1
+    const PRuint screenWidth  = 1280;
+    const PRuint screenHeight = 768;
+    const PRboolean isFullscreen = PR_TRUE;
     #else
     const PRuint screenWidth  = 1600;
     const PRuint screenHeight = 900;
+    const PRboolean isFullscreen = PR_FALSE;
     #endif
 
     DWORD winStyle = WS_SYSMENU | WS_MINIMIZEBOX | WS_CAPTION;
@@ -190,6 +196,28 @@ int main()
         winRect.right   = desktopWidth/2 + screenWidth/2;
         winRect.bottom  = desktopHeight/2 + screenHeight/2;
     }
+
+    if (isFullscreen)
+    {
+        winStyle        = WS_POPUP;
+
+        winRect.left    = 0;
+        winRect.top     = 0;
+        winRect.right   = screenWidth;
+        winRect.bottom  = screenHeight;
+
+        DEVMODE devMode;
+        {
+            memset(&devMode, 0, sizeof(devMode));
+            devMode.dmSize          = sizeof(devMode);
+            devMode.dmPelsWidth     = screenWidth;
+            devMode.dmPelsHeight    = screenHeight;
+            devMode.dmBitsPerPel    = 32;
+            devMode.dmFields        = DM_BITSPERPEL | DM_PELSWIDTH | DM_PELSHEIGHT;
+        }
+        ChangeDisplaySettings(&devMode, CDS_FULLSCREEN);
+    }
+
     AdjustWindowRect(&winRect, winStyle, FALSE);
 
     HWND wnd = CreateWindow(
