@@ -254,11 +254,13 @@ int main()
     prBindFrameBuffer(frameBuffer);
 
     // Create textures
+    const PRboolean dither = PR_TRUE;
+
     PRobject textureA = prCreateTexture();
-    prTextureImage2DFromFile(textureA, "media/house.jpg", PR_TRUE, PR_TRUE);
+    prTextureImage2DFromFile(textureA, "media/house.jpg", dither, PR_TRUE);
 
     PRobject textureB = prCreateTexture();
-    prTextureImage2DFromFile(textureB, "media/tiles.png", PR_TRUE, PR_TRUE);
+    prTextureImage2DFromFile(textureB, "media/tiles.png", dither, PR_TRUE);
 
     // Create vertex buffer
     PRobject vertexBuffer = prCreateVertexBuffer();

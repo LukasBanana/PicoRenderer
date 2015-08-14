@@ -41,7 +41,7 @@
 #define PR_INTERP_64BIT
 
 //! Merge color- and depth buffers to a single one inside a frame buffer.
-#define PR_MERGE_COLOR_AND_DEPTH_BUFFERS
+#define PR_MERGE_COLOR_AND_DEPTH_BUFFERS //!CAN NOT BE DISABLED YET!
 
 
 #ifdef PR_INTERP_64BIT
