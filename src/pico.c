@@ -160,6 +160,11 @@ void prTextureImage2DFromFile(
     _pr_image_delete(image);
 }
 
+void prTexEnvi(PRenum param, PRint value)
+{
+    _pr_state_machine_set_texenvi(param, value);
+}
+
 // --- vertexbuffer --- //
 
 PRobject prCreateVertexBuffer()

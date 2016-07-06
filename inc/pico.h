@@ -164,6 +164,14 @@ Sets the 2D image data from file to the specified texture.
 */
 void prTextureImage2DFromFile(PRobject texture, const char* filename, PRboolean dither, PRboolean generateMips);
 
+/**
+Sets the texture environment parameters.
+\param[in] param Specifies the paramer whose value is to be set. Valid values are:
+- PR_TEXTURE_LOD_BIAS: Specifies the level-of-detail bias for MIP-mapping. Must be in the range [0, 255]. By default 0.
+\param[in] value Specifies the new integer value.
+*/
+void prTexEnvi(PRenum param, PRint value);
+
 // --- vertexbuffer --- //
 
 /**
@@ -350,8 +358,7 @@ void prLoadIdentity(PRfloat* matrix4x4);
 
 /**
 Sets the specified state.
-\param[in] cap Specifies the capability whose state is to be changed.
-Value values are:
+\param[in] cap Specifies the capability whose state is to be changed. Valid values are:
 - PR_SCISSOR - Enables/disables the scissor rectangle (see prScissor). By default PR_FALSE.
 \param[in] state Specifies the new state.
 \see prEnable

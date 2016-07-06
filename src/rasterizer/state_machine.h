@@ -44,7 +44,8 @@ typedef struct pr_state_machine
     pr_texture*         boundTexture;
 
     PRubyte             colorIndex;                 // Active color index
-    
+    PRubyte             textureLodBias;
+
     PRenum              cullMode;
     PRenum              polygonMode;
 
@@ -70,6 +71,9 @@ void _pr_state_machine_makecurrent(pr_state_machine* stateMachine);
 
 void _pr_state_machine_set_state(PRenum cap, PRboolean state);
 PRboolean _pr_state_machine_get_state(PRenum cap);
+
+void _pr_state_machine_set_texenvi(PRenum param, PRint value);
+PRint _pr_state_machine_get_texenvi(PRenum param);
 
 void _pr_state_machine_bind_framebuffer(pr_framebuffer* frameBuffer);
 void _pr_state_machine_bind_vertexbuffer(pr_vertexbuffer* vertexBuffer);

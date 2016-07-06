@@ -174,8 +174,8 @@ int main()
     int desktopHeight   = GetSystemMetrics(SM_CYSCREEN);
 
     #if 1
-    const PRuint screenWidth  = 800;
-    const PRuint screenHeight = 600;
+    const PRuint screenWidth  = 640;//800;
+    const PRuint screenHeight = 480;//600;
     const PRboolean isFullscreen = PR_FALSE;
     #elif 1
     const PRuint screenWidth  = 1280;
@@ -261,6 +261,8 @@ int main()
 
     PRobject textureB = prCreateTexture();
     prTextureImage2DFromFile(textureB, "media/tiles.png", dither, PR_TRUE);
+
+    prTexEnvi(PR_TEXTURE_LOD_BIAS, 1);
 
     // Create vertex buffer
     PRobject vertexBuffer = prCreateVertexBuffer();
@@ -527,7 +529,7 @@ int main()
 
             // Draw floor
             float floorSize = 100.0f;
-            int floorTC = 50;
+            int numQuads = 50;
 
             prLoadIdentity(worldMatrix);
             prTranslate(worldMatrix, 0, 4, 0);
@@ -538,13 +540,37 @@ int main()
 
             prBegin(PR_TRIANGLES);
             {
-                prTexCoord2i(0, 0); prVertex3i(-1, 0, 1);
-                prTexCoord2i(floorTC, 0); prVertex3i(1, 0, 1);
-                prTexCoord2i(floorTC, floorTC); prVertex3i(1, 0, -1);
+                #ifdef PR_PERSPECTIVE_CORRECTED
 
-                prTexCoord2i(0, 0); prVertex3i(-1, 0, 1);
-                prTexCoord2i(floorTC, floorTC); prVertex3i(1, 0, -1);
-                prTexCoord2i(0, floorTC); prVertex3i(-1, 0, -1);
+                // Only use a single quad when textures are perspective corrected
+                prTexCoord2i(0, 0); prVertex3f(-1, 0, 1);
+                prTexCoord2i(numQuads, 0); prVertex3f(1, 0, 1);
+                prTexCoord2i(numQuads, numQuads); prVertex3f(1, 0, -1);
+
+                prTexCoord2i(0, 0); prVertex3f(-1, 0, 1);
+                prTexCoord2i(numQuads, numQuads); prVertex3f(1, 0, -1);
+                prTexCoord2i(0, numQuads); prVertex3f(-1, 0, -1);
+
+                #else
+
+                // Use many quads to emulate perspective texture correction
+                float step = 2.0f / (float)numQuads;
+
+                for (float x = -1.0f; x < 1.0f; x += step)
+                {
+                    for (float z = -1.0f; z < 1.0f; z += step)
+                    {
+                        prTexCoord2i(0, 0); prVertex3f(x, 0, z + step);
+                        prTexCoord2i(1, 0); prVertex3f(x + step, 0, z + step);
+                        prTexCoord2i(1, 1); prVertex3f(x + step, 0, z);
+
+                        prTexCoord2i(0, 0); prVertex3f(x, 0, z + step);
+                        prTexCoord2i(1, 1); prVertex3f(x + step, 0, z);
+                        prTexCoord2i(0, 1); prVertex3f(x, 0, z);
+                    }
+                }
+
+                #endif
             }
             prEnd();
 

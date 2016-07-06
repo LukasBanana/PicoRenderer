@@ -12,8 +12,6 @@
 #include "image.h"
 #include "state_machine.h"
 
-#include "color_palette.h"//!!!
-
 #include <math.h>
 #include <stdlib.h>
 #include <string.h>
@@ -341,9 +339,13 @@ PRubyte _pr_texture_num_mips(PRubyte maxSize)
 
 const PRubyte* _pr_texture_select_miplevel(const pr_texture* texture, PRubyte mip, PRtexsize* width, PRtexsize* height)
 {
+    // Add MIP level offset
+    mip = PR_CLAMP((PRubyte)(((PRint)mip) + _stateMachine->textureLodBias), 0, texture->mips - 1);
+
     // Store mip size in output parameters
     *width = PR_MIP_SIZE(texture->width, mip);
     *height = PR_MIP_SIZE(texture->height, mip);
+
     // Return MIP-map texel offset
     return texture->mipTexels[mip];
 }

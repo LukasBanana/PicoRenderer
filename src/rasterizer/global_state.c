@@ -126,7 +126,19 @@ void _pr_immediate_mode_vertex(PRfloat x, PRfloat y, PRfloat z, PRfloat w)
     // Count to next vertex
     ++_globalState.immModeVertCounter;
 
+    // Check if limit is exceeded
     if (_globalState.immModeVertCounter >= PR_NUM_IMMEDIATE_VERTICES)
         _immediate_mode_flush();
+
+    switch (_globalState.immModePrimitives)
+    {
+        case PR_TRIANGLES:
+            if ( _globalState.immModeVertCounter + 3 >= PR_NUM_IMMEDIATE_VERTICES &&
+                 _globalState.immModeVertCounter % 3 == 0 )
+            {
+                _immediate_mode_flush();
+            }
+            break;
+    }
 }
 

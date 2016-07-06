@@ -118,6 +118,7 @@ void _pr_state_machine_init(pr_state_machine* stateMachine)
     stateMachine->boundTexture          = NULL;
 
     stateMachine->colorIndex            = 0;
+    stateMachine->textureLodBias        = 0;
     stateMachine->cullMode              = PR_CULL_NONE;
     stateMachine->polygonMode           = PR_POLYGON_FILL;
 
@@ -167,6 +168,31 @@ PRboolean _pr_state_machine_get_state(PRenum cap)
         return PR_FALSE;
     }
     return PR_STATE_MACHINE.states[cap];
+}
+
+void _pr_state_machine_set_texenvi(PRenum param, PRint value)
+{
+    switch (param)
+    {
+        case PR_TEXTURE_LOD_BIAS:
+            PR_STATE_MACHINE.textureLodBias = (PRubyte)PR_CLAMP(value, 0, 255);
+            break;
+        default:
+            PR_ERROR(PR_ERROR_INDEX_OUT_OF_BOUNDS);
+            break;
+    }
+}
+
+PRint _pr_state_machine_get_texenvi(PRenum param)
+{
+    switch (param)
+    {
+        case PR_TEXTURE_LOD_BIAS:
+            return (PRint)PR_STATE_MACHINE.textureLodBias;
+        default:
+            PR_ERROR(PR_ERROR_INDEX_OUT_OF_BOUNDS);
+            return 0;
+    }
 }
 
 void _pr_state_machine_bind_framebuffer(pr_framebuffer* frameBuffer)

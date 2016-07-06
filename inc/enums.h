@@ -43,6 +43,9 @@
 // States
 #define PR_SCISSOR          0
 
+// Texture environment parameters
+#define PR_TEXTURE_LOD_BIAS 0
+
 // Frame buffer clear flags
 #define PR_COLOR_BUFFER_BIT 0x00000001
 #define PR_DEPTH_BUFFER_BIT 0x00000002
