@@ -15,6 +15,12 @@ Status
 This project is in ALPHA status!
 
 
+Screenshot
+==========
+<p align="center">Example scene:</p>
+<p align="center"><img src="test/media/preview.png" alt="test/media/preview.png"/></p>
+
+
 Why C and not C++?
 ==================
 C code is slim, highly portable, compiles fast and for a low-level software renderer one doesn't need lots of object-oriented or templated code.
