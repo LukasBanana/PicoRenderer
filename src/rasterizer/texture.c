@@ -312,7 +312,7 @@ PRboolean _pr_texture_image2d(
 }
 
 PRboolean _pr_texture_subimage2d(
-    pr_texture* texture, PRubyte mip, PRtexsize x, PRtexsize y, PRtexsize width, PRtexsize height, PRenum format, const PRubyte* data, PRboolean dither)
+    pr_texture* texture, PRubyte mip, PRtexsize x, PRtexsize y, PRtexsize width, PRtexsize height, PRenum format, const PRvoid* data, PRboolean dither)
 {
     // Validate parameters
     if (texture == NULL)

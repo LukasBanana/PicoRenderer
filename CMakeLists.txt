@@ -19,9 +19,6 @@ add_definitions(-D_CRT_SECURE_NO_WARNINGS)
 
 # === Global files ===
 
-file(GLOB_RECURSE SourcesAll ${PROJECT_SOURCE_DIR}/src/*.*)
-file(GLOB_RECURSE HeadersAll ${PROJECT_SOURCE_DIR}/inc/*.*)
-
 file(GLOB HeadersMain ${PROJECT_SOURCE_DIR}/inc/*.*)
 file(GLOB SourcesMain ${PROJECT_SOURCE_DIR}/src/*.*)
 
@@ -32,9 +29,13 @@ if(WIN32)
 	file(GLOB SourcesPlatform ${PROJECT_SOURCE_DIR}/src/platform/win32/*.*)
 	file(GLOB SourcesTest ${PROJECT_SOURCE_DIR}/test/win32/*.*)
 	include_directories("${PROJECT_SOURCE_DIR}/src/platform/win32")
+elseif(APPLE)
+	file(GLOB SourcesPlatform ${PROJECT_SOURCE_DIR}/src/platform/osx/*.*)
+	file(GLOB SourcesTest ${PROJECT_SOURCE_DIR}/test/osx/*.*)
+	include_directories("${PROJECT_SOURCE_DIR}/src/platform/osx")
 else()
 	file(GLOB SourcesPlatform ${PROJECT_SOURCE_DIR}/src/platform/posix/*.*)
-	#file(GLOB SourcesTest ${PROJECT_SOURCE_DIR}/test/posix/*.*)
+	file(GLOB SourcesTest ${PROJECT_SOURCE_DIR}/test/posix/*.*)
 	include_directories("${PROJECT_SOURCE_DIR}/src/platform/posix")
 endif()
 
@@ -74,7 +75,7 @@ source_group(
 )
 
 source_group(
-	"test"
+	"test1"
 	FILES
 	${SourcesTest}
 )
@@ -84,18 +85,22 @@ source_group(
 
 add_library(
 	pico_renderer
-	${SourcesAll}
-	${HeadersAll}
+	${SourcesMain}
+	${HeadersMain}
+	${SourcesRasterizer}
+	${SourcesPlatformBase}
+	${SourcesPlatform}
+	${PROJECT_SOURCE_DIR}/src/pico.c
 )
 
 add_executable(
-	test
+	test1
 	${SourcesTest}
 )
 
-target_link_libraries(test pico_renderer)
+target_link_libraries(test1 pico_renderer)
 
 set_target_properties(pico_renderer PROPERTIES LINKER_LANGUAGE C)
-set_target_properties(test PROPERTIES LINKER_LANGUAGE C)
+set_target_properties(test1 PROPERTIES LINKER_LANGUAGE C)
 
 

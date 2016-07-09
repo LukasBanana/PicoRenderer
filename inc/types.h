@@ -12,10 +12,14 @@
 #include <stddef.h>
 
 
-#define PR_TRUE     1
-#define PR_FALSE    0
+#define PR_TRUE         1
+#define PR_FALSE        0
 
-#define PR_INLINE   _inline
+#ifdef _MSC_VER
+#   define PR_INLINE    _inline
+#else
+#   define PR_INLINE    inline
+#endif
 
 
 //! Boolean type.

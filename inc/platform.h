@@ -9,11 +9,13 @@
 #define __PR_PLATFORM_H__
 
 
-#if defined(WIN32)
+#if defined(_WIN32)
 #   include <Windows.h>
 #   define PR_PLATFORM_WIN32
-#elif defined(unix)
-#   define PR_PLATFORM_POSIX
+#elif defined(__APPLE__)
+#   define PR_PLATFORM_OSX
+#elif defined(__linux__)
+#   define PR_PLATFORM_LINUX
 #else
 #   error OS not supported yet
 #endif
@@ -28,9 +30,18 @@ typedef struct PRcontextdesc
 }
 PRcontextdesc;
 
-#elif defined(PR_PLATFORM_POSIX)
+#elif defined(PR_PLATFORM_OSX)
 
-//! Posix render context description structure.
+//! OSX render context description structure.
+typedef struct PRcontextdesc
+{
+    int unused;
+}
+PRcontextdesc;
+
+#elif defined(PR_PLATFORM_LINUX)
+
+//! Linux render context description structure.
 typedef struct PRcontextdesc
 {
     int unused;
