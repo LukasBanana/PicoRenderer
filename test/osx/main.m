@@ -5,6 +5,8 @@
  * See "LICENSE.txt" for license information.
  */
 
+#import <Cocoa/Cocoa.h>
+
 #include <pico.h>
 
 
@@ -15,10 +17,8 @@ PRobject frameBuffer    = NULL;
 PRboolean isQuit        = PR_FALSE;
 
 
-int main()
+int main(int argc, char* argv[])
 {
-    
-    
-    return 0;
+    return NSApplicationMain(argc, (const char**)argv);
 }
 
