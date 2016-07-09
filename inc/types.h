@@ -18,7 +18,7 @@
 #ifdef _MSC_VER
 #   define PR_INLINE    _inline
 #else
-#   define PR_INLINE    inline
+#   define PR_INLINE    static inline
 #endif
 
 

@@ -93,23 +93,29 @@ add_library(
 	${PROJECT_SOURCE_DIR}/src/pico.c
 )
 
-add_executable(
-	test1
-	${SourcesTest}
-)
+if(APPLE)
+	add_executable(
+		test1
+		MACOSX_BUNDLE
+		${SourcesTest}
+	)
+else()
+	add_executable(
+		test1
+		${SourcesTest}
+	)
+endif()
 
-target_link_libraries(test1 pico_renderer)
-
-set_target_properties(pico_renderer PROPERTIES LINKER_LANGUAGE C)
-set_target_properties(test1 PROPERTIES LINKER_LANGUAGE C)
-
-
-# === Libraries ===
 
 if(APPLE)
 	find_library(COCOA_LIBRARY Cocoa)
-	target_link_libraries(test1 ${COCOA_LIBRARY})
+	target_link_libraries(test1 ${COCOA_LIBRARY} pico_renderer)
+else()
+	target_link_libraries(test1 pico_renderer)
 endif()
+
+set_target_properties(pico_renderer PROPERTIES LINKER_LANGUAGE C)
+set_target_properties(test1 PROPERTIES LINKER_LANGUAGE C)
 
 
 

@@ -5,6 +5,8 @@
  * See "LICENSE.txt" for license information.
  */
 
+#import <Cocoa/Cocoa.h>
+
 #include "context.h"
 #include "error.h"
 #include "helper.h"
@@ -14,7 +16,7 @@ pr_context* _currentContext = NULL;
 
 pr_context* _pr_context_create(const PRcontextdesc* desc, PRuint width, PRuint height)
 {
-    if (desc == NULL || width <= 0 || height <= 0)
+    if (desc == NULL || desc->window == NULL || width <= 0 || height <= 0)
     {
         _pr_error_set(PR_ERROR_INVALID_ARGUMENT, __FUNCTION__);
         return NULL;
@@ -23,8 +25,25 @@ pr_context* _pr_context_create(const PRcontextdesc* desc, PRuint width, PRuint h
     // Create render context
     pr_context* context = PR_MALLOC(pr_context);
 
-    //TODO...
+    // Store OSX objects
+    context->window = desc->window;
+    context->screenBitmap = (void*)[[NSBitmapImageRep alloc]
+        initWithBitmapDataPlanes: nil
+        pixelsWide: width
+        pixelsHigh: height
+        bitsPerSample: 8
+        samplesPerPixel: 3
+        hasAlpha: NO
+        isPlanar: NO
+        colorSpaceName: NSCalibratedRGBColorSpace
+        bytesPerRow: (3 * width)
+        bitsPerPixel: 24
+    ];
 
+    // Create pixel buffer
+    context->width  = width;
+    context->height = height;
+    
     // Create color palette
     context->colorPalette = PR_MALLOC(pr_color_palette);
     _pr_color_palette_fill_r3g3b2(context->colorPalette);
@@ -41,9 +60,11 @@ void _pr_context_delete(pr_context* context)
     if (context != NULL)
     {
         _pr_ref_assert(&(context->stateMachine));
+        
+        // Delete OSX objects
+        [((NSBitmapImageRep*)context->screenBitmap) release];
 
         free(context->colorPalette);
-        free(context->colors);
         free(context);
     }
 }
@@ -70,10 +91,13 @@ void _pr_context_present(pr_context* context, const pr_framebuffer* framebuffer)
         return;
     }
 
+    // Show framebuffer on device context ('SetDIBits' only needs a device context when 'DIB_PAL_COLORS' is used)
+    NSBitmapImageRep* screenBitmap = (NSBitmapImageRep*)context->screenBitmap;
+    
     // Get iterators
     const PRuint num = context->width*context->height;
 
-    pr_color* dst = context->colors;
+    pr_color* dst = (pr_color*)[screenBitmap bitmapData];
     pr_color* dstEnd = dst + num;
 
     const pr_pixel* pixels = framebuffer->pixels;
@@ -93,8 +117,16 @@ void _pr_context_present(pr_context* context, const pr_framebuffer* framebuffer)
         ++dst;
         ++pixels;
     }
-
-    // Show framebuffer on device context ('SetDIBits' only needs a device context when 'DIB_PAL_COLORS' is used)
-    //TODO...
+    
+    // Present final bitmap
+    //NSGraphicsContext* gfx = [((NSWindow*)context->window) graphicsContext];
+    
+    /*NSGraphicsContext* gfx = [NSGraphicsContext graphicsContextWithBitmapImageRep:screenBitmap];
+    [NSGraphicsContext saveGraphicsState];
+    [NSGraphicsContext setCurrentContext:gfx];
+    
+    [screenBitmap draw];
+    
+    [NSGraphicsContext restoreGraphicsState];*/
 }
 

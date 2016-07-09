@@ -35,7 +35,7 @@ PRcontextdesc;
 //! OSX render context description structure.
 typedef struct PRcontextdesc
 {
-    int unused;
+    void* window;
 }
 PRcontextdesc;
 

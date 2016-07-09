@@ -22,17 +22,19 @@
 //! Render context structure.
 typedef struct pr_context
 {
-    // GDI objects
+    // Win32 objects
     HWND                wnd;
     HDC                 dc;
     HDC                 dcBmp;
     BITMAPINFO          bmpInfo;
     HBITMAP             bmp;
+    
     // Renderer objects
     pr_color*           colors;
     PRuint              width;
     PRuint              height;
     pr_color_palette*   colorPalette;
+    
     // State objects
     pr_state_machine    stateMachine;
 }

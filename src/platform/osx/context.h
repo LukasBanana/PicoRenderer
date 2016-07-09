@@ -20,8 +20,11 @@
 //! Render context structure.
 typedef struct pr_context
 {
+    // OSX objects
+    void*               window;
+    void*               screenBitmap;
+    
     // Renderer objects
-    pr_color*           colors;
     PRuint              width;
     PRuint              height;
     pr_color_palette*   colorPalette;
