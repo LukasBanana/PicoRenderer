@@ -6,47 +6,54 @@ It has an interface similiar to OpenGL 1.1.
 
 
 License
-=======
+-------
+
 BSD 3-Clause License
 
 
 Status
-======
+------
+
 This project is in ALPHA status!
 
 
 Screenshot
-==========
+----------
+
 <p align="center">Example scene:</p>
 <p align="center"><img src="test/media/preview.png" alt="test/media/preview.png"/></p>
 
 
 Why C and not C++?
-==================
+------------------
+
 C code is slim, highly portable, compiles fast and for a low-level software renderer one doesn't need lots of object-oriented or templated code.
 
 
 Build
-=====
+-----
+
 - CMake 2.8 (http://www.cmake.org/)
 - C99 compliant compiler
 
 
 Fine Tuning
-===========
+-----------
+
 There are several macros which allows you to enabled or disable specific features for fine tuning.
 For example if "PR_FAST_MATH" is defined, all uses of the sine function ('sinf' from the C standard library) will be replaced by "_aprx_sin" which implements an approximated and fast sine function (in src/rasterizer/ext_math.c).
 See src/rasterizer/static_config.h for all these macros.
 
 
 Plugins
-=======
+-------
 
 This project makes use of the "stb_image" library (see https://github.com/nothings/stb)
 
 
 Getting Started
-===============
+---------------
+
 ```c
 // PicoRenderer (PR) interface example
 // (interface still in development)
