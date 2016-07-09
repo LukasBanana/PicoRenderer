@@ -350,20 +350,23 @@ const PRubyte* _pr_texture_select_miplevel(const pr_texture* texture, PRubyte mi
     return texture->mipTexels[mip];
 }
 
-PRubyte _pr_texture_compute_miplevel(const pr_texture* texture, PRfloat dux, PRfloat duy, PRfloat dvx, PRfloat dvy)
+PRubyte _pr_texture_compute_miplevel(const pr_texture* texture, PRfloat r1x, PRfloat r1y, PRfloat r2x, PRfloat r2y)
 {
     // Compute derivation of u and v vectors
-    PRfloat ux = fabsf(dux) * texture->width;
-    PRfloat uy = fabsf(duy) * texture->height;
+    r1x = fabsf(r1x);// * texture->width;
+    r1y = fabsf(r1y);// * texture->height;
 
-    PRfloat vx = fabsf(dvx) * texture->width;
-    PRfloat vy = fabsf(dvy) * texture->height;
+    r2x = fabsf(r2x);// * texture->width;
+    r2y = fabsf(r2y);// * texture->height;
 
     // Select LOD by maximal derivation vector length (using dot product)
-    PRfloat d = PR_MAX(ux*ux + uy*uy, vx*vx + vy*vy);
+    PRfloat r1_len = sqrtf(r1x*r1x + r1y*r1y);
+    PRfloat r2_len = sqrtf(r2x*r2x + r2y*r2y);
+    PRfloat d = PR_MAX(r1_len, r2_len)*10.0f;
     
-    // Clamp LOD to [0 .. texture->texture->mips)
-    PRint lod = _int_log2(d * 1.5f) * 2 / 3;
+    // Clamp LOD to [0, texture->texture->mips)
+    //PRint lod = _int_log2(d);
+    PRint lod = (PRint)log2f(d);
     return (PRubyte)PR_CLAMP(lod, 0, texture->mips - 1);
 }
 

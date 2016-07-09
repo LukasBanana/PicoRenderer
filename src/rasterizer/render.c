@@ -15,6 +15,7 @@
 #include "static_config.h"
 
 #include <stdio.h>
+#include <math.h>
 
 
 // --- internals ---
@@ -911,44 +912,8 @@ static void _rasterize_polygon_point(
     }
 }
 
-static void _rasterize_polygon(pr_framebuffer* frameBuffer, const pr_texture* texture)
+static void _rasterize_polygon(pr_framebuffer* frameBuffer, const pr_texture* texture, PRubyte mipLevel)
 {
-    #if 0//!!!
-
-    // Select MIP level
-    float tc0x = b->texCoord.x - a->texCoord.x;
-    float tc0y = b->texCoord.y - a->texCoord.y;
-
-    float tc1x = c->texCoord.x - a->texCoord.x;
-    float tc1y = c->texCoord.y - a->texCoord.y;
-
-    float c0x = b->ndc.x - a->ndc.x;
-    float c0y = b->ndc.y - a->ndc.y;
-
-    float c1x = c->ndc.x - a->ndc.x;
-    float c1y = c->ndc.y - a->ndc.y;
-
-    float len0 = sqrtf(c0x*c0x + c0y*c0y);
-    float len1 = sqrtf(c1x*c1x + c1y*c1y);
-
-    PRubyte mipLevel = _pr_texture_compute_miplevel(
-        texture,
-        /*(b->texCoord.x - a->texCoord.x) * (b->ndc.x - a->ndc.x),
-        (b->texCoord.y - a->texCoord.y) * (b->ndc.y - a->ndc.y),
-        (c->texCoord.x - a->texCoord.x) * (c->ndc.x - a->ndc.x),
-        (c->texCoord.y - a->texCoord.y) * (c->ndc.y - a->ndc.y)*/
-        tc0x / len0,
-        tc0y / len0,
-        tc1x / len1,
-        tc1y / len1
-    );
-
-    #else
-
-    PRubyte mipLevel = 0;
-
-    #endif
-
     // Rasterize polygon with selected MIP level
     switch (PR_STATE_MACHINE.polygonMode)
     {
@@ -998,6 +963,31 @@ static PRboolean _clip_and_project_polygon(PRint numVertices)
     return PR_TRUE;
 }
 
+static PRubyte _compute_polygon_miplevel(const pr_texture* texture)
+{
+    #if 0//!!!
+
+    const pr_raster_vertex* a = &(_rasterVertices[0]);
+    const pr_raster_vertex* b = &(_rasterVertices[1]);
+    const pr_raster_vertex* c = &(_rasterVertices[2]);
+
+    // Get dx, dy, du, dv for this vertex
+    PRfloat dx, dy, du, dv;
+
+    dx = sqrtf(PR_SQ(b->x - a->x) + PR_SQ(b->y - a->y));
+    dy = sqrtf(PR_SQ(c->x - a->x) + PR_SQ(c->y - a->y));
+    du = sqrtf(PR_SQ((b->u - a->u)*texture->width) + PR_SQ((b->v - a->v)*texture->height));
+    dv = sqrtf(PR_SQ((c->u - a->u)*texture->width) + PR_SQ((c->v - a->v)*texture->height));
+
+    return _pr_texture_compute_miplevel(texture, du/dx, dv/dx, du/dy, dv/dy);
+
+    #else
+
+    return 0;
+
+    #endif
+}
+
 static void _render_triangles(
     const pr_texture* texture, PRsizei numVertices, PRsizei firstVertex, const pr_vertexbuffer* vertexBuffer)
 {
@@ -1020,7 +1010,7 @@ static void _render_triangles(
         if (_clip_and_project_polygon(3) != PR_FALSE)
         {
             // Rasterize active polygon
-            _rasterize_polygon(frameBuffer, texture);
+            _rasterize_polygon(frameBuffer, texture, _compute_polygon_miplevel(texture));
         }
     }
 }
@@ -1097,7 +1087,7 @@ static void _render_indexed_triangles(
         if (_clip_and_project_polygon(3) != PR_FALSE)
         {
             // Rasterize active polygon
-            _rasterize_polygon(frameBuffer, texture);
+            _rasterize_polygon(frameBuffer, texture, _compute_polygon_miplevel(texture));
         }
     }
 }

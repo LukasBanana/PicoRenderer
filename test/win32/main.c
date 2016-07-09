@@ -540,7 +540,7 @@ int main()
 
             prBegin(PR_TRIANGLES);
             {
-                #ifdef PR_PERSPECTIVE_CORRECTED
+                #if 0//defined(PR_PERSPECTIVE_CORRECTED)
 
                 // Only use a single quad when textures are perspective corrected
                 prTexCoord2i(0, 0); prVertex3f(-1, 0, 1);

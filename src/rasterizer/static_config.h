@@ -32,10 +32,10 @@
 #define PR_DEBUG
 
 //! Use perspective corrected depth and texture coordinates
-//#define PR_PERSPECTIVE_CORRECTED
+#define PR_PERSPECTIVE_CORRECTED
 
 //! Use an 8-bit depth buffer (instead of 16 bit)
-#define PR_DEPTH_BUFFER_8BIT
+//#define PR_DEPTH_BUFFER_8BIT
 
 //! Use an 64-bit interpolation type instead of 32-bit.
 #define PR_INTERP_64BIT
