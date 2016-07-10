@@ -11,6 +11,7 @@
 #include <pico.h>
 #include <stdbool.h>
 #include <math.h>
+#include <time.h>
 
 #include <rasterizer/image.h>
 #include <rasterizer/matrix4.h>
@@ -254,7 +255,11 @@ int main()
     prBindFrameBuffer(frameBuffer);
 
     // Create textures
+    #ifdef PR_COLOR_BUFFER_24BIT
+    const PRboolean dither = PR_FALSE;
+    #else
     const PRboolean dither = PR_TRUE;
+    #endif
 
     PRobject textureA = prCreateTexture();
     prTextureImage2DFromFile(textureA, "media/house.jpg", dither, PR_TRUE);
@@ -262,7 +267,7 @@ int main()
     PRobject textureB = prCreateTexture();
     prTextureImage2DFromFile(textureB, "media/tiles.png", dither, PR_TRUE);
 
-    prTexEnvi(PR_TEXTURE_LOD_BIAS, 1);
+    //prTexEnvi(PR_TEXTURE_LOD_BIAS, 1);
 
     // Create vertex buffer
     PRobject vertexBuffer = prCreateVertexBuffer();
@@ -371,6 +376,9 @@ int main()
     //prCullMode(PR_CULL_BACK);
     prCullMode(PR_CULL_FRONT);
 
+    clock_t startTime = clock();
+    int fps = 0;
+
     // Main loop
     while (!isQuit)
     {
@@ -386,6 +394,15 @@ int main()
         {
             TranslateMessage(&msg);
             DispatchMessage(&msg);
+        }
+
+        // Show FPS
+        ++fps;
+        if (clock()/CLOCKS_PER_SEC > startTime/CLOCKS_PER_SEC)
+        {
+            startTime = clock();
+            printf("fps = %i\n", fps);
+            fps = 0;
         }
 
         // Update user input

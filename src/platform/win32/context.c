@@ -102,15 +102,17 @@ void _pr_context_present(pr_context* context, const pr_framebuffer* framebuffer)
     pr_color* dstEnd = dst + num;
 
     const pr_pixel* pixels = framebuffer->pixels;
-
     const pr_color* palette = context->colorPalette->colors;
+
+    #ifndef PR_COLOR_BUFFER_24BIT
     const pr_color* paletteColor;
+    #endif
 
     // Iterate over all pixels
     while (dst != dstEnd)
     {
         #ifdef PR_COLOR_BUFFER_24BIT
-        *dst = pixels->color;
+        *dst = pixels->colorIndex;
         #else
         paletteColor = (palette + pixels->colorIndex);
 

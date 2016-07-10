@@ -34,7 +34,7 @@ static void _texture_subimage2d(
     subimage.height     = height;
     subimage.format     = 3;
     subimage.defFree    = PR_TRUE;
-    subimage.colors     = (PRcolorindex*)data;
+    subimage.colors     = (PRubyte*)data;
 
     _pr_image_color_to_colorindex(texels, &subimage, dither);
 }
@@ -172,7 +172,7 @@ void _pr_texture_singular_init(pr_texture* texture)
         texture->width  = 1;
         texture->height = 1;
         texture->mips   = 1;
-        texture->texels = PR_CALLOC(PRbyte, 1);
+        texture->texels = PR_CALLOC(PRcolorindex, 1);
     }
 }
 
@@ -398,7 +398,7 @@ PRcolorindex _pr_texture_sample_nearest(const pr_texture* texture, PRfloat u, PR
 
     // Get texels from MIP-level
     PRtexsize w, h;
-    const PRubyte* texels = _pr_texture_select_miplevel(texture, mip, &w, &h);
+    const PRcolorindex* texels = _pr_texture_select_miplevel(texture, mip, &w, &h);
 
     // Sample nearest texel
     return _pr_texture_sample_nearest_from_mipmap(texels, w, h, u, v);

@@ -277,7 +277,7 @@ static void _rasterize_line(pr_framebuffer* frameBuffer, const pr_texture* textu
 
     // Select MIP level
     PRtexsize mipWidth, mipHeight;
-    const PRubyte* texels = _pr_texture_select_miplevel(texture, mipLevel, &mipWidth, &mipHeight);
+    const PRcolorindex* texels = _pr_texture_select_miplevel(texture, mipLevel, &mipWidth, &mipHeight);
 
     // Pre-compuations
     int dx = vertexB->x - vertexA->x;
@@ -367,7 +367,7 @@ static void _render_indexed_lines_textured(
 }
 
 static void _render_indexed_lines_colored(
-    PRubyte colorIndex, PRsizei numVertices, PRsizei firstVertex, const pr_vertexbuffer* vertexBuffer, const pr_indexbuffer* indexBuffer)
+    PRsizei numVertices, PRsizei firstVertex, const pr_vertexbuffer* vertexBuffer, const pr_indexbuffer* indexBuffer)
 {
     pr_framebuffer* frameBuffer = PR_STATE_MACHINE.boundFrameBuffer;
 
@@ -458,7 +458,7 @@ void _pr_render_indexed_lines(PRsizei numVertices, PRsizei firstVertex, /*const 
     if (PR_STATE_MACHINE.boundTexture != NULL)
         _render_indexed_lines_textured(PR_STATE_MACHINE.boundTexture, numVertices, firstVertex, vertexBuffer, indexBuffer);
     else
-        _render_indexed_lines_colored(PR_STATE_MACHINE.color0, numVertices, firstVertex, vertexBuffer, indexBuffer);
+        _render_indexed_lines_colored(numVertices, firstVertex, vertexBuffer, indexBuffer);
 }
 
 void _pr_render_indexed_line_strip(PRsizei numVertices, PRsizei firstVertex, const pr_vertexbuffer* vertexBuffer, const pr_indexbuffer* indexBuffer)
@@ -497,7 +497,7 @@ static void _render_screenspace_image_textured(const pr_texture* texture, PRint 
     // Select MIP level
     PRtexsize width, height;
     PRubyte mipLevel = _pr_texture_compute_miplevel(texture, 1.0f / (PRfloat)(right - left), 0.0f, 0.0f, 1.0f / (PRfloat)(bottom - top));
-    const PRubyte* texels = _pr_texture_select_miplevel(texture, mipLevel, &width, &height);
+    const PRcolorindex* texels = _pr_texture_select_miplevel(texture, mipLevel, &width, &height);
 
     // Rasterize rectangle
     pr_pixel* pixels = frameBuffer->pixels;
@@ -535,7 +535,7 @@ static void _render_screenspace_image_textured(const pr_texture* texture, PRint 
     }
 }
 
-static void _render_screenspace_image_colored(PRubyte colorIndex, PRint left, PRint top, PRint right, PRint bottom)
+static void _render_screenspace_image_colored(PRcolorindex colorIndex, PRint left, PRint top, PRint right, PRint bottom)
 {
     pr_framebuffer* frameBuffer = PR_STATE_MACHINE.boundFrameBuffer;
 
@@ -793,7 +793,7 @@ static void _rasterize_polygon_fill(pr_framebuffer* frameBuffer, const pr_textur
 {
     // Select MIP level
     PRtexsize mipWidth, mipHeight;
-    const PRubyte* texels = _pr_texture_select_miplevel(texture, mipLevel, &mipWidth, &mipHeight);
+    const PRcolorindex* texels = _pr_texture_select_miplevel(texture, mipLevel, &mipWidth, &mipHeight);
 
     // Find left- and right sided polygon edges
     PRint x, y, top = 0, bottom = 0;
