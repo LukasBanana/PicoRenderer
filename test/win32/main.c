@@ -174,18 +174,23 @@ int main()
     int desktopWidth    = GetSystemMetrics(SM_CXSCREEN);
     int desktopHeight   = GetSystemMetrics(SM_CYSCREEN);
 
-    #if 1
+    #define SCREEN_MODE 1
+    #if SCREEN_MODE == 1
     const PRuint screenWidth  = 640;//800;
     const PRuint screenHeight = 480;//600;
     const PRboolean isFullscreen = PR_FALSE;
-    #elif 1
+    #elif SCREEN_MODE == 2
     const PRuint screenWidth  = 1280;
     const PRuint screenHeight = 768;
     const PRboolean isFullscreen = PR_TRUE;
-    #else
+    #elif SCREEN_MODE == 3
     const PRuint screenWidth  = 1600;
     const PRuint screenHeight = 900;
     const PRboolean isFullscreen = PR_FALSE;
+    #else
+    const PRuint screenWidth  = 1920;
+    const PRuint screenHeight = 1080;
+    const PRboolean isFullscreen = PR_TRUE;
     #endif
 
     DWORD winStyle = WS_SYSMENU | WS_MINIMIZEBOX | WS_CAPTION;
@@ -267,8 +272,8 @@ int main()
     PRobject textureB = prCreateTexture();
     prTextureImage2DFromFile(textureB, "media/tiles.png", dither, PR_TRUE);
 
-    //prTexEnvi(PR_TEXTURE_LOD_BIAS, 1);
-
+    prTexEnvi(PR_TEXTURE_LOD_BIAS, 1);
+    
     // Create vertex buffer
     PRobject vertexBuffer = prCreateVertexBuffer();
     PRobject indexBuffer = prCreateIndexBuffer();
@@ -558,7 +563,7 @@ int main()
 
             prBegin(PR_TRIANGLES);
             {
-                #if 0//defined(PR_PERSPECTIVE_CORRECTED)
+                #if defined(PR_PERSPECTIVE_CORRECTED) && 1
 
                 // Only use a single quad when textures are perspective corrected
                 prTexCoord2i(0, 0); prVertex3f(-1, 0, 1);
