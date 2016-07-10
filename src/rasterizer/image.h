@@ -47,7 +47,7 @@ This must already be allocated with the specified size: width*height*sizeof(PRub
 \param[in] format Specifies the source color format. Must be 1, 2, 3 or 4.
 \param[in] dither Specifies whether the image is to be converted with or without dithering.
 */
-void _pr_image_color_to_colorindex_r3g3b2(PRubyte* dstColors, const pr_image* srcImage, PRboolean dither);
+void _pr_image_color_to_colorindex(PRcolorindex* dstColors, const pr_image* srcImage, PRboolean dither);
 
 
 #endif

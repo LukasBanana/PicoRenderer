@@ -37,8 +37,11 @@
 //! Use an 8-bit depth buffer (instead of 16 bit)
 //#define PR_DEPTH_BUFFER_8BIT
 
-//! Use an 64-bit interpolation type instead of 32-bit.
+//! Use a 64-bit interpolation type instead of 32-bit
 #define PR_INTERP_64BIT
+
+//! Use a 24-bit color buffer (instead of 8 bit)
+//#define PR_COLOR_BUFFER_24BIT
 
 //! Merge color- and depth buffers to a single one inside a frame buffer.
 #define PR_MERGE_COLOR_AND_DEPTH_BUFFERS //!CAN NOT BE DISABLED YET!

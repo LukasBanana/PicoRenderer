@@ -24,5 +24,18 @@ typedef pr_color_rgb pr_color;
 
 #endif
 
+#ifdef PR_COLOR_BUFFER_24BIT
+
+// excpetion in naming conventions for this project:
+// with default static configuration, the color index is an 'unsigned char',
+// but with 24-bit color buffer, this is from type 'pr_color' structure.
+typedef pr_color PRcolorindex;
+
+#else
+
+typedef PRubyte PRcolorindex;
+
+#endif
+
 
 #endif

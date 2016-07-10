@@ -12,6 +12,7 @@
 #include "types.h"
 #include "enums.h"
 #include "vector2.h"
+#include "color.h"
 
 
 // Maximal 11 MIP-maps restricts the textures to have a
@@ -27,11 +28,11 @@
 //! Textures store all their mip maps in a single texel array for compact memory access.
 typedef struct pr_texture
 {
-    PRtexsize       width;                      //!< Width of the first MIP level.
-    PRtexsize       height;                     //!< Height of the first MIP level.
-    PRubyte         mips;                       //!< Number of MIP levels.
-    PRubyte*        texels;                     //!< Texel MIP chain.
-    const PRubyte*  mipTexels[PR_MAX_NUM_MIPS]; //! Texel offsets for the MIP chain (Use a static array for better cache locality).
+    PRtexsize           width;                      //!< Width of the first MIP level.
+    PRtexsize           height;                     //!< Height of the first MIP level.
+    PRubyte             mips;                       //!< Number of MIP levels.
+    PRcolorindex*       texels;                     //!< Texel MIP chain.
+    const PRcolorindex* mipTexels[PR_MAX_NUM_MIPS]; //!< Texel offsets for the MIP chain (Use a static array for better cache locality).
 }
 pr_texture;
 
@@ -66,16 +67,16 @@ PRboolean _pr_texture_subimage2d(
 PRubyte _pr_texture_num_mips(PRubyte maxSize);
 
 //! Returns a pointer to the specified texture MIP level.
-const PRubyte* _pr_texture_select_miplevel(const pr_texture* texture, PRubyte mip, PRtexsize* width, PRtexsize* height);
+const PRcolorindex* _pr_texture_select_miplevel(const pr_texture* texture, PRubyte mip, PRtexsize* width, PRtexsize* height);
 
 //! Returns the MIP level index for the specified texture.
 PRubyte _pr_texture_compute_miplevel(const pr_texture* texture, PRfloat r1x, PRfloat r1y, PRfloat r2x, PRfloat r2y);
 
 //! Samples the nearest texel from the specified MIP-map level.
-PRubyte _pr_texture_sample_nearest_from_mipmap(const PRubyte* mipTexels, PRtexsize mipWidth, PRtexsize mipHeight, PRfloat u, PRfloat v);
+PRcolorindex _pr_texture_sample_nearest_from_mipmap(const PRcolorindex* mipTexels, PRtexsize mipWidth, PRtexsize mipHeight, PRfloat u, PRfloat v);
 
 //! Samples the nearest texel from the specified texture. MIP-map selection is compuited by tex-coord derivations ddx and ddy.
-PRubyte _pr_texture_sample_nearest(const pr_texture* texture, PRfloat u, PRfloat v, PRfloat ddx, PRfloat ddy);
+PRcolorindex _pr_texture_sample_nearest(const pr_texture* texture, PRfloat u, PRfloat v, PRfloat ddx, PRfloat ddy);
 
 
 #endif

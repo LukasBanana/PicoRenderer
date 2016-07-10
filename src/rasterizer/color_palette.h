@@ -33,7 +33,7 @@ pr_color_palette;
 void _pr_color_palette_fill_r3g3b2(pr_color_palette* colorPalette);
 
 //! Converts the specified RGB color into a color index with encoding R3G3B2.
-PRubyte _pr_color_to_colorindex_r3g3b2(PRubyte r, PRubyte g, PRubyte b);
+PRcolorindex _pr_color_to_colorindex(PRubyte r, PRubyte g, PRubyte b);
 
 
 #endif

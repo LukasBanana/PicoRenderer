@@ -44,14 +44,14 @@ pr_framebuffer;
 pr_framebuffer* _pr_framebuffer_create(PRuint width, PRuint height);
 void _pr_framebuffer_delete(pr_framebuffer* frameBuffer);
 
-void _pr_framebuffer_clear(pr_framebuffer* frameBuffer, PRubyte clearColor, PRfloat clearDepth, PRbitfield clearFlags);
+void _pr_framebuffer_clear(pr_framebuffer* frameBuffer, PRfloat clearDepth, PRbitfield clearFlags);
 
 //! Sets the start and end offsets of the specified scanlines.
 void _pr_framebuffer_setup_scanlines(
     pr_framebuffer* frameBuffer, pr_scaline_side* sides, pr_raster_vertex start, pr_raster_vertex end
 );
 
-PR_INLINE void _pr_framebuffer_plot(pr_framebuffer* frameBuffer, PRuint x, PRuint y, PRubyte colorIndex)
+PR_INLINE void _pr_framebuffer_plot(pr_framebuffer* frameBuffer, PRuint x, PRuint y, PRcolorindex colorIndex)
 {
     #ifdef PR_MERGE_COLOR_AND_DEPTH_BUFFERS
     frameBuffer->pixels[y * frameBuffer->width + x].colorIndex = colorIndex;

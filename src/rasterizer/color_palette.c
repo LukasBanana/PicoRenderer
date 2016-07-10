@@ -47,8 +47,18 @@ void _pr_color_palette_fill_r3g3b2(pr_color_palette* colorPalette)
     }
 }
 
-PRubyte _pr_color_to_colorindex_r3g3b2(PRubyte r, PRubyte g, PRubyte b)
+PRcolorindex _pr_color_to_colorindex(PRubyte r, PRubyte g, PRubyte b)
 {
+    #ifdef PR_COLOR_BUFFER_24BIT
+
+    PRcolorindex color;
+    color.r = r;
+    color.g = g;
+    color.b = b;
+    return color;
+
+    #else
+
     /*
     No need to crop numbers by bitwise AND 0x07 or 0x03,
     since PRubyte cannot exceed the ranges.
@@ -57,5 +67,7 @@ PRubyte _pr_color_to_colorindex_r3g3b2(PRubyte r, PRubyte g, PRubyte b)
         ((r / PR_COLORINDEX_SELECT_RED  ) << 5) |
         ((g / PR_COLORINDEX_SELECT_GREEN) << 2) |
         ( b / PR_COLORINDEX_SELECT_BLUE       );
+
+    #endif
 }
 

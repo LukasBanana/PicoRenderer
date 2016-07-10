@@ -16,7 +16,7 @@
 
 // --- points --- //
 
-void _pr_render_screenspace_point(PRint x, PRint y, PRubyte colorIndex);
+void _pr_render_screenspace_point(PRint x, PRint y);
 
 void _pr_render_points(PRsizei numVertices, PRsizei firstVertex, /*const */pr_vertexbuffer* vertexBuffer);
 
@@ -24,7 +24,7 @@ void _pr_render_indexed_points(PRsizei numVertices, PRsizei firstVertex, const p
 
 // --- lines --- //
 
-void _pr_render_screenspace_line(PRint x1, PRint y1, PRint x2, PRint y2, PRubyte colorIndex);
+void _pr_render_screenspace_line(PRint x1, PRint y1, PRint x2, PRint y2);
 
 void _pr_render_lines(PRsizei numVertices, PRsizei firstVertex, const pr_vertexbuffer* vertexBuffer);
 void _pr_render_line_strip(PRsizei numVertices, PRsizei firstVertex, const pr_vertexbuffer* vertexBuffer);

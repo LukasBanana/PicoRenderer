@@ -9,6 +9,7 @@
 #include "static_config.h"
 #include "error.h"
 #include "ext_math.h"
+#include "color_palette.h"
 
 
 static pr_state_machine _nullStateMachine;
@@ -117,7 +118,8 @@ void _pr_state_machine_init(pr_state_machine* stateMachine)
     stateMachine->boundIndexBuffer      = NULL;
     stateMachine->boundTexture          = NULL;
 
-    stateMachine->colorIndex            = 0;
+    stateMachine->clearColor            = _pr_color_to_colorindex(0, 0, 0);
+    stateMachine->color0            = _pr_color_to_colorindex(0, 0, 0);
     stateMachine->textureLodBias        = 0;
     stateMachine->cullMode              = PR_CULL_NONE;
     stateMachine->polygonMode           = PR_POLYGON_FILL;

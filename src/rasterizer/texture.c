@@ -20,7 +20,7 @@
 // --- internals --- //
 
 static void _texture_subimage2d(
-    PRubyte* texels, PRubyte mip, PRtexsize width, PRtexsize height, PRenum format, const PRvoid* data, PRboolean dither)
+    PRcolorindex* texels, PRubyte mip, PRtexsize width, PRtexsize height, PRenum format, const PRvoid* data, PRboolean dither)
 {
     if (format != PR_UBYTE_RGB)
     {
@@ -34,9 +34,9 @@ static void _texture_subimage2d(
     subimage.height     = height;
     subimage.format     = 3;
     subimage.defFree    = PR_TRUE;
-    subimage.colors     = (PRubyte*)data;
+    subimage.colors     = (PRcolorindex*)data;
 
-    _pr_image_color_to_colorindex_r3g3b2(texels, &subimage, dither);
+    _pr_image_color_to_colorindex(texels, &subimage, dither);
 }
 
 static void _texture_subimage2d_rect(
@@ -245,10 +245,10 @@ PRboolean _pr_texture_image2d(
         PR_FREE(texture->texels);
 
         // Create texels
-        texture->texels = PR_CALLOC(PRubyte, numTexels);
+        texture->texels = PR_CALLOC(PRcolorindex, numTexels);
 
         // Setup MIP texel offsets
-        const PRubyte* texels = texture->texels;
+        const PRcolorindex* texels = texture->texels;
         PRtexsize w = width, h = height;
 
         for (PRubyte mip = 0; mip < texture->mips; ++mip)
@@ -268,7 +268,7 @@ PRboolean _pr_texture_image2d(
     }
 
     // Fill image data of first MIP level
-    PRubyte* texels = texture->texels;
+    PRcolorindex* texels = texture->texels;
 
     _texture_subimage2d(texels, 0, width, height, format, data, dither);
 
@@ -337,7 +337,7 @@ PRubyte _pr_texture_num_mips(PRubyte maxSize)
     return maxSize > 0 ? (PRubyte)(floorf(log2f(maxSize))) + 1 : 0;
 }
 
-const PRubyte* _pr_texture_select_miplevel(const pr_texture* texture, PRubyte mip, PRtexsize* width, PRtexsize* height)
+const PRcolorindex* _pr_texture_select_miplevel(const pr_texture* texture, PRubyte mip, PRtexsize* width, PRtexsize* height)
 {
     // Add MIP level offset
     mip = PR_CLAMP((PRubyte)(((PRint)mip) + _stateMachine->textureLodBias), 0, texture->mips - 1);
@@ -370,7 +370,7 @@ PRubyte _pr_texture_compute_miplevel(const pr_texture* texture, PRfloat r1x, PRf
     return (PRubyte)PR_CLAMP(lod, 0, texture->mips - 1);
 }
 
-PRubyte _pr_texture_sample_nearest_from_mipmap(const PRubyte* mipTexels, PRtexsize mipWidth, PRtexsize mipHeight, PRfloat u, PRfloat v)
+PRcolorindex _pr_texture_sample_nearest_from_mipmap(const PRcolorindex* mipTexels, PRtexsize mipWidth, PRtexsize mipHeight, PRfloat u, PRfloat v)
 {
     // Clamp texture coordinates
     PRint x = (PRint)((u - (PRint)u)*mipWidth);
@@ -385,7 +385,7 @@ PRubyte _pr_texture_sample_nearest_from_mipmap(const PRubyte* mipTexels, PRtexsi
     return mipTexels[y*mipWidth + x];
 }
 
-PRubyte _pr_texture_sample_nearest(const pr_texture* texture, PRfloat u, PRfloat v, PRfloat ddx, PRfloat ddy)
+PRcolorindex _pr_texture_sample_nearest(const pr_texture* texture, PRfloat u, PRfloat v, PRfloat ddx, PRfloat ddy)
 {
     // Select MIP-level texels by tex-coord derivation
     const PRfloat dx = ddx * texture->width;

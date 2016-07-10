@@ -102,17 +102,12 @@ void prBindFrameBuffer(PRobject frameBuffer);
 /**
 Clears the specified frame buffer.
 \param[in] frameBuffer Specifies the frame buffer which is to be cleared.
-\param[in] clearColor Specifies the color index to clear the color buffer.
 \param[in] clearDepth Specifies the depth value to clear the depth buffer.
 \param[in] clearFlags Specifies the clear flags. This can be a bitwise OR combination of the following bit masks:
 - PR_COLOR_BUFFER_BIT: Clears the color buffer.
 - PR_DEPTH_BUFFER_BIT: Clears the depth buffer.
-\see prGetColorIndex
 */
-void prClearFrameBuffer(PRobject frameBuffer, PRubyte clearColor, PRfloat clearDepth, PRbitfield clearFlags);
-
-//! Converts the specified RGB color into a color index (in the format R3G3B2).
-PRubyte prGetColorIndex(PRubyte red, PRubyte green, PRubyte blue);
+void prClearFrameBuffer(PRobject frameBuffer, PRfloat clearDepth, PRbitfield clearFlags);
 
 // --- texture --- //
 
@@ -430,14 +425,17 @@ void prPolygonMode(PRenum mode);
 
 // --- drawing --- //
 
+//! Sets the clear color. Default is (0, 0, 0).
+void prClearColor(PRubyte r, PRubyte g, PRubyte b);
+
 //! Binds the current color index.
-void prColor(PRubyte colorIndex);
+void prColor(PRubyte r, PRubyte g, PRubyte b);
 
 //! Draws a single 2D point onto the screen.
-void prDrawScreenPoint(PRint x, PRint y, PRubyte colorIndex);
+void prDrawScreenPoint(PRint x, PRint y);
 
 //! Draws a single 2D line onto the screen.
-void prDrawScreenLine(PRint x1, PRint y1, PRint x2, PRint y2, PRubyte colorIndex);
+void prDrawScreenLine(PRint x1, PRint y1, PRint x2, PRint y2);
 
 //! Draws a single 2D image with the currently bound texture.
 void prDrawScreenImage(PRint left, PRint top, PRint right, PRint bottom);

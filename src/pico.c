@@ -108,14 +108,9 @@ void prBindFrameBuffer(PRobject frameBuffer)
     _pr_state_machine_bind_framebuffer((pr_framebuffer*)frameBuffer);
 }
 
-void prClearFrameBuffer(PRobject frameBuffer, PRubyte clearColor, PRfloat clearDepth, PRbitfield clearFlags)
+void prClearFrameBuffer(PRobject frameBuffer, PRfloat clearDepth, PRbitfield clearFlags)
 {
-    _pr_framebuffer_clear((pr_framebuffer*)frameBuffer, clearColor, clearDepth, clearFlags);
-}
-
-PRubyte prGetColorIndex(PRubyte red, PRubyte green, PRubyte blue)
-{
-    return _pr_color_to_colorindex_r3g3b2(red, green, blue);
+    _pr_framebuffer_clear((pr_framebuffer*)frameBuffer, clearDepth, clearFlags);
 }
 
 // --- texture --- //
@@ -317,19 +312,24 @@ void prPolygonMode(PRenum mode)
 
 // --- drawing --- //
 
-void prColor(PRubyte colorIndex)
+void prClearColor(PRubyte r, PRubyte g, PRubyte b)
 {
-    PR_STATE_MACHINE.colorIndex = colorIndex;
+    PR_STATE_MACHINE.clearColor = _pr_color_to_colorindex(r, g, b);
 }
 
-void prDrawScreenPoint(PRint x, PRint y, PRubyte colorIndex)
+void prColor(PRubyte r, PRubyte g, PRubyte b)
 {
-    _pr_render_screenspace_point(x, y, colorIndex);
+    PR_STATE_MACHINE.color0 = _pr_color_to_colorindex(r, g, b);
 }
 
-void prDrawScreenLine(PRint x1, PRint y1, PRint x2, PRint y2, PRubyte colorIndex)
+void prDrawScreenPoint(PRint x, PRint y)
 {
-    _pr_render_screenspace_line(x1, y1, x2, y2, colorIndex);
+    _pr_render_screenspace_point(x, y);
+}
+
+void prDrawScreenLine(PRint x1, PRint y1, PRint x2, PRint y2)
+{
+    _pr_render_screenspace_line(x1, y1, x2, y2);
 }
 
 void prDrawScreenImage(PRint left, PRint top, PRint right, PRint bottom)

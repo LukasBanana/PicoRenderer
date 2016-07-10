@@ -422,7 +422,8 @@ int main()
         #endif
 
         // Drawing
-        prClearFrameBuffer(frameBuffer, prGetColorIndex(255, 255, 255), 0.0f, PR_COLOR_BUFFER_BIT | PR_DEPTH_BUFFER_BIT);
+        prClearColor(255, 255, 255);
+        prClearFrameBuffer(frameBuffer, 0.0f, PR_COLOR_BUFFER_BIT | PR_DEPTH_BUFFER_BIT);
         {
             #if 0
             
@@ -487,7 +488,7 @@ int main()
 
             #elif 1
 
-            prColor(prGetColorIndex(0, 0, 255));
+            prColor(0, 0, 255);
 
             // Bind buffers
             prBindVertexBuffer(vertexBuffer);

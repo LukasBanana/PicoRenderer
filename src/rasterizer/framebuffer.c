@@ -9,6 +9,7 @@
 #include "error.h"
 #include "helper.h"
 #include "state_machine.h"
+#include "color_palette.h"
 
 #include <stdlib.h>
 #include <string.h>
@@ -52,12 +53,15 @@ void _pr_framebuffer_delete(pr_framebuffer* frameBuffer)
     }
 }
 
-void _pr_framebuffer_clear(pr_framebuffer* frameBuffer, PRubyte clearColor, PRfloat clearDepth, PRbitfield clearFlags)
+void _pr_framebuffer_clear(pr_framebuffer* frameBuffer, PRfloat clearDepth, PRbitfield clearFlags)
 {
     if (frameBuffer != NULL && frameBuffer->pixels != NULL)
     {
         // Convert depth (32-bit) into pixel depth (16-bit or 8-bit)
         PRdepthtype depth = _pr_pixel_write_depth(clearDepth);
+
+        // Get clear color from state machine (and optionally its color index)
+        PRcolorindex clearColor = PR_STATE_MACHINE.clearColor;
 
         // Iterate over the entire framebuffer
         pr_pixel* dst = frameBuffer->pixels;

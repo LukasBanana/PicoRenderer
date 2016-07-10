@@ -43,7 +43,8 @@ typedef struct pr_state_machine
     pr_indexbuffer*     boundIndexBuffer;
     pr_texture*         boundTexture;
 
-    PRubyte             colorIndex;                 // Active color index
+    PRcolorindex        clearColor;
+    PRcolorindex        color0;                 // Active color index
     PRubyte             textureLodBias;
 
     PRenum              cullMode;

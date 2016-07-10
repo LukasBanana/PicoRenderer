@@ -144,7 +144,7 @@ static void _dither_color(PRint* buffer, PRint x, PRint y, PRint comp, PRint wid
     #undef COLOR
 }
 
-void _pr_image_color_to_colorindex_r3g3b2(PRubyte* dstColors, const pr_image* srcImage, PRboolean dither)
+void _pr_image_color_to_colorindex(PRcolorindex* dstColors, const pr_image* srcImage, PRboolean dither)
 {
     // Validate and map input parameters
     if (dstColors == NULL || srcImage == NULL)
@@ -207,7 +207,7 @@ void _pr_image_color_to_colorindex_r3g3b2(PRubyte* dstColors, const pr_image* sr
 
         // Finally convert buffer to color index
         for (PRuint i = 0, j = 0; i < numPixels; ++i, j += 3)
-            dstColors[i] = _pr_color_to_colorindex_r3g3b2(buffer[j], buffer[j + 1], buffer[j + 2]);
+            dstColors[i] = _pr_color_to_colorindex(buffer[j], buffer[j + 1], buffer[j + 2]);
 
         // Delete temporary buffer
         PR_FREE(buffer);
@@ -223,14 +223,14 @@ void _pr_image_color_to_colorindex_r3g3b2(PRubyte* dstColors, const pr_image* sr
             for (PRuint i = 0, j = 0; i < numPixels; ++i, j += format)
             {
                 gray = src[j];
-                dstColors[i] = _pr_color_to_colorindex_r3g3b2(gray, gray, gray);
+                dstColors[i] = _pr_color_to_colorindex(gray, gray, gray);
             }
         }
         else
         {
             // Copy RGB image into color index
             for (PRuint i = 0, j = 0; i < numPixels; ++i, j += format)
-                dstColors[i] = _pr_color_to_colorindex_r3g3b2(src[j], src[j + 1], src[j + 2]);
+                dstColors[i] = _pr_color_to_colorindex(src[j], src[j + 1], src[j + 2]);
         }
     }
 }

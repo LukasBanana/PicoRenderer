@@ -110,7 +110,7 @@ static PRboolean _is_triangle_culled(const pr_vector2 a, const pr_vector2 b, con
 
 // --- points --- //
 
-void _pr_render_screenspace_point(PRint x, PRint y, PRubyte colorIndex)
+void _pr_render_screenspace_point(PRint x, PRint y)
 {
     // Validate bound frame buffer
     pr_framebuffer* frameBuffer = PR_STATE_MACHINE.boundFrameBuffer;
@@ -133,7 +133,7 @@ void _pr_render_screenspace_point(PRint x, PRint y, PRubyte colorIndex)
     #endif
 
     // Plot screen space point
-    _pr_framebuffer_plot(frameBuffer, x, y, colorIndex);
+    _pr_framebuffer_plot(frameBuffer, x, y, PR_STATE_MACHINE.color0);
 }
 
 void _pr_render_points(PRsizei numVertices, PRsizei firstVertex, /*const */pr_vertexbuffer* vertexBuffer)
@@ -181,7 +181,7 @@ void _pr_render_points(PRsizei numVertices, PRsizei firstVertex, /*const */pr_ve
         #endif
 
         if (x < width && y < height)
-            _pr_framebuffer_plot(frameBuffer, x, y, PR_STATE_MACHINE.colorIndex);
+            _pr_framebuffer_plot(frameBuffer, x, y, PR_STATE_MACHINE.color0);
     }
 }
 
@@ -193,7 +193,7 @@ void _pr_render_indexed_points(PRsizei numVertices, PRsizei firstVertex, const p
 // --- lines --- //
 
 // This function implements the line "bresenham" algorithm.
-static void _render_screenspace_line_colored(PRint x1, PRint y1, PRint x2, PRint y2, PRubyte colorIndex)
+static void _render_screenspace_line_colored(PRint x1, PRint y1, PRint x2, PRint y2)
 {
     // Get bound frame buffer
     pr_framebuffer* frameBuffer = PR_STATE_MACHINE.boundFrameBuffer;
@@ -251,7 +251,7 @@ static void _render_screenspace_line_colored(PRint x1, PRint y1, PRint x2, PRint
     for (int t = 0; t < el; ++t)
     {
         // Render pixel
-        _pr_framebuffer_plot(PR_STATE_MACHINE.boundFrameBuffer, (PRuint)x, (PRuint)y, colorIndex);
+        _pr_framebuffer_plot(PR_STATE_MACHINE.boundFrameBuffer, (PRuint)x, (PRuint)y, PR_STATE_MACHINE.color0);
 
         // Move to next pixel
         err -= es;
@@ -330,7 +330,7 @@ static void _rasterize_line(pr_framebuffer* frameBuffer, const pr_texture* textu
 
     int err = el/2;
 
-    PRubyte colorIndex;
+    PRcolorindex colorIndex;
     
     // Render each pixel of the line
     for (PRint t = 0; t < el; ++t)
@@ -397,11 +397,11 @@ static void _render_indexed_lines_colored(
         PRint x2 = (PRint)vertexB->ndc.x;
         PRint y2 = (PRint)vertexB->ndc.y;
 
-        _render_screenspace_line_colored(x1, y1, x2, y2, colorIndex);
+        _render_screenspace_line_colored(x1, y1, x2, y2);
     }
 }
 
-void _pr_render_screenspace_line(PRint x1, PRint y1, PRint x2, PRint y2, PRubyte colorIndex)
+void _pr_render_screenspace_line(PRint x1, PRint y1, PRint x2, PRint y2)
 {
     // Get bound frame buffer
     pr_framebuffer* frameBuffer = PR_STATE_MACHINE.boundFrameBuffer;
@@ -417,7 +417,7 @@ void _pr_render_screenspace_line(PRint x1, PRint y1, PRint x2, PRint y2, PRubyte
     y2 = frameBuffer->height - y2 - 1;
     #endif
 
-    _render_screenspace_line_colored(x1, y1, x2, y2, colorIndex);
+    _render_screenspace_line_colored(x1, y1, x2, y2);
 }
 
 void _pr_render_lines(PRsizei numVertices, PRsizei firstVertex, const pr_vertexbuffer* vertexBuffer)
@@ -458,7 +458,7 @@ void _pr_render_indexed_lines(PRsizei numVertices, PRsizei firstVertex, /*const 
     if (PR_STATE_MACHINE.boundTexture != NULL)
         _render_indexed_lines_textured(PR_STATE_MACHINE.boundTexture, numVertices, firstVertex, vertexBuffer, indexBuffer);
     else
-        _render_indexed_lines_colored(PR_STATE_MACHINE.colorIndex, numVertices, firstVertex, vertexBuffer, indexBuffer);
+        _render_indexed_lines_colored(PR_STATE_MACHINE.color0, numVertices, firstVertex, vertexBuffer, indexBuffer);
 }
 
 void _pr_render_indexed_line_strip(PRsizei numVertices, PRsizei firstVertex, const pr_vertexbuffer* vertexBuffer, const pr_indexbuffer* indexBuffer)
@@ -579,7 +579,7 @@ void _pr_render_screenspace_image(PRint left, PRint top, PRint right, PRint bott
         if (PR_STATE_MACHINE.boundTexture != NULL)
             _render_screenspace_image_textured(PR_STATE_MACHINE.boundTexture, left, top, right, bottom);
         else
-            _render_screenspace_image_colored(PR_STATE_MACHINE.colorIndex, left, top, right, bottom);
+            _render_screenspace_image_colored(PR_STATE_MACHINE.color0, left, top, right, bottom);
     }
     else
         PR_ERROR(PR_ERROR_INVALID_STATE);
@@ -907,7 +907,7 @@ static void _rasterize_polygon_point(
             frameBuffer,
             _rasterVertices[i].x,
             _rasterVertices[i].y,
-            PR_STATE_MACHINE.colorIndex
+            PR_STATE_MACHINE.color0
         );
     }
 }
@@ -1035,7 +1035,7 @@ void _pr_render_triangles(PRsizei numVertices, PRsizei firstVertex, const pr_ver
 
     if (PR_STATE_MACHINE.boundTexture == NULL)
     {
-        _pr_texture_singular_color(&PR_SINGULAR_TEXTURE, PR_STATE_MACHINE.colorIndex);
+        _pr_texture_singular_color(&PR_SINGULAR_TEXTURE, PR_STATE_MACHINE.color0);
         _render_triangles(&PR_SINGULAR_TEXTURE, numVertices, firstVertex, vertexBuffer);
     }
     else
@@ -1112,7 +1112,7 @@ void _pr_render_indexed_triangles(PRsizei numVertices, PRsizei firstVertex, cons
 
     if (PR_STATE_MACHINE.boundTexture == NULL)
     {
-        _pr_texture_singular_color(&PR_SINGULAR_TEXTURE, PR_STATE_MACHINE.colorIndex);
+        _pr_texture_singular_color(&PR_SINGULAR_TEXTURE, PR_STATE_MACHINE.color0);
         _render_indexed_triangles(&PR_SINGULAR_TEXTURE, numVertices, firstVertex, vertexBuffer, indexBuffer);
     }
     else
