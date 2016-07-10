@@ -394,6 +394,8 @@ int main()
     clock_t startTime = clock();
     int fps = 0;
 
+    prEnable(PR_MIP_MAPPING);
+
     // Main loop
     while (!isQuit)
     {
