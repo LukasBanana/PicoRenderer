@@ -83,12 +83,22 @@ LRESULT CALLBACK window_callback(HWND wnd, UINT message, WPARAM wParam, LPARAM l
 
         case WM_KEYUP:
         {
-            if (wParam == VK_TAB)
+            switch (wParam)
             {
-                if (polyMode == PR_POLYGON_FILL)
-                    polyMode = PR_POLYGON_LINE;
-                else
-                    polyMode = PR_POLYGON_FILL;
+                case VK_TAB:
+                {
+                    if (polyMode == PR_POLYGON_FILL)
+                        polyMode = PR_POLYGON_LINE;
+                    else
+                        polyMode = PR_POLYGON_FILL;
+                }
+                break;
+
+                case 'M':
+                {
+                    prSetState(PR_MIP_MAPPING, !prGetState(PR_MIP_MAPPING));
+                }
+                break;
             }
             keyDown[wParam] = false;
         }
@@ -272,7 +282,7 @@ int main()
     PRobject textureB = prCreateTexture();
     prTextureImage2DFromFile(textureB, "media/tiles.png", dither, PR_TRUE);
 
-    prTexEnvi(PR_TEXTURE_LOD_BIAS, 1);
+    //prTexEnvi(PR_TEXTURE_LOD_BIAS, 1);
     
     // Create vertex buffer
     PRobject vertexBuffer = prCreateVertexBuffer();
@@ -401,6 +411,7 @@ int main()
             DispatchMessage(&msg);
         }
 
+        #if 0
         // Show FPS
         ++fps;
         if (clock()/CLOCKS_PER_SEC > startTime/CLOCKS_PER_SEC)
@@ -409,6 +420,7 @@ int main()
             printf("fps = %i\n", fps);
             fps = 0;
         }
+        #endif
 
         // Update user input
         if (buttonDown[0])
@@ -563,7 +575,7 @@ int main()
 
             prBegin(PR_TRIANGLES);
             {
-                #if defined(PR_PERSPECTIVE_CORRECTED) && 1
+                #if defined(PR_PERSPECTIVE_CORRECTED) && 0
 
                 // Only use a single quad when textures are perspective corrected
                 prTexCoord2i(0, 0); prVertex3f(-1, 0, 1);

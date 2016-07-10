@@ -350,7 +350,7 @@ const PRcolorindex* _pr_texture_select_miplevel(const pr_texture* texture, PRuby
     return texture->mipTexels[mip];
 }
 
-PRubyte _pr_texture_compute_miplevel(const pr_texture* texture, PRfloat r1x, PRfloat r1y, PRfloat r2x, PRfloat r2y)
+/*PRubyte _pr_texture_compute_miplevel(const pr_texture* texture, PRfloat r1x, PRfloat r1y, PRfloat r2x, PRfloat r2y)
 {
     // Compute derivation of u and v vectors
     r1x = fabsf(r1x);// * texture->width;
@@ -365,10 +365,10 @@ PRubyte _pr_texture_compute_miplevel(const pr_texture* texture, PRfloat r1x, PRf
     PRfloat d = PR_MAX(r1_len, r2_len)*10.0f;
     
     // Clamp LOD to [0, texture->texture->mips)
-    //PRint lod = _int_log2(d);
-    PRint lod = (PRint)log2f(d);
+    PRint lod = _int_log2(d);
+    //PRint lod = (PRint)log2f(d);
     return (PRubyte)PR_CLAMP(lod, 0, texture->mips - 1);
-}
+}*/
 
 PRcolorindex _pr_texture_sample_nearest_from_mipmap(const PRcolorindex* mipTexels, PRtexsize mipWidth, PRtexsize mipHeight, PRfloat u, PRfloat v)
 {

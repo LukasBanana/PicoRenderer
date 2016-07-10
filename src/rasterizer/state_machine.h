@@ -20,7 +20,7 @@
 
 
 #define PR_STATE_MACHINE    (*_stateMachine)
-#define PR_NUM_STATES       1
+#define PR_NUM_STATES       2
 
 
 typedef struct pr_state_machine

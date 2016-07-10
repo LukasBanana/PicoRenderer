@@ -496,7 +496,7 @@ static void _render_screenspace_image_textured(const pr_texture* texture, PRint 
 
     // Select MIP level
     PRtexsize width, height;
-    PRubyte mipLevel = _pr_texture_compute_miplevel(texture, 1.0f / (PRfloat)(right - left), 0.0f, 0.0f, 1.0f / (PRfloat)(bottom - top));
+    PRubyte mipLevel = 0;//_pr_texture_compute_miplevel(texture, 1.0f / (PRfloat)(right - left), 0.0f, 0.0f, 1.0f / (PRfloat)(bottom - top));
     const PRcolorindex* texels = _pr_texture_select_miplevel(texture, mipLevel, &width, &height);
 
     // Rasterize rectangle
@@ -965,27 +965,23 @@ static PRboolean _clip_and_project_polygon(PRint numVertices)
 
 static PRubyte _compute_polygon_miplevel(const pr_texture* texture)
 {
-    #if 0//!!!
+    if (PR_STATE_MACHINE.states[PR_MIP_MAPPING] != PR_FALSE)
+    {
+        // Find closest vertex
+        PRinterp zMin = _rasterVertices[0].z;
+        for (PRint i = 1; i < _numPolyVerts; ++i)
+        {
+            if (zMin > _rasterVertices[i].z)
+                zMin = _rasterVertices[i].z;
+        }
 
-    const pr_raster_vertex* a = &(_rasterVertices[0]);
-    const pr_raster_vertex* b = &(_rasterVertices[1]);
-    const pr_raster_vertex* c = &(_rasterVertices[2]);
+        // Derive mip level from z value
+        zMin = 0.25f / zMin;
+        PRint zLog = _int_log2((PRfloat)zMin);
 
-    // Get dx, dy, du, dv for this vertex
-    PRfloat dx, dy, du, dv;
-
-    dx = sqrtf(PR_SQ(b->x - a->x) + PR_SQ(b->y - a->y));
-    dy = sqrtf(PR_SQ(c->x - a->x) + PR_SQ(c->y - a->y));
-    du = sqrtf(PR_SQ((b->u - a->u)*texture->width) + PR_SQ((b->v - a->v)*texture->height));
-    dv = sqrtf(PR_SQ((c->u - a->u)*texture->width) + PR_SQ((c->v - a->v)*texture->height));
-
-    return _pr_texture_compute_miplevel(texture, du/dx, dv/dx, du/dy, dv/dy);
-
-    #else
-
+        return PR_CLAMP(zLog, 0, texture->mips - 1);
+    }
     return 0;
-
-    #endif
 }
 
 static void _render_triangles(

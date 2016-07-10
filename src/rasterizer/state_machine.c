@@ -113,20 +113,21 @@ void _pr_state_machine_init(pr_state_machine* stateMachine)
     _pr_rect_init(&(stateMachine->scissorRect));
     _pr_rect_init(&(stateMachine->clipRect));
 
-    stateMachine->boundFrameBuffer      = NULL;
-    stateMachine->boundVertexBuffer     = NULL;
-    stateMachine->boundIndexBuffer      = NULL;
-    stateMachine->boundTexture          = NULL;
+    stateMachine->boundFrameBuffer          = NULL;
+    stateMachine->boundVertexBuffer         = NULL;
+    stateMachine->boundIndexBuffer          = NULL;
+    stateMachine->boundTexture              = NULL;
 
-    stateMachine->clearColor            = _pr_color_to_colorindex(0, 0, 0);
-    stateMachine->color0            = _pr_color_to_colorindex(0, 0, 0);
-    stateMachine->textureLodBias        = 0;
-    stateMachine->cullMode              = PR_CULL_NONE;
-    stateMachine->polygonMode           = PR_POLYGON_FILL;
+    stateMachine->clearColor                = _pr_color_to_colorindex(0, 0, 0);
+    stateMachine->color0                    = _pr_color_to_colorindex(0, 0, 0);
+    stateMachine->textureLodBias            = 0;
+    stateMachine->cullMode                  = PR_CULL_NONE;
+    stateMachine->polygonMode               = PR_POLYGON_FILL;
 
-    stateMachine->states[PR_SCISSOR]    = PR_FALSE;
+    stateMachine->states[PR_SCISSOR]        = PR_FALSE;
+    stateMachine->states[PR_MIP_MAPPING]    = PR_FALSE;
 
-    stateMachine->refCounter            = 0;
+    stateMachine->refCounter                = 0;
 }
 
 void _pr_state_machine_init_null()
@@ -151,7 +152,7 @@ void _pr_state_machine_set_state(PRenum cap, PRboolean state)
     }
 
     // Store new state
-    PR_STATE_MACHINE.states[cap] = state;
+    PR_STATE_MACHINE.states[cap] = (state != PR_FALSE ? PR_TRUE : PR_FALSE);
 
     // Check for special cases (update functions)
     switch (cap)

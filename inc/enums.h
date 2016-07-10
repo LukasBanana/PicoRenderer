@@ -42,6 +42,7 @@
 
 // States
 #define PR_SCISSOR          0
+#define PR_MIP_MAPPING      1
 
 // Texture environment parameters
 #define PR_TEXTURE_LOD_BIAS 0
