@@ -135,14 +135,14 @@ void prBindTexture(PRobject texture)
     _pr_state_machine_bind_texture((pr_texture*)texture);
 }
 
-void prTextureImage2D(
+void prTexImage2D(
     PRobject texture, PRtexsize width, PRtexsize height, PRenum format,
     const PRvoid* data, PRboolean dither, PRboolean generateMips)
 {
     _pr_texture_image2d((pr_texture*)texture, width, height, format, data, dither, generateMips);
 }
 
-void prTextureImage2DFromFile(
+void prTexImage2DFromFile(
     PRobject texture, const char* filename, PRboolean dither, PRboolean generateMips)
 {
     pr_image* image = _pr_image_load_from_file(filename);

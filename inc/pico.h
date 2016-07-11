@@ -153,7 +153,7 @@ Sets the 2D image data to the specified texture.
 \param[in] dither Specifies whether dithering is to be applied to the image (to compensate 8-bit colors).
 \param[in] generateMips Specifies whether MIP maps are to be generated for this texture.
 */
-void prTextureImage2D(
+void prTexImage2D(
     PRobject texture, PRtexsize width, PRtexsize height, PRenum format,
     const PRvoid* data, PRboolean dither, PRboolean generateMips
 );
@@ -164,9 +164,9 @@ Sets the 2D image data from file to the specified texture.
 \param[in] filename Specifies the image filename. Valid image file formats are: BMP, PNG, TGA, JPEG (base line only).
 \param[in] dither Specifies whether dithering is to be applied to the image (to compensate 8-bit colors).
 \param[in] generateMips Specifies whether MIP maps are to be generated for this texture.
-\see prTextureImage2D
+\see prTexImage2D
 */
-void prTextureImage2DFromFile(PRobject texture, const char* filename, PRboolean dither, PRboolean generateMips);
+void prTexImage2DFromFile(PRobject texture, const char* filename, PRboolean dither, PRboolean generateMips);
 
 /**
 Sets the texture environment parameters.

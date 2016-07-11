@@ -277,10 +277,10 @@ int main()
     #endif
 
     PRobject textureA = prCreateTexture();
-    prTextureImage2DFromFile(textureA, "media/house.jpg", dither, PR_TRUE);
+    prTexImage2DFromFile(textureA, "media/house.jpg", dither, PR_TRUE);
 
     PRobject textureB = prCreateTexture();
-    prTextureImage2DFromFile(textureB, "media/tiles.png", dither, PR_TRUE);
+    prTexImage2DFromFile(textureB, "media/tiles.png", dither, PR_TRUE);
 
     //prTexEnvi(PR_TEXTURE_LOD_BIAS, 1);
     
