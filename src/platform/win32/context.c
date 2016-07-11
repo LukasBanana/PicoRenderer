@@ -35,8 +35,8 @@ pr_context* _pr_context_create(const PRcontextdesc* desc, PRuint width, PRuint h
     bmi->bmiHeader.biCompression    = BI_RGB;
 
     // Setup context
-    context->wnd        = desc->window;
-    context->dc         = GetDC(desc->window);
+    context->wnd        = *((HWND*)desc->window);
+    context->dc         = GetDC(context->wnd);
     context->dcBmp      = CreateCompatibleDC(context->dc);
     context->bmp        = CreateCompatibleBitmap(context->dc, width, height);
     context->colors     = PR_CALLOC(pr_color, width*height);

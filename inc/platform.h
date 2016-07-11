@@ -9,47 +9,18 @@
 #define __PR_PLATFORM_H__
 
 
-#if defined(_WIN32)
-#   include <Windows.h>
-#   define PR_PLATFORM_WIN32
-#elif defined(__APPLE__)
-#   define PR_PLATFORM_OSX
-#elif defined(__linux__)
-#   include <X11/Xlib.h>
-#   define PR_PLATFORM_LINUX
-#else
-#   error OS not supported yet
-#endif
-
-
-#if defined(PR_PLATFORM_WIN32)
-
-//! Win32 render context description structure.
+//! Render context description structure.
 typedef struct PRcontextdesc
 {
-    HWND window;
-}
-PRcontextdesc;
-
-#elif defined(PR_PLATFORM_OSX)
-
-//! OSX render context description structure.
-typedef struct PRcontextdesc
-{
+    /**
+    Reference to the OS dependent window.
+    - For Win32, this must be from type 'HWND*'
+    - For MacOS, this must be from type 'NSWindow*'
+    - For Linux, this must be from type 'Window*'
+    */
     void* window;
 }
 PRcontextdesc;
-
-#elif defined(PR_PLATFORM_LINUX)
-
-//! Linux render context description structure.
-typedef struct PRcontextdesc
-{
-    Window window;
-}
-PRcontextdesc;
-
-#endif
 
 
 #endif
