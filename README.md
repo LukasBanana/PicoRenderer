@@ -11,17 +11,22 @@ License
 BSD 3-Clause License
 
 
-Status
-------
-
-This project is in ALPHA status!
-
-
 Screenshot
 ----------
 
 <p align="center"><img src="test/media/preview_win32.png" alt="test/media/preview_win32.png"/></p>
 <p align="center">Example scene (<i>test1</i> on Windows 10)</p>
+
+
+Status
+------
+
+Still in ALPHA status.
+
+Supported Platforms:
+- Windows (tested on Windows 10)
+- MacOS (tested on OSX El Capitan)
+- Linux (demo not available)
 
 
 Why C and not C++?
@@ -64,16 +69,27 @@ int main()
   if (!prInit())
     return 1;
   
-  // Create render context
+  // Create OS dependent window, this is your task ;-)
   PRuint scrWidth = 800, scrHeight = 600;
   PRcontextdesc contextDesc;
   
-  #if defined(WIN32)
-  //contextDesc.hWnd = ...
-  #endif
+  /*
+  #if defined(_WIN32)
   
+  HWND wnd = CreateWindow(...);
+  contextDesc.wnd = wnd;
+  
+  #elif defined(__APPLE__)
+  
+  NSWindow* wnd = [[NSWindow alloc] ...];
+  contextDesc.wnd = wnd;
+  
+  #endif
+  */
+  
+  // Create render context
   PRobject context = prCreateContext(&contextDesc, scrWidth, scrHeight);
-  prMakeCurrent(context);
+  //prMakeCurrent(context);
   
   // Create frame buffer
   PRobject frameBuffer = prCreateFrameBuffer(scrWidth, scrHeight);
@@ -88,7 +104,7 @@ int main()
     (PRfloat)scrWidth/scrHeight,  // aspect ratio
     1.0f,                         // near clipping plane
     100.0f,                       // far clipping plane
-    PR_DEG2RAD(74.0f)             // field of view (fov) in radians
+    74.0f * PR_DEG2RAD            // field of view (FOV) in radians (74 degrees to radians)
   );
   prProjectionMatrix(projection);
   
@@ -110,14 +126,16 @@ int main()
     prWorldMatrix(worldMatrix);
     rotation += 0.01f;
     
-    // Draw scene
-    prClearColor(255, 255, 255);
+    // Clear scene (with black background)
+    prClearColor(0, 0, 0);
     prClearFrameBuffer(
       frameBuffer,
       0.0f,
       PR_COLOR_BUFFER_BIT | PR_DEPTH_BUFFER_BIT
     );
     
+    // Draw yellow triangle
+    prColor(255, 255, 0);
     prBegin(PR_TRIANGLES);
     {
       prVertex2f(0, 1.155f);
@@ -131,7 +149,6 @@ int main()
   }
   
   // Release all objects
-  prDeleteVertexBuffer(vertexBuffer);
   prDeleteFrameBuffer(frameBuffer);
   prDeleteContext(context);
   
