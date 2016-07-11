@@ -21,8 +21,8 @@
 typedef struct pr_context
 {
     // OSX objects
-    void*               window;
-    void*               screenBitmap;
+    void*               wnd;
+    void*               bmp;
     
     // Renderer objects
     PRuint              width;

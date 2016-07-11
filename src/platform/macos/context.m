@@ -26,8 +26,8 @@ pr_context* _pr_context_create(const PRcontextdesc* desc, PRuint width, PRuint h
     pr_context* context = PR_MALLOC(pr_context);
 
     // Store OSX objects
-    context->window = desc->window;
-    context->screenBitmap = (void*)[[NSBitmapImageRep alloc]
+    context->wnd = desc->window;
+    context->bmp = (void*)[[NSBitmapImageRep alloc]
         initWithBitmapDataPlanes: nil
         pixelsWide: width
         pixelsHigh: height
@@ -62,7 +62,7 @@ void _pr_context_delete(pr_context* context)
         _pr_ref_assert(&(context->stateMachine));
         
         // Delete OSX objects
-        [((NSBitmapImageRep*)context->screenBitmap) release];
+        [((NSBitmapImageRep*)context->bmp) release];
 
         free(context->colorPalette);
         free(context);
@@ -92,12 +92,12 @@ void _pr_context_present(pr_context* context, const pr_framebuffer* framebuffer)
     }
 
     // Show framebuffer on device context ('SetDIBits' only needs a device context when 'DIB_PAL_COLORS' is used)
-    NSBitmapImageRep* screenBitmap = (NSBitmapImageRep*)context->screenBitmap;
+    NSBitmapImageRep* bmp = (NSBitmapImageRep*)context->bmp;
     
     // Get iterators
     const PRuint num = context->width*context->height;
 
-    pr_color* dst = (pr_color*)[screenBitmap bitmapData];
+    pr_color* dst = (pr_color*)[bmp bitmapData];
     pr_color* dstEnd = dst + num;
 
     const pr_pixel* pixels = framebuffer->pixels;
@@ -119,13 +119,13 @@ void _pr_context_present(pr_context* context, const pr_framebuffer* framebuffer)
     }
     
     // Present final bitmap
-    NSWindow* wnd = (NSWindow*)context->window;
+    NSWindow* wnd = (NSWindow*)context->wnd;
     NSGraphicsContext* gfx = [wnd graphicsContext];
     
     [NSGraphicsContext saveGraphicsState];
     [NSGraphicsContext setCurrentContext:gfx];
     
-    [screenBitmap draw];
+    [bmp draw];
     
     [NSGraphicsContext restoreGraphicsState];
     

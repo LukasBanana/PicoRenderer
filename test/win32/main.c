@@ -1,5 +1,5 @@
 /*
- * test.c (WIN32)
+ * test.c (Win32)
  * 
  * This file is part of the "PicoRenderer" (Copyright (c) 2014 by Lukas Hermanns)
  * See "LICENSE.txt" for license information.
@@ -238,7 +238,7 @@ int main()
 
     HWND wnd = CreateWindow(
         wcName,
-        "pico_renderer test (WIN32)",
+        "pico_renderer test (Win32)",
         winStyle,
         winRect.left,
         winRect.top,
