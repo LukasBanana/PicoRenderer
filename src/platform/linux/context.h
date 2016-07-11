@@ -16,18 +16,15 @@
 #include "platform.h"
 #include "state_machine.h"
 
-#include <X11/X11lib.h>
+#include <X11/Xlib.h>
 
 
 //! Render context structure.
 typedef struct pr_context
 {
     // X11 objects
-    HWND                wnd;
-    HDC                 dc;
-    HDC                 dcBmp;
-    BITMAPINFO          bmpInfo;
-    HBITMAP             bmp;
+    Window              wnd;
+    //GC                  gfx;
 
     // Renderer objects
     pr_color*           colors;

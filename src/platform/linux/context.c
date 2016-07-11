@@ -1,5 +1,5 @@
 /*
- * context.c (WIN32)
+ * context.c (Linux)
  * 
  * This file is part of the "PicoRenderer" (Copyright (c) 2014 by Lukas Hermanns)
  * See "LICENSE.txt" for license information.
@@ -23,27 +23,8 @@ pr_context* _pr_context_create(const PRcontextdesc* desc, PRuint width, PRuint h
     // Create render context
     pr_context* context = PR_MALLOC(pr_context);
 
-    // Setup bitmap info structure
-    BITMAPINFO* bmi = (&context->bmpInfo);
-    memset(bmi, 0, sizeof(BITMAPINFO));
-
-    bmi->bmiHeader.biSize           = sizeof(BITMAPINFOHEADER);
-    bmi->bmiHeader.biWidth          = (LONG)width;
-    bmi->bmiHeader.biHeight         = (LONG)height;
-    bmi->bmiHeader.biPlanes         = 1;
-    bmi->bmiHeader.biBitCount       = 24;
-    bmi->bmiHeader.biCompression    = BI_RGB;
-
-    // Setup context
-    context->wnd        = desc->window;
-    context->dc         = GetDC(desc->window);
-    context->dcBmp      = CreateCompatibleDC(context->dc);
-    context->bmp        = CreateCompatibleBitmap(context->dc, width, height);
-    context->colors     = PR_CALLOC(pr_color, width*height);
-    context->width      = width;
-    context->height     = height;
-
-    SelectObject(context->dcBmp, context->bmp);
+    // Create X11 objects
+    //todo...
 
     // Create color palette
     context->colorPalette = PR_MALLOC(pr_color_palette);
@@ -62,10 +43,7 @@ void _pr_context_delete(pr_context* context)
     {
         _pr_ref_assert(&(context->stateMachine));
 
-        if (context->bmp != NULL)
-            DeleteObject(context->bmp);
-        if (context->dcBmp != NULL)
-            DeleteDC(context->dcBmp);
+        //todo...
 
         free(context->colorPalette);
         free(context->colors);
@@ -125,8 +103,6 @@ void _pr_context_present(pr_context* context, const pr_framebuffer* framebuffer)
         ++pixels;
     }
 
-    // Show framebuffer on device context ('SetDIBits' only needs a device context when 'DIB_PAL_COLORS' is used)
-    SetDIBits(NULL, context->bmp, 0, context->height, context->colors, &(context->bmpInfo), DIB_RGB_COLORS);
-    BitBlt(context->dc, 0, 0, context->width, context->height, context->dcBmp, 0, 0, SRCCOPY);
+    //todo...
 }
 
