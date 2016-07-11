@@ -115,7 +115,7 @@ elseif(APPLE)
 	find_library(COCOA_LIBRARY Cocoa)
 	target_link_libraries(test1 ${COCOA_LIBRARY} pico_renderer)
 elseif(UNIX)
-	target_link_libraries(pico_renderer X11)
+	target_link_libraries(pico_renderer X11 m)
 	target_link_libraries(test1 pico_renderer X11)
 endif()
 
