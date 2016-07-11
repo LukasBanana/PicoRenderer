@@ -17,7 +17,9 @@
 #define PR_VERSION_STR      "0.1 alpha"
 
 //! Use BGR color output instead of RGB (used for Win32 GDI)
-#define PR_BGR_COLOR_OUTPUT
+#ifdef _WIN32
+#   define PR_BGR_COLOR_OUTPUT
+#endif
 
 //! Includes the STB image file handler plugin
 #define PR_INCLUDE_PLUGINS

@@ -119,14 +119,16 @@ void _pr_context_present(pr_context* context, const pr_framebuffer* framebuffer)
     }
     
     // Present final bitmap
-    //NSGraphicsContext* gfx = [((NSWindow*)context->window) graphicsContext];
+    NSWindow* wnd = (NSWindow*)context->window;
+    NSGraphicsContext* gfx = [wnd graphicsContext];
     
-    /*NSGraphicsContext* gfx = [NSGraphicsContext graphicsContextWithBitmapImageRep:screenBitmap];
     [NSGraphicsContext saveGraphicsState];
     [NSGraphicsContext setCurrentContext:gfx];
     
     [screenBitmap draw];
     
-    [NSGraphicsContext restoreGraphicsState];*/
+    [NSGraphicsContext restoreGraphicsState];
+    
+    [wnd flushWindow];
 }
 

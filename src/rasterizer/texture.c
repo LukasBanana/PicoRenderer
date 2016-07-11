@@ -171,7 +171,7 @@ void _pr_texture_singular_init(pr_texture* texture)
     {
         texture->width  = 1;
         texture->height = 1;
-        texture->mips   = 1;
+        texture->mips   = 0;
         texture->texels = PR_CALLOC(PRcolorindex, 1);
     }
 }
@@ -339,6 +339,10 @@ PRubyte _pr_texture_num_mips(PRubyte maxSize)
 
 const PRcolorindex* _pr_texture_select_miplevel(const pr_texture* texture, PRubyte mip, PRtexsize* width, PRtexsize* height)
 {
+    // Return texel buffer (MIP-map 0) if there are no MIP-maps
+    if (texture->mips == 0)
+        return texture->texels;
+    
     // Add MIP level offset
     mip = PR_CLAMP((PRubyte)(((PRint)mip) + _stateMachine->textureLodBias), 0, texture->mips - 1);
 

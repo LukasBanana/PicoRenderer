@@ -369,7 +369,7 @@ static void _render_indexed_lines_textured(
 static void _render_indexed_lines_colored(
     PRsizei numVertices, PRsizei firstVertex, const pr_vertexbuffer* vertexBuffer, const pr_indexbuffer* indexBuffer)
 {
-    pr_framebuffer* frameBuffer = PR_STATE_MACHINE.boundFrameBuffer;
+    //pr_framebuffer* frameBuffer = PR_STATE_MACHINE.boundFrameBuffer;
 
     // Iterate over the index buffer
     for (PRsizei i = firstVertex, n = numVertices + firstVertex; i + 1 < n; i += 2)
@@ -941,13 +941,16 @@ static PRboolean _clip_and_project_polygon(PRint numVertices)
     _numPolyVerts = numVertices;
     _polygon_z_clipping(1.0f, 100.0f);//!!!
     //_polygon_z_clipping(0.01f, 100.0f);//!!!
+    
+    if (_numPolyVerts < 3)
+        return PR_FALSE;
 
     // Projection
     for (PRint j = 0; j < _numPolyVerts; ++j)
         _project_vertex(&(_clipVertices[j]), &(PR_STATE_MACHINE.viewport));
 
     // Make culling test
-    if (_numPolyVerts < 3 || _is_triangle_culled(_CVERT_VEC2(0), _CVERT_VEC2(1), _CVERT_VEC2(2)))
+    if (_is_triangle_culled(_CVERT_VEC2(0), _CVERT_VEC2(1), _CVERT_VEC2(2)))
         return PR_FALSE;
 
     // Setup raster vertices

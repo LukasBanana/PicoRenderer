@@ -17,8 +17,8 @@ PRobject context        = NULL;
 PRobject frameBuffer    = NULL;
 PRboolean isQuit        = PR_FALSE;
 
-PRint screenWidth       = 640;
-PRint screenHeight      = 480;
+PRint scrWidth          = 640;
+PRint scrHeight         = 480;
 
 
 // --- interfaces --- //
@@ -88,7 +88,7 @@ int main(int argc, char* argv[])
     NSWindow* window = NULL;
     
     window = [[NSWindow alloc]
-        initWithContentRect:NSMakeRect(0, 0, (CGFloat)screenWidth, (CGFloat)screenHeight)
+        initWithContentRect:NSMakeRect(0, 0, (CGFloat)scrWidth, (CGFloat)scrHeight)
         styleMask:(NSTitledWindowMask + NSClosableWindowMask)
         backing:NSBackingStoreBuffered
         defer:FALSE
@@ -99,6 +99,8 @@ int main(int argc, char* argv[])
     [window setAcceptsMouseMovedEvents:TRUE];
     [window setIsVisible:TRUE];
     [window makeKeyAndOrderFront:nil];
+    [window setTitle:@"pico_renderer test (MACOS)"];
+    //[[window contentView] setNeedsDisplay:TRUE];
     
     // Initialize renderer
     prInit();
@@ -106,18 +108,35 @@ int main(int argc, char* argv[])
     // Create graphics context
     PRcontextdesc contextDesc;
     contextDesc.window = (void*)window;
-    PRobject context = prCreateContext(&contextDesc, screenWidth, screenHeight);
+    PRobject context = prCreateContext(&contextDesc, scrWidth, scrHeight);
+    //prMakeCurrent();
     
     // Create frame buffer
-    frameBuffer = prCreateFrameBuffer(screenWidth, screenHeight);
+    frameBuffer = prCreateFrameBuffer(scrWidth, scrHeight);
     prBindFrameBuffer(frameBuffer);
     
+    prClearColor(0, 0, 0);
+    
+    // Setup projection matrix
+    PRfloat projection[16];
+    prBuildPerspectiveProjection(
+        projection,                   // output matrix
+        (PRfloat)scrWidth/scrHeight,  // aspect ratio
+        1.0f,                         // near clipping plane
+        100.0f,                       // far clipping plane
+        74.0f * PR_DEG2RAD            // field of view (fov) in radians
+    );
+    prProjectionMatrix(projection);
+    
+    // World transform
+    PRfloat worldMatrix[16];
+    PRfloat rotation = 0.0f;
     
     // Main loop
     while (!isQuit)
     {
         // Process events
-        NSEvent* event = [NSApp nextEventMatchingMask:NSAnyEventMask untilDate:nil inMode:NSDefaultRunLoopMode dequeue:YES];
+        NSEvent* event = [window nextEventMatchingMask:NSAnyEventMask untilDate:nil inMode:NSDefaultRunLoopMode dequeue:YES];
         
         if (event != nil)
         {
@@ -131,20 +150,47 @@ int main(int argc, char* argv[])
                     [NSApp sendEvent:event];
                     break;
             }
+            
+            [event release];
         }
-        
-        [event release];
         
         if ([[NSApp delegate] isQuit])
             isQuit = PR_TRUE;
         
+        // Setup viewport
+        prViewport(0, 0, scrWidth, scrHeight);
+        
+        // Setup world matrix
+        prLoadIdentity(worldMatrix);
+        prTranslate(worldMatrix, 0, 0, 2);
+        prRotate(worldMatrix, 0, 0, 1, rotation);
+        prWorldMatrix(worldMatrix);
+        rotation += 0.025f;
+        
         // Draw scene
-        //todo...
+        prClearFrameBuffer(
+            frameBuffer,
+            0.0f,
+            PR_COLOR_BUFFER_BIT | PR_DEPTH_BUFFER_BIT
+        );
+        
+        prColor(255, 255, 0);
+        
+        prBegin(PR_TRIANGLES);
+        {
+            prVertex2f(0, 1.155f);
+            prVertex2f(1, -0.577f);
+            prVertex2f(-1, -0.577f);
+        }
+        prEnd();
         
         prPresent(context);
     }
     
     // Clean up
+    prDeleteFrameBuffer(frameBuffer);
+    prDeleteContext(context);
+    
     prRelease();
     
     return 0;
