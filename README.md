@@ -20,8 +20,8 @@ This project is in ALPHA status!
 Screenshot
 ----------
 
-<p align="center">Example scene:</p>
-<p align="center"><img src="test/media/preview.png" alt="test/media/preview.png"/></p>
+<p align="center"><img src="test/media/preview_win32.png" alt="test/media/preview_win32.png"/></p>
+<p align="center">Example scene (<i>test1</i> on Windows 10)</p>
 
 
 Why C and not C++?

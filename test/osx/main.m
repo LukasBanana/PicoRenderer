@@ -89,7 +89,7 @@ int main(int argc, char* argv[])
     
     window = [[NSWindow alloc]
         initWithContentRect:NSMakeRect(0, 0, (CGFloat)scrWidth, (CGFloat)scrHeight)
-        styleMask:(NSTitledWindowMask + NSClosableWindowMask)
+        styleMask:(NSTitledWindowMask + NSClosableWindowMask + NSMiniaturizableWindowMask)
         backing:NSBackingStoreBuffered
         defer:FALSE
     ];
@@ -99,7 +99,7 @@ int main(int argc, char* argv[])
     [window setAcceptsMouseMovedEvents:TRUE];
     [window setIsVisible:TRUE];
     [window makeKeyAndOrderFront:nil];
-    [window setTitle:@"pico_renderer test (MACOS)"];
+    [window setTitle:@"pico_renderer test (MacOS)"];
     //[[window contentView] setNeedsDisplay:TRUE];
     
     // Initialize renderer
