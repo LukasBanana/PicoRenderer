@@ -153,7 +153,7 @@ Sets the 2D image data to the specified texture.
 \param[in] dither Specifies whether dithering is to be applied to the image (to compensate 8-bit colors).
 \param[in] generateMips Specifies whether MIP maps are to be generated for this texture.
 */
-void prTexureImage2D(
+void prTextureImage2D(
     PRobject texture, PRtexsize width, PRtexsize height, PRenum format,
     const PRvoid* data, PRboolean dither, PRboolean generateMips
 );
