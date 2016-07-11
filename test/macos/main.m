@@ -17,8 +17,8 @@ PRobject context        = NULL;
 PRobject frameBuffer    = NULL;
 PRboolean isQuit        = PR_FALSE;
 
-PRint scrWidth          = 640;
-PRint scrHeight         = 480;
+PRuint scrWidth         = 640;
+PRuint scrHeight        = 480;
 
 
 // --- interfaces --- //
@@ -82,7 +82,7 @@ int main(int argc, char* argv[])
     [[NSAutoreleasePool alloc] init];
     [NSApplication sharedApplication];
     [NSApp setDelegate:[[[AppDelegate alloc] initApp] autorelease]];
-    [NSBundle loadNibNamed:@"MainMenu" owner:[NSApp delegate]];
+    //[NSBundle loadNibNamed:@"MainMenu" owner:[NSApp delegate]];
     [NSApp finishLaunching];
     
     NSWindow* window = NULL;
