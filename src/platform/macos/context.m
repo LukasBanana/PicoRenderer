@@ -16,7 +16,7 @@ pr_context* _currentContext = NULL;
 
 pr_context* _pr_context_create(const PRcontextdesc* desc, PRuint width, PRuint height)
 {
-    if (desc == NULL || desc->window == NULL || width <= 0 || height <= 0)
+    if (desc == NULL || desc->window == NULL || width <= 0 || height <= 0)
     {
         _pr_error_set(PR_ERROR_INVALID_ARGUMENT, __FUNCTION__);
         return NULL;
