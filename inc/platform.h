@@ -1,6 +1,6 @@
 /*
  * platform.h
- * 
+ *
  * This file is part of the "PicoRenderer" (Copyright (c) 2014 by Lukas Hermanns)
  * See "LICENSE.txt" for license information.
  */
@@ -15,6 +15,7 @@
 #elif defined(__APPLE__)
 #   define PR_PLATFORM_OSX
 #elif defined(__linux__)
+#   include <X11/Xlib.h>
 #   define PR_PLATFORM_LINUX
 #else
 #   error OS not supported yet
@@ -44,7 +45,7 @@ PRcontextdesc;
 //! Linux render context description structure.
 typedef struct PRcontextdesc
 {
-    int unused;
+    Window window;
 }
 PRcontextdesc;
 

@@ -109,11 +109,14 @@ else()
 endif()
 
 
-if(APPLE)
+if(WIN32)
+	target_link_libraries(test1 pico_renderer)
+elseif(APPLE)
 	find_library(COCOA_LIBRARY Cocoa)
 	target_link_libraries(test1 ${COCOA_LIBRARY} pico_renderer)
-else()
-	target_link_libraries(test1 pico_renderer)
+elseif(UNIX)
+	target_link_libraries(pico_renderer X11)
+	target_link_libraries(test1 pico_renderer X11)
 endif()
 
 set_target_properties(pico_renderer PROPERTIES LINKER_LANGUAGE C)

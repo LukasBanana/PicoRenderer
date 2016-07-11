@@ -1,6 +1,6 @@
 /*
  * context.c (Linux)
- * 
+ *
  * This file is part of the "PicoRenderer" (Copyright (c) 2014 by Lukas Hermanns)
  * See "LICENSE.txt" for license information.
  */
@@ -9,12 +9,14 @@
 #include "error.h"
 #include "helper.h"
 
+#include <stdlib.h>
+
 
 pr_context* _currentContext = NULL;
 
 pr_context* _pr_context_create(const PRcontextdesc* desc, PRuint width, PRuint height)
 {
-    if (desc == NULL || desc->window == NULL || width <= 0 || height <= 0)
+    if (desc == NULL || desc->window == 0 || width <= 0 || height <= 0)
     {
         _pr_error_set(PR_ERROR_INVALID_ARGUMENT, __FUNCTION__);
         return NULL;
