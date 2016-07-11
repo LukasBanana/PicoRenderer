@@ -86,6 +86,11 @@ void prDeleteContext(PRobject context)
     _pr_context_delete((pr_context*)context);
 }
 
+void prMakeCurrent(PRobject context)
+{
+    _pr_context_makecurrent((pr_context*)context);
+}
+
 void prPresent(PRobject context)
 {
     _pr_context_present((pr_context*)context, PR_STATE_MACHINE.boundFrameBuffer);
