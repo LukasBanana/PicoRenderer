@@ -261,7 +261,7 @@ int main()
     // Create render context
     PRcontextdesc contextDesc;
 
-    contextDesc.wnd = wnd;
+    contextDesc.window = wnd;
 
     context = prCreateContext(&contextDesc, screenWidth, screenHeight);
 

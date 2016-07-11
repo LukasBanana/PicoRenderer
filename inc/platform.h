@@ -26,7 +26,7 @@
 //! Win32 render context description structure.
 typedef struct PRcontextdesc
 {
-    HWND wnd;
+    HWND window;
 }
 PRcontextdesc;
 

@@ -14,7 +14,7 @@ pr_context* _currentContext = NULL;
 
 pr_context* _pr_context_create(const PRcontextdesc* desc, PRuint width, PRuint height)
 {
-    if (desc == NULL || desc->wnd == NULL || width <= 0 || height <= 0)
+    if (desc == NULL || desc->window == NULL || width <= 0 || height <= 0)
     {
         _pr_error_set(PR_ERROR_INVALID_ARGUMENT, __FUNCTION__);
         return NULL;
@@ -35,8 +35,8 @@ pr_context* _pr_context_create(const PRcontextdesc* desc, PRuint width, PRuint h
     bmi->bmiHeader.biCompression    = BI_RGB;
 
     // Setup context
-    context->wnd        = desc->wnd;
-    context->dc         = GetDC(desc->wnd);
+    context->wnd        = desc->window;
+    context->dc         = GetDC(desc->window);
     context->dcBmp      = CreateCompatibleDC(context->dc);
     context->bmp        = CreateCompatibleBitmap(context->dc, width, height);
     context->colors     = PR_CALLOC(pr_color, width*height);
