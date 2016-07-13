@@ -77,12 +77,17 @@ int main()
   #if defined(_WIN32)
   
   HWND wnd = CreateWindow(...);
-  contextDesc.window = wnd;
+  contextDesc.window = (void*)(&wnd);
   
   #elif defined(__APPLE__)
   
   NSWindow* wnd = [[NSWindow alloc] ...];
-  contextDesc.window = wnd;
+  contextDesc.window = (void*)wnd;
+  
+  #elif defined(__linux__)
+  
+  Window wnd = XCreateWindow(...);
+  contextDesc.window = (void*)wnd;
   
   #endif
   */
