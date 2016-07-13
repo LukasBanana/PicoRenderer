@@ -1,6 +1,6 @@
 /*
  * error_ids.h
- * 
+ *
  * This file is part of the "PicoRenderer" (Copyright (c) 2014 by Lukas Hermanns)
  * See "LICENSE.txt" for license information.
  */
@@ -39,8 +39,11 @@ typedef void (*PR_ERROR_HANDLER_PROC)(PRenum errorID, const char* info);
 //! Unexpected end-of-file error
 #define PR_ERROR_UNEXPECTED_EOF         8
 
+//! Context creation error (e.g. when X11 server is missing on a Linux system)
+#define PR_ERROR_CONTEXT                9
+
 //! Fatal error (occures only in debug mode)
-#define PR_ERROR_FATAL                  9
+#define PR_ERROR_FATAL                  10
 
 
 #endif

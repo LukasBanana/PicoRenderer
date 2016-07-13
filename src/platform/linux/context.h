@@ -25,6 +25,7 @@ typedef struct pr_context
     // X11 objects
     Window              wnd;
     //GC                  gfx;
+    Pixmap              pmp;
 
     // Renderer objects
     pr_color*           colors;

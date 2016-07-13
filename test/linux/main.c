@@ -85,10 +85,16 @@ int main()
     // Initialize pico renderer
     prInit();
 
-
+    // Create graphics context
     PRcontextdesc contextDesc;
-    //contextDesc.window = ;
-    //prCreateContext(&contextDesc, );
+    contextDesc.window = (void*)(&wnd);
+    PRobject context = prCreateContext(&contextDesc, scrWidth, scrHeight);
+
+    if (context == NULL)
+    {
+        fprintf(stderr, "pico_renderer: context creation failed!\n");
+        return 0;
+    }
 
     // Main loop
     XEvent event;

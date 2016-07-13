@@ -25,9 +25,25 @@ pr_context* _pr_context_create(const PRcontextdesc* desc, PRuint width, PRuint h
     // Create render context
     pr_context* context = PR_MALLOC(pr_context);
 
+    // Open X11 display
+    Display* display = XOpenDisplay(NULL);
+
+    if (display == NULL)
+    {
+        _pr_error_set(PR_ERROR_CONTEXT, __FUNCTION__);
+        return NULL;
+    }
+
     // Create X11 objects
     context->wnd = *((Window*)desc->window);
+    context->pmp = XCreatePixmap(display, context->wnd, width, height, 8);
     //todo...
+
+    if (context->pmp == 0)
+    {
+        _pr_error_set(PR_ERROR_CONTEXT, __FUNCTION__);
+        return NULL;
+    }
 
     // Create color palette
     context->colorPalette = PR_MALLOC(pr_color_palette);
@@ -46,7 +62,8 @@ void _pr_context_delete(pr_context* context)
     {
         _pr_ref_assert(&(context->stateMachine));
 
-        //todo...
+        // Free X11 objects
+        XFree(context->pmp);
 
         free(context->colorPalette);
         free(context->colors);
