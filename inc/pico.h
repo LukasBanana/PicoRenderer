@@ -9,6 +9,10 @@
 #define __PR_PICO_H__
 
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include "types.h"
 #include "error_ids.h"
 #include "platform.h"
@@ -557,5 +561,9 @@ void prVertex2f(PRfloat x, PRfloat y);
 //! \see prVertex2f
 void prVertex2i(PRint x, PRint y);
 
+
+#ifdef __cplusplus
+} // /extern "C"
+#endif
 
 #endif
