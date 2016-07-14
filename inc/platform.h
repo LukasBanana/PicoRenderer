@@ -14,11 +14,11 @@ typedef struct PRcontextdesc
 {
     /**
     Reference to the OS dependent window.
-    - For Win32, this must be from type 'HWND*'
-    - For MacOS, this must be from type 'NSWindow*'
-    - For Linux, this must be from type 'Window*'
+    - For Win32, this must be from type 'const HWND*'
+    - For MacOS, this must be from type 'const NSWindow*'
+    - For Linux, this must be from type 'const Window*'
     */
-    void* window;
+    const void* window;
 }
 PRcontextdesc;
 
