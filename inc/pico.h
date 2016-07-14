@@ -180,6 +180,16 @@ Sets the texture environment parameters.
 */
 void prTexEnvi(PRenum param, PRint value);
 
+/**
+Returns a parameter of the specified texture MIP-map.
+\param[in] texture Specifies the texture whose parameter is to be determined.
+\param[in] mipLevel Specifiefs the MIP-map level.
+\param[in] param Specifies the parameter which is to be determined.
+- PR_TEXTURE_WIDTH: Returns the MIP-map texture width.
+- PR_TEXTURE_HEIGHT: Returns the MIP-map texture height.
+*/
+PRint prGetTexLevelParameteri(PRobject texture, PRubyte mipLevel, PRenum param);
+
 // --- vertexbuffer --- //
 
 /**

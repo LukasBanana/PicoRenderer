@@ -165,6 +165,11 @@ void prTexEnvi(PRenum param, PRint value)
     _pr_state_machine_set_texenvi(param, value);
 }
 
+PRint prGetTexLevelParameteri(PRobject texture, PRubyte mipLevel, PRenum param)
+{
+    return _pr_texture_get_mip_parameter((const pr_texture*)texture, mipLevel, param);
+}
+
 // --- vertexbuffer --- //
 
 PRobject prCreateVertexBuffer()

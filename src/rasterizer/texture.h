@@ -78,5 +78,8 @@ PRcolorindex _pr_texture_sample_nearest_from_mipmap(const PRcolorindex* mipTexel
 //! Samples the nearest texel from the specified texture. MIP-map selection is compuited by tex-coord derivations ddx and ddy.
 PRcolorindex _pr_texture_sample_nearest(const pr_texture* texture, PRfloat u, PRfloat v, PRfloat ddx, PRfloat ddy);
 
+//! Returns a parameter of the specified texture MIP-map level.
+PRint _pr_texture_get_mip_parameter(const pr_texture* texture, PRubyte mip, PRenum param);
+
 
 #endif

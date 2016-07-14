@@ -40,6 +40,10 @@
 #define PR_POLYGON_LINE     0x00000054
 #define PR_POLYGON_POINT    0x00000055
 
+// prGetTexLevelParameteri arguments
+#define PR_TEXTURE_WIDTH    0x00000060
+#define PR_TEXTURE_HEIGHT   0x00000061
+
 // States
 #define PR_SCISSOR          0
 #define PR_MIP_MAPPING      1

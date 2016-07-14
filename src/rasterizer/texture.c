@@ -11,6 +11,7 @@
 #include "helper.h"
 #include "image.h"
 #include "state_machine.h"
+#include "enums.h"
 
 #include <math.h>
 #include <stdlib.h>
@@ -407,5 +408,24 @@ PRcolorindex _pr_texture_sample_nearest(const pr_texture* texture, PRfloat u, PR
     // Sample nearest texel
     return _pr_texture_sample_nearest_from_mipmap(texels, w, h, u, v);
     //return _pr_color_to_colorindex_r3g3b2(mip*20, mip*20, mip*20);
+}
+
+PRint _pr_texture_get_mip_parameter(const pr_texture* texture, PRubyte mip, PRenum param)
+{
+    if (texture == NULL || mip >= texture->mips || param < PR_TEXTURE_WIDTH || param > PR_TEXTURE_HEIGHT)
+    {
+        PR_ERROR(PR_ERROR_INVALID_ARGUMENT);
+        return 0;
+    }
+
+    switch (param)
+    {
+        case PR_TEXTURE_WIDTH:
+            return (texture->width << mip);
+        case PR_TEXTURE_HEIGHT:
+            return (texture->height << mip);
+    }
+
+    return 0;
 }
 
