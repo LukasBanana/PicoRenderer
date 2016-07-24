@@ -48,6 +48,9 @@
 //! Merge color- and depth buffers to a single one inside a frame buffer.
 #define PR_MERGE_COLOR_AND_DEPTH_BUFFERS //!CAN NOT BE DISABLED YET!
 
+//! Makes all pixels with color black a transparent pixel.
+#define PR_BLACK_IS_ALPHA
+
 
 #ifdef PR_INTERP_64BIT
 //! 64-bit interpolation type.

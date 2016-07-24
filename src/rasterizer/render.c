@@ -276,7 +276,7 @@ static void _rasterize_line(pr_framebuffer* frameBuffer, const pr_texture* textu
     const pr_raster_vertex* vertexB = &(_rasterVertices[indexB]);
 
     // Select MIP level
-    PRtexsize mipWidth, mipHeight;
+    PRtexsize mipWidth = 0, mipHeight = 0;
     const PRcolorindex* texels = _pr_texture_select_miplevel(texture, mipLevel, &mipWidth, &mipHeight);
 
     // Pre-compuations
@@ -495,7 +495,7 @@ static void _render_screenspace_image_textured(const pr_texture* texture, PRint 
         PR_SWAP(PRint, left, right);
 
     // Select MIP level
-    PRtexsize width, height;
+    PRtexsize width = 0, height = 0;
     PRubyte mipLevel = 0;//_pr_texture_compute_miplevel(texture, 1.0f / (PRfloat)(right - left), 0.0f, 0.0f, 1.0f / (PRfloat)(bottom - top));
     const PRcolorindex* texels = _pr_texture_select_miplevel(texture, mipLevel, &width, &height);
 
@@ -522,7 +522,24 @@ static void _render_screenspace_image_textured(const pr_texture* texture, PRint 
 
         for (PRint x = left; x <= right; ++x)
         {
-            scanline->colorIndex = _pr_texture_sample_nearest_from_mipmap(texels, width, height, u, v);
+            PRcolorindex color = _pr_texture_sample_nearest_from_mipmap(texels, width, height, u, v);
+
+            #ifdef PR_BLACK_IS_ALPHA
+            #   ifdef PR_COLOR_BUFFER_24BIT
+            if (color.r != 0 || color.g != 0 || color.b != 0)
+            {
+            #   else
+            if (color != 0)
+            {
+            #   endif
+            #endif
+
+            scanline->colorIndex = color;
+
+            #ifdef PR_BLACK_IS_ALPHA
+            }
+            #endif
+
             ++scanline;
             u += uStep;
         }
@@ -792,7 +809,7 @@ static void _index_dec(PRint* x, PRint numVertices)
 static void _rasterize_polygon_fill(pr_framebuffer* frameBuffer, const pr_texture* texture, PRubyte mipLevel)
 {
     // Select MIP level
-    PRtexsize mipWidth, mipHeight;
+    PRtexsize mipWidth = 0, mipHeight = 0;
     const PRcolorindex* texels = _pr_texture_select_miplevel(texture, mipLevel, &mipWidth, &mipHeight);
 
     // Find left- and right sided polygon edges
@@ -968,7 +985,7 @@ static PRboolean _clip_and_project_polygon(PRint numVertices)
 
 static PRubyte _compute_polygon_miplevel(const pr_texture* texture)
 {
-    if (PR_STATE_MACHINE.states[PR_MIP_MAPPING] != PR_FALSE)
+    if (PR_STATE_MACHINE.states[PR_MIP_MAPPING] != PR_FALSE && texture->mips > 0)
     {
         // Find closest vertex
         PRinterp zMin = _rasterVertices[0].z;
@@ -1032,13 +1049,14 @@ void _pr_render_triangles(PRsizei numVertices, PRsizei firstVertex, const pr_ver
         return;
     }
 
-    if (PR_STATE_MACHINE.boundTexture == NULL)
+    pr_texture* texture = PR_STATE_MACHINE.boundTexture;
+    if (texture == NULL || texture->texels == NULL)
     {
         _pr_texture_singular_color(&PR_SINGULAR_TEXTURE, PR_STATE_MACHINE.color0);
         _render_triangles(&PR_SINGULAR_TEXTURE, numVertices, firstVertex, vertexBuffer);
     }
     else
-        _render_triangles(PR_STATE_MACHINE.boundTexture, numVertices, firstVertex, vertexBuffer);
+        _render_triangles(texture, numVertices, firstVertex, vertexBuffer);
 }
 
 void _pr_render_triangle_strip(PRsizei numVertices, PRsizei firstVertex, const pr_vertexbuffer* vertexBuffer)
