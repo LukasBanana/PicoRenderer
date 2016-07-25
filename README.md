@@ -5,25 +5,23 @@ This project provides a simple, 8-bit colored, 3D software renderer written in C
 It has an interface similiar to OpenGL 1.1.
 
 
-License
--------
+Overview
+--------
 
-BSD 3-Clause License
+- **Version**: 1.00 Alpha
+- **License**: [3-Clause BSD License](https://github.com/LukasBanana/PicoRenderer/blob/master/LICENSE.txt)
 
 
-Screenshot
-----------
+Screenshots
+-----------
 
 <p align="center"><img src="test/media/preview_win32.png" alt="test/media/preview_win32.png"/></p>
 <p align="center">Example scene (<i>test1</i> on Windows 10)</p>
 
 
-Status
-------
+Supported Platforms
+-------------------
 
-Still in ALPHA status.
-
-Supported Platforms:
 - Windows (tested on Windows 10)
 - MacOS (tested on OSX El Capitan)
 - Linux (demo not available)
