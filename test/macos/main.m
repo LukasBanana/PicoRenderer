@@ -132,6 +132,10 @@ int main(int argc, char* argv[])
     PRfloat worldMatrix[16];
     PRfloat rotation = 0.0f;
     
+    PRobject tex0 = prCreateTexture();
+    prTexImage2DFromFile(tex0, "crate.png", PR_TRUE, PR_TRUE);
+    prTexEnvi(PR_TEXTURE_LOD_BIAS, 2);
+    
     // Main loop
     while (!isQuit)
     {
@@ -162,10 +166,12 @@ int main(int argc, char* argv[])
         
         // Setup world matrix
         prLoadIdentity(worldMatrix);
-        prTranslate(worldMatrix, 0, 0, 2);
+        prTranslate(worldMatrix, 0, 0, 4);
+        prRotate(worldMatrix, 1, 0, 0, M_PI*0.28);
         prRotate(worldMatrix, 0, 0, 1, rotation);
+        prScale(worldMatrix, 2, 2, 2);
         prWorldMatrix(worldMatrix);
-        rotation += 0.025f;
+        rotation += 0.01f;//0.025f;
         
         // Draw scene
         prClearFrameBuffer(
@@ -176,11 +182,26 @@ int main(int argc, char* argv[])
         
         prColor(255, 255, 0);
         
+        prBindTexture(tex0);
         prBegin(PR_TRIANGLES);
         {
-            prVertex2f(0, 1.155f);
-            prVertex2f(1, -0.577f);
-            prVertex2f(-1, -0.577f);
+            prTexCoord2i(0, 0);
+            prVertex2i(-1, 1);
+            
+            prTexCoord2f(1, 0);
+            prVertex2i(1, 1);
+            
+            prTexCoord2i(1, 1);
+            prVertex2i(1, -1);
+            
+            prTexCoord2i(0, 0);
+            prVertex2i(-1, 1);
+            
+            prTexCoord2i(1, 1);
+            prVertex2i(1, -1);
+            
+            prTexCoord2f(0, 1);
+            prVertex2i(-1, -1);
         }
         prEnd();
         
