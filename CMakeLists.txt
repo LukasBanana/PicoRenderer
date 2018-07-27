@@ -5,6 +5,11 @@ cmake_minimum_required(VERSION 2.8)
 project(PicoRenderer)
 
 
+# === Options ===
+
+option(USE_SDL2 "USE_SDL2" OFF)
+
+
 # === Build path ===
 
 set(dir ${CMAKE_CURRENT_BINARY_DIR}/build)
@@ -25,7 +30,11 @@ file(GLOB SourcesMain ${PROJECT_SOURCE_DIR}/src/*.*)
 file(GLOB SourcesRasterizer ${PROJECT_SOURCE_DIR}/src/rasterizer/*.*)
 file(GLOB SourcesPlatformBase ${PROJECT_SOURCE_DIR}/src/platform/*.*)
 
-if(WIN32)
+if(USE_SDL2)
+	file(GLOB SourcesPlatform ${PROJECT_SOURCE_DIR}/src/platform/SDL2/*.*)
+	file(GLOB SourcesTest ${PROJECT_SOURCE_DIR}/test/SDL2/*.*)
+	include_directories("${PROJECT_SOURCE_DIR}/src/platform/SDL2")
+elseif(WIN32)
 	file(GLOB SourcesPlatform ${PROJECT_SOURCE_DIR}/src/platform/win32/*.*)
 	file(GLOB SourcesTest ${PROJECT_SOURCE_DIR}/test/win32/*.*)
 	include_directories("${PROJECT_SOURCE_DIR}/src/platform/win32")
@@ -109,7 +118,9 @@ else()
 endif()
 
 
-if(WIN32)
+if(USE_SDL2)
+	target_link_libraries(test1 pico_renderer SDL2 m)
+elseif(WIN32)
 	target_link_libraries(test1 pico_renderer)
 elseif(APPLE)
 	find_library(COCOA_LIBRARY Cocoa)
@@ -121,7 +132,3 @@ endif()
 
 set_target_properties(pico_renderer PROPERTIES LINKER_LANGUAGE C)
 set_target_properties(test1 PROPERTIES LINKER_LANGUAGE C)
-
-
-
-
