@@ -5,8 +5,8 @@
  * See "LICENSE.txt" for license information.
  */
 
-#ifndef __PR_CONTEXT_H__
-#define __PR_CONTEXT_H__
+#ifndef PR_CONTEXT_H
+#define PR_CONTEXT_H
 
 
 #include "types.h"
