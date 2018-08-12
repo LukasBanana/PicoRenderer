@@ -7,7 +7,7 @@ project(PicoRenderer)
 
 # === Options ===
 
-option(USE_SDL2 "USE_SDL2" OFF)
+option(PICO_USE_SDL2 "Use SDL2 as render context" OFF)
 
 
 # === Build path ===
@@ -30,7 +30,7 @@ file(GLOB SourcesMain ${PROJECT_SOURCE_DIR}/src/*.*)
 file(GLOB SourcesRasterizer ${PROJECT_SOURCE_DIR}/src/rasterizer/*.*)
 file(GLOB SourcesPlatformBase ${PROJECT_SOURCE_DIR}/src/platform/*.*)
 
-if(USE_SDL2)
+if(PICO_USE_SDL2)
 	file(GLOB SourcesPlatform ${PROJECT_SOURCE_DIR}/src/platform/SDL2/*.*)
 	file(GLOB SourcesTest ${PROJECT_SOURCE_DIR}/test/SDL2/*.*)
 	include_directories("${PROJECT_SOURCE_DIR}/src/platform/SDL2")
@@ -118,7 +118,7 @@ else()
 endif()
 
 
-if(USE_SDL2)
+if(PICO_USE_SDL2)
 	target_link_libraries(test1 pico_renderer SDL2 m)
 elseif(WIN32)
 	target_link_libraries(test1 pico_renderer)
