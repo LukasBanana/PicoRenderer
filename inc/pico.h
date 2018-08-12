@@ -5,8 +5,8 @@
  * See "LICENSE.txt" for license information.
  */
 
-#ifndef __PR_PICO_H__
-#define __PR_PICO_H__
+#ifndef PR_PICO_H
+#define PR_PICO_H
 
 
 #ifdef __cplusplus

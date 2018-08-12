@@ -5,8 +5,8 @@
  * See "LICENSE.txt" for license information.
  */
 
-#ifndef __PR_VERTEXBUFFER_H__
-#define __PR_VERTEXBUFFER_H__
+#ifndef PR_VERTEXBUFFER_H
+#define PR_VERTEXBUFFER_H
 
 
 #include "vertex.h"

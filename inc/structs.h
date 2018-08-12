@@ -5,8 +5,8 @@
  * See "LICENSE.txt" for license information.
  */
 
-#ifndef __PR_STRUCTS_H__
-#define __PR_STRUCTS_H__
+#ifndef PR_STRUCTS_H
+#define PR_STRUCTS_H
 
 
 #include "types.h"

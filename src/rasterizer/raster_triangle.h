@@ -5,8 +5,8 @@
  * See "LICENSE.txt" for license information.
  */
 
-#ifndef __PR_RASTER_TRIANGLE_H__
-#define __PR_RASTER_TRIANGLE_H__
+#ifndef PR_RASTER_TRIANGLE_H
+#define PR_RASTER_TRIANGLE_H
 
 
 #include "raster_vertex.h"

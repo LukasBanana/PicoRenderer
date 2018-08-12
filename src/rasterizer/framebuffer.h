@@ -5,8 +5,8 @@
  * See "LICENSE.txt" for license information.
  */
 
-#ifndef __PR_FRAMEBUFFER_H__
-#define __PR_FRAMEBUFFER_H__
+#ifndef PR_FRAMEBUFFER_H
+#define PR_FRAMEBUFFER_H
 
 
 #include "pixel.h"

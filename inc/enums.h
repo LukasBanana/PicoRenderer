@@ -5,8 +5,8 @@
  * See "LICENSE.txt" for license information.
  */
 
-#ifndef __PR_ENUMS_H__
-#define __PR_ENUMS_H__
+#ifndef PR_ENUMS_H
+#define PR_ENUMS_H
 
 
 // Color formats

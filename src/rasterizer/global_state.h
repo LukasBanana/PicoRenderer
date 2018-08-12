@@ -5,8 +5,8 @@
  * See "LICENSE.txt" for license information.
  */
 
-#ifndef __PR_GLOBAL_STATE_H__
-#define __PR_GLOBAL_STATE_H__
+#ifndef PR_GLOBAL_STATE_H
+#define PR_GLOBAL_STATE_H
 
 
 #include "texture.h"

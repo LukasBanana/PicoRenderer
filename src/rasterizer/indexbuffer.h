@@ -5,8 +5,8 @@
  * See "LICENSE.txt" for license information.
  */
 
-#ifndef __PR_INDEXBUFFER_H__
-#define __PR_INDEXBUFFER_H__
+#ifndef PR_INDEXBUFFER_H
+#define PR_INDEXBUFFER_H
 
 
 #include "types.h"

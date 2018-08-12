@@ -5,8 +5,8 @@
  * See "LICENSE.txt" for license information.
  */
 
-#ifndef __PR_PLATFORM_H__
-#define __PR_PLATFORM_H__
+#ifndef PR_PLATFORM_H
+#define PR_PLATFORM_H
 
 
 //! Render context description structure.

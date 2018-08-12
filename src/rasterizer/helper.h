@@ -5,8 +5,8 @@
  * See "LICENSE.txt" for license information.
  */
 
-#ifndef __PR_HELPER_H__
-#define __PR_HELPER_H__
+#ifndef PR_HELPER_H
+#define PR_HELPER_H
 
 
 #define PR_MALLOC(t)        (t*)malloc(sizeof(t))

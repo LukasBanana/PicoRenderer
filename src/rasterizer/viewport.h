@@ -5,8 +5,8 @@
  * See "LICENSE.txt" for license information.
  */
 
-#ifndef __PR_VIEWPORT_H__
-#define __PR_VIEWPORT_H__
+#ifndef PR_VIEWPORT_H
+#define PR_VIEWPORT_H
 
 
 #include "types.h"

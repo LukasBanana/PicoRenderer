@@ -5,8 +5,8 @@
  * See "LICENSE.txt" for license information.
  */
 
-#ifndef __PR_MATRIX4_H__
-#define __PR_MATRIX4_H__
+#ifndef PR_MATRIX4_H
+#define PR_MATRIX4_H
 
 
 #include "types.h"

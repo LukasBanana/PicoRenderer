@@ -5,8 +5,8 @@
  * See "LICENSE.txt" for license information.
  */
 
-#ifndef __PR_EXT_MATH_H__
-#define __PR_EXT_MATH_H__
+#ifndef PR_EXT_MATH_H
+#define PR_EXT_MATH_H
 
 
 #include "types.h"

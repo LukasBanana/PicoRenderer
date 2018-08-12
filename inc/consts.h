@@ -5,8 +5,8 @@
  * See "LICENSE.txt" for license information.
  */
 
-#ifndef __PR_CONSTS_H__
-#define __PR_CONSTS_H__
+#ifndef PR_CONSTS_H
+#define PR_CONSTS_H
 
 
 #define PR_MATH_PI 3.14159265359f

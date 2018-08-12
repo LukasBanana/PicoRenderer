@@ -5,8 +5,8 @@
  * See "LICENSE.txt" for license information.
  */
 
-#ifndef __PR_TYPES_H__
-#define __PR_TYPES_H__
+#ifndef PR_TYPES_H
+#define PR_TYPES_H
 
 
 #include <stddef.h>

@@ -5,8 +5,8 @@
  * See "LICENSE.txt" for license information.
  */
 
-#ifndef __PR_VECTOR_ARITHMETIC_H__
-#define __PR_VECTOR_ARITHMETIC_H__
+#ifndef PR_VECTOR_ARITHMETIC_H
+#define PR_VECTOR_ARITHMETIC_H
 
 
 #include "types.h"

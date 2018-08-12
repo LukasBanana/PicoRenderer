@@ -5,8 +5,8 @@
  * See "LICENSE.txt" for license information.
  */
 
-#ifndef __PR_COLOR_BGR_H__
-#define __PR_COLOR_BGR_H__
+#ifndef PR_COLOR_BGR_H
+#define PR_COLOR_BGR_H
 
 
 #include "types.h"

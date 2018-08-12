@@ -5,8 +5,8 @@
  * See "LICENSE.txt" for license information.
  */
 
-#ifndef __PR_VECTOR3_H__
-#define __PR_VECTOR3_H__
+#ifndef PR_VECTOR3_H
+#define PR_VECTOR3_H
 
 
 #include "types.h"

@@ -5,8 +5,8 @@
  * See "LICENSE.txt" for license information.
  */
 
-#ifndef __PR_STATIC_CONFIG_H__
-#define __PR_STATIC_CONFIG_H__
+#ifndef PR_STATIC_CONFIG_H
+#define PR_STATIC_CONFIG_H
 
 
 // Version number

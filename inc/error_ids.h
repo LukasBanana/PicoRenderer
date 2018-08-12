@@ -5,8 +5,8 @@
  * See "LICENSE.txt" for license information.
  */
 
-#ifndef __PR_ERROR_IDS_H__
-#define __PR_ERROR_IDS_H__
+#ifndef PR_ERROR_IDS_H
+#define PR_ERROR_IDS_H
 
 
 typedef void (*PR_ERROR_HANDLER_PROC)(PRenum errorID, const char* info);

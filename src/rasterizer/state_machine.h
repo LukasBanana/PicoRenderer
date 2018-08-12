@@ -5,8 +5,8 @@
  * See "LICENSE.txt" for license information.
  */
 
-#ifndef __PR_STATE_MACHINE_H__
-#define __PR_STATE_MACHINE_H__
+#ifndef PR_STATE_MACHINE_H
+#define PR_STATE_MACHINE_H
 
 
 #include "matrix4.h"
