@@ -120,7 +120,7 @@ void _pr_render_screenspace_point(PRint x, PRint y)
         PR_ERROR(PR_ERROR_INVALID_STATE);
         return;
     }
-    
+
     if ( x < 0 || x >= (PRint)frameBuffer->width ||
          y < 0 || y >= (PRint)frameBuffer->height )
     {
@@ -159,10 +159,10 @@ void _pr_render_points(PRsizei numVertices, PRsizei firstVertex, /*const */pr_ve
         PR_ERROR(PR_ERROR_INVALID_ARGUMENT);
         return;
     }
-     
+
     // Transform vertices
     _vertexbuffer_transform(numVertices, firstVertex, vertexBuffer);
-    
+
     // Render points
     pr_vertex* vert;
 
@@ -210,17 +210,17 @@ static void _render_screenspace_line_colored(PRint x1, PRint y1, PRint x2, PRint
     // Pre-compuations
     int dx = x2 - x1;
     int dy = y2 - y1;
-    
+
     int incx = PR_SIGN(dx);
     int incy = PR_SIGN(dy);
-    
+
     if (dx < 0)
         dx = -dx;
     if (dy < 0)
         dy = -dy;
-    
+
     int pdx, pdy, ddx, ddy, es, el;
-    
+
     if (dx > dy)
     {
         pdx = incx;
@@ -239,14 +239,14 @@ static void _render_screenspace_line_colored(PRint x1, PRint y1, PRint x2, PRint
         es  = dx;
         el  = dy;
     }
-    
+
     if (el == 0)
         return;
-    
+
     int x   = x1;
     int y   = y1;
     int err = el/2;
-    
+
     // Render each pixel of the line
     for (int t = 0; t < el; ++t)
     {
@@ -282,17 +282,17 @@ static void _rasterize_line(pr_framebuffer* frameBuffer, const pr_texture* textu
     // Pre-compuations
     int dx = vertexB->x - vertexA->x;
     int dy = vertexB->y - vertexA->y;
-    
+
     int incx = PR_SIGN(dx);
     int incy = PR_SIGN(dy);
-    
+
     if (dx < 0)
         dx = -dx;
     if (dy < 0)
         dy = -dy;
-    
+
     int pdx, pdy, ddx, ddy, es, el;
-    
+
     if (dx > dy)
     {
         pdx = incx;
@@ -311,10 +311,10 @@ static void _rasterize_line(pr_framebuffer* frameBuffer, const pr_texture* textu
         es  = dx;
         el  = dy;
     }
-    
+
     if (el == 0)
         return;
-    
+
     int x = vertexA->x;
     int y = vertexA->y;
     PRinterp u = vertexA->u;
@@ -331,7 +331,7 @@ static void _rasterize_line(pr_framebuffer* frameBuffer, const pr_texture* textu
     int err = el/2;
 
     PRcolorindex colorIndex;
-    
+
     // Render each pixel of the line
     for (PRint t = 0; t < el; ++t)
     {
@@ -339,7 +339,7 @@ static void _rasterize_line(pr_framebuffer* frameBuffer, const pr_texture* textu
         colorIndex = _pr_texture_sample_nearest_from_mipmap(texels, mipWidth, mipHeight, (PRfloat)u, (PRfloat)v);
 
         _pr_framebuffer_plot(frameBuffer, (PRuint)x, (PRuint)y, colorIndex);
-        
+
         // Increase tex-coords
         u += uStep;
         v += vStep;
@@ -411,7 +411,7 @@ void _pr_render_screenspace_line(PRint x1, PRint y1, PRint x2, PRint y2)
         PR_ERROR(PR_ERROR_INVALID_STATE);
         return;
     }
-    
+
     #ifdef PR_ORIGIN_LEFT_TOP
     y1 = frameBuffer->height - y1 - 1;
     y2 = frameBuffer->height - y2 - 1;
@@ -517,7 +517,7 @@ static void _render_screenspace_image_textured(const pr_texture* texture, PRint 
     for (PRint y = top; y <= bottom; ++y)
     {
         scanline = pixels + (y * pitch + left);
-        
+
         u = 0.0f;
 
         for (PRint x = left; x <= right; ++x)
@@ -958,7 +958,7 @@ static PRboolean _clip_and_project_polygon(PRint numVertices)
     _numPolyVerts = numVertices;
     _polygon_z_clipping(1.0f, 100.0f);//!!!
     //_polygon_z_clipping(0.01f, 100.0f);//!!!
-    
+
     if (_numPolyVerts < 3)
         return PR_FALSE;
 

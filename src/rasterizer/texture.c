@@ -343,7 +343,7 @@ const PRcolorindex* _pr_texture_select_miplevel(const pr_texture* texture, PRuby
     // Return texel buffer (MIP-map 0) if there are no MIP-maps
     if (texture->mips == 0)
         return texture->texels;
-    
+
     // Add MIP level offset
     mip = PR_CLAMP((PRubyte)(((PRint)mip) + _stateMachine->textureLodBias), 0, texture->mips - 1);
 
@@ -368,7 +368,7 @@ const PRcolorindex* _pr_texture_select_miplevel(const pr_texture* texture, PRuby
     PRfloat r1_len = sqrtf(r1x*r1x + r1y*r1y);
     PRfloat r2_len = sqrtf(r2x*r2x + r2y*r2y);
     PRfloat d = PR_MAX(r1_len, r2_len)*10.0f;
-    
+
     // Clamp LOD to [0, texture->texture->mips)
     PRint lod = _int_log2(d);
     //PRint lod = (PRint)log2f(d);

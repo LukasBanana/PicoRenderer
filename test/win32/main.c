@@ -257,7 +257,7 @@ int main()
     prErrorHandler(ErrorCallback);
 
     printf("%s %s\n", prGetString(PR_STRING_RENDERER), prGetString(PR_STRING_VERSION));
-    
+
     // Create render context
     PRcontextdesc contextDesc;
 
@@ -283,7 +283,7 @@ int main()
     prTexImage2DFromFile(textureB, "media/tiles.png", dither, PR_TRUE);
 
     //prTexEnvi(PR_TEXTURE_LOD_BIAS, 1);
-    
+
     // Create vertex buffer
     PRobject vertexBuffer = prCreateVertexBuffer();
     PRobject indexBuffer = prCreateIndexBuffer();
@@ -434,7 +434,7 @@ int main()
         posZ += 0.1f * mouseWheel;
 
         #ifdef MOVE_CAMERA
-        
+
         if (pitch < -PI*0.5f)
             pitch = -PI*0.5f;
         if (pitch > PI*0.5f)
@@ -462,16 +462,16 @@ int main()
         prClearFrameBuffer(frameBuffer, 0.0f, PR_COLOR_BUFFER_BIT | PR_DEPTH_BUFFER_BIT);
         {
             #if 0
-            
+
             prDrawScreenLine(300, 200, 500, 200, prGetColorIndex(255, 0, 0));
             prDrawScreenLine(500, 200, 500, 400, prGetColorIndex(0, 255, 0));
             prDrawScreenLine(500, 400, 300, 400, prGetColorIndex(0, 0, 255));
             prDrawScreenLine(300, 400, 300, 200, prGetColorIndex(0, 255, 255));
 
             prDrawScreenLine(10, 10, mouseX, mouseY, prGetColorIndex(255, 255, 0));
-            
+
             #elif 0
-            
+
             for (int y = 0; y < 256; ++y)
                 prDrawScreenLine(100, 100 + y, 356, 100 + y, prGetColorIndex(y, y, y));
 
@@ -487,7 +487,7 @@ int main()
             // Bind buffers
             prBindVertexBuffer(vertexBuffer);
             prBindIndexBuffer(indexBuffer);
-            
+
             // Setup view
             prViewport(0, 0, viewWidth, viewHeight);
             prColor(prGetColorIndex(0, 0, 255));
@@ -680,7 +680,7 @@ int main()
     prRelease();
 
     DestroyWindow(wnd);
-    
+
     UnregisterClass(wcName, GetModuleHandle(NULL));
 
     return 0;

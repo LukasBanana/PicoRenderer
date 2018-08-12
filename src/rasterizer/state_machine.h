@@ -37,7 +37,7 @@ typedef struct pr_state_machine
     pr_rect             viewportRect;
     pr_rect             scissorRect;
     pr_rect             clipRect;
-    
+
     pr_framebuffer*     boundFrameBuffer;
     pr_vertexbuffer*    boundVertexBuffer;
     pr_indexbuffer*     boundIndexBuffer;

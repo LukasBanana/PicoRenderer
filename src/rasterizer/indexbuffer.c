@@ -16,7 +16,7 @@
 pr_indexbuffer* _pr_indexbuffer_create()
 {
     pr_indexbuffer* indexBuffer = PR_MALLOC(pr_indexbuffer);
-    
+
     indexBuffer->numIndices = 0;
     indexBuffer->indices    = NULL;
 
@@ -30,7 +30,7 @@ void _pr_indexbuffer_delete(pr_indexbuffer* indexBuffer)
     if (indexBuffer != NULL)
     {
         _pr_ref_release(indexBuffer);
-        
+
         PR_FREE(indexBuffer->indices);
         PR_FREE(indexBuffer);
     }
@@ -71,7 +71,7 @@ void _pr_indexbuffer_data_from_file(pr_indexbuffer* indexBuffer, PRsizei* numInd
         PR_ERROR(PR_ERROR_NULL_POINTER);
         return;
     }
-    
+
     // Read number of indices
     PRushort numInd = 0;
     fread(&numInd, sizeof(PRushort), 1, file);

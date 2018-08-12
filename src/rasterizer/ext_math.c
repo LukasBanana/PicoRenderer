@@ -70,10 +70,10 @@ PRfloat _aprx_log2(PRfloat x)
     long* const expPtr = (long*)(&x);
     long y = *expPtr;
     const long lg2 = ((y >> 23) & 255) - 128;
-    
+
     y &= ~(255 << 23);
     y += 127 << 23;
-    
+
     *expPtr = y;
 
     x = ((-1.0f/3) * x + 2) * x - 2.0f/3;

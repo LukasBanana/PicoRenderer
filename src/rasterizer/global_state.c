@@ -70,7 +70,7 @@ static void _immediate_mode_flush()
             PR_ERROR(PR_ERROR_INVALID_ARGUMENT);
             break;
     }
-    
+
     // Reset vertex counter
     _globalState.immModeVertCounter = 0;
 }

@@ -124,10 +124,10 @@ static void _dither_color(PRint* buffer, PRint x, PRint y, PRint comp, PRint wid
     // Get old and new color
     int oldPixel = COLOR(x, y);
     int newPixel = (oldPixel/scale)*scale;
-    
+
     // Write final color
     COLOR(x, y) = newPixel;
-    
+
     // Get quantification error
     int quantErr = oldPixel - newPixel;
 
@@ -152,7 +152,7 @@ void _pr_image_color_to_colorindex(PRcolorindex* dstColors, const pr_image* srcI
         _pr_error_set(PR_ERROR_NULL_POINTER, __FUNCTION__);
         return;
     }
- 
+
     const PRint width = srcImage->width;
     const PRint height = srcImage->height;
     const PRint format = srcImage->format;

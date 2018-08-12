@@ -34,7 +34,7 @@ static void _state_machine_cliprect(PRint left, PRint top, PRint right, PRint bo
         _stateMachine->clipRect.top     = top;
         _stateMachine->clipRect.bottom  = bottom;
     }
-    
+
     #else
 
     _stateMachine->clipRect.top     = top;
@@ -63,7 +63,7 @@ static void _update_cliprect()
     // Clamp clipping rectangle
     const PRint maxWidth = PR_STATE_MACHINE.boundFrameBuffer->width - 1;
     const PRint maxHeight = PR_STATE_MACHINE.boundFrameBuffer->height - 1;
-    
+
     _state_machine_cliprect(
         PR_CLAMP(left, 0, maxWidth),
         PR_CLAMP(top, 0, maxHeight),

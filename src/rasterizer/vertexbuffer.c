@@ -17,7 +17,7 @@
 pr_vertexbuffer* _pr_vertexbuffer_create()
 {
     pr_vertexbuffer* vertexBuffer = PR_MALLOC(pr_vertexbuffer);
-    
+
     vertexBuffer->numVertices   = 0;
     vertexBuffer->vertices      = NULL;
 
@@ -153,9 +153,9 @@ void _pr_vertexbuffer_data(pr_vertexbuffer* vertexBuffer, PRsizei numVertices, c
 
         // Copy texture coordinates
         if (texCoordsByteAlign != NULL)
-        {   
+        {
             const PRfloat* texCoord = (const PRfloat*)texCoordsByteAlign;
-            
+
             vert->texCoord.x = texCoord[0];
             vert->texCoord.y = texCoord[1];
 
@@ -179,7 +179,7 @@ void _pr_vertexbuffer_data_from_file(pr_vertexbuffer* vertexBuffer, PRsizei* num
         PR_ERROR(PR_ERROR_NULL_POINTER);
         return;
     }
-    
+
     // Read number of vertices
     PRushort vertCount = 0;
     fread(&vertCount, sizeof(PRushort), 1, file);
