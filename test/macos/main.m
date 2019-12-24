@@ -56,7 +56,7 @@ PRuint scrHeight        = 480;
 
 // --- functions --- //
 
-void postKeyEvent(void* event)
+static void postKeyEvent(void* event)
 {
     NSString* s = [(NSEvent*)event characters];
     
@@ -75,33 +75,58 @@ void postKeyEvent(void* event)
     [s release];
 }
 
+static void processEvents(NSWindow* wnd)
+{
+    for (;;)
+    {
+        NSEvent* event = [wnd
+            nextEventMatchingMask:  NSEventMaskAny
+            untilDate:              nil
+            inMode:                 NSDefaultRunLoopMode
+            dequeue:                YES
+        ];
+
+        if (event == nil)
+            break;
+
+        switch ([event type])
+        {
+            case NSEventTypeKeyDown:
+                postKeyEvent(event);
+                break;
+
+            default:
+                [NSApp sendEvent:event];
+                break;
+        }
+    }
+}
 
 int main(int argc, char* argv[])
 {
     // Create window with cocoa framework
     [[NSAutoreleasePool alloc] init];
     [NSApplication sharedApplication];
-    [NSApp setDelegate:[[[AppDelegate alloc] initApp] autorelease]];
+    [NSApp setDelegate:(id<NSApplicationDelegate>)[[[AppDelegate alloc] initApp] autorelease]];
     //[NSBundle loadNibNamed:@"MainMenu" owner:[NSApp delegate]];
     [NSApp finishLaunching];
     
     NSWindow* window = NULL;
     
     window = [[NSWindow alloc]
-        initWithContentRect:NSMakeRect(0, 0, (CGFloat)scrWidth, (CGFloat)scrHeight)
-        styleMask:(NSTitledWindowMask + NSClosableWindowMask + NSMiniaturizableWindowMask)
-        backing:NSBackingStoreBuffered
-        defer:FALSE
+        initWithContentRect:    NSMakeRect(0, 0, (CGFloat)scrWidth, (CGFloat)scrHeight)
+        styleMask:              (NSWindowStyleMaskTitled | NSWindowStyleMaskClosable | NSWindowStyleMaskMiniaturizable)
+        backing:                NSBackingStoreBuffered
+        defer:                  NO
     ];
-    
+
     [window center];
-    [window setDelegate:[NSApp delegate]];
-    [window setAcceptsMouseMovedEvents:TRUE];
-    [window setIsVisible:TRUE];
+    [window setDelegate:(id<NSWindowDelegate>)[NSApp delegate]];
+    [window setAcceptsMouseMovedEvents:YES];
+    [window setIsVisible:YES];
     [window makeKeyAndOrderFront:nil];
     [window setTitle:@"pico_renderer test (MacOS)"];
-    //[[window contentView] setNeedsDisplay:TRUE];
-    
+
     // Initialize renderer
     prInit();
     
@@ -140,27 +165,11 @@ int main(int argc, char* argv[])
     while (!isQuit)
     {
         // Process events
-        NSEvent* event = [window nextEventMatchingMask:NSAnyEventMask untilDate:nil inMode:NSDefaultRunLoopMode dequeue:YES];
-        
-        if (event != nil)
-        {
-            switch ([(NSEvent*)event type])
-            {
-                case NSKeyDown:
-                    postKeyEvent(event);
-                    break;
-                    
-                default:
-                    [NSApp sendEvent:event];
-                    break;
-            }
-            
-            [event release];
-        }
-        
-        if ([[NSApp delegate] isQuit])
+        processEvents(window);
+
+        if ([(AppDelegate*)[NSApp delegate] isQuit])
             isQuit = PR_TRUE;
-        
+
         // Setup viewport
         prViewport(0, 0, scrWidth, scrHeight);
         

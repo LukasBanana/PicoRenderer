@@ -12,6 +12,35 @@
 #include "helper.h"
 
 
+// Custom view to display context bitmap in NSWindow
+
+@interface PicoNSView : NSView
+{
+    pr_context* context;
+}
+
+@end
+
+@implementation PicoNSView
+
+- (id)initWithFrame:(NSRect)frame ctx:(pr_context*)pContext;
+{
+    self = [super initWithFrame:frame];
+    context = pContext;
+    return self;
+}
+
+- (void)drawRect:(NSRect)pRect
+{
+    NSBitmapImageRep* bmp = (NSBitmapImageRep*)context->bmp;
+    [bmp draw];
+}
+
+@end
+
+
+// MacOS specific graphics context
+
 pr_context* _currentContext = NULL;
 
 pr_context* _pr_context_create(const PRcontextdesc* desc, PRuint width, PRuint height)
@@ -26,19 +55,22 @@ pr_context* _pr_context_create(const PRcontextdesc* desc, PRuint width, PRuint h
     pr_context* context = PR_MALLOC(pr_context);
 
     // Store OSX objects
-    context->wnd = desc->window;
+    context->wnd = (void*)desc->window;
     context->bmp = (void*)[[NSBitmapImageRep alloc]
-        initWithBitmapDataPlanes: nil
-        pixelsWide: width
-        pixelsHigh: height
-        bitsPerSample: 8
-        samplesPerPixel: 3
-        hasAlpha: NO
-        isPlanar: NO
-        colorSpaceName: NSCalibratedRGBColorSpace
-        bytesPerRow: (3 * width)
-        bitsPerPixel: 24
+        initWithBitmapDataPlanes:   nil
+        pixelsWide:                 width
+        pixelsHigh:                 height
+        bitsPerSample:              8
+        samplesPerPixel:            3
+        hasAlpha:                   NO
+        isPlanar:                   NO
+        colorSpaceName:             NSDeviceRGBColorSpace//NSCalibratedRGBColorSpace
+        bytesPerRow:                (3 * width)
+        bitsPerPixel:               24
     ];
+
+    // Create graphics context
+    NSWindow* wnd = (NSWindow*)desc->window;
 
     // Create pixel buffer
     context->width  = width;
@@ -51,6 +83,12 @@ pr_context* _pr_context_create(const PRcontextdesc* desc, PRuint width, PRuint h
     // Initialize state machine
     _pr_state_machine_init(&(context->stateMachine));
     _pr_context_makecurrent(context);
+
+    // Use custom view to display context bitmap
+    wnd.contentView = [[PicoNSView alloc]
+        initWithFrame:  [[wnd contentView] bounds]
+        ctx:            context
+    ];
 
     return context;
 }
@@ -91,11 +129,10 @@ void _pr_context_present(pr_context* context, const pr_framebuffer* framebuffer)
         return;
     }
 
-    // Show framebuffer on device context ('SetDIBits' only needs a device context when 'DIB_PAL_COLORS' is used)
-    NSBitmapImageRep* bmp = (NSBitmapImageRep*)context->bmp;
-    
     // Get iterators
-    const PRuint num = context->width*context->height;
+    const PRuint num = context->width * context->height;
+
+    NSBitmapImageRep* bmp = (NSBitmapImageRep*)context->bmp;
 
     pr_color* dst = (pr_color*)[bmp bitmapData];
     pr_color* dstEnd = dst + num;
@@ -117,18 +154,9 @@ void _pr_context_present(pr_context* context, const pr_framebuffer* framebuffer)
         ++dst;
         ++pixels;
     }
-    
-    // Present final bitmap
+
+    // Trigger content view to be redrawn
     NSWindow* wnd = (NSWindow*)context->wnd;
-    NSGraphicsContext* gfx = [wnd graphicsContext];
-    
-    [NSGraphicsContext saveGraphicsState];
-    [NSGraphicsContext setCurrentContext:gfx];
-    
-    [bmp draw];
-    
-    [NSGraphicsContext restoreGraphicsState];
-    
-    [wnd flushWindow];
+    [[wnd contentView] setNeedsDisplay:YES];
 }
 
